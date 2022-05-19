@@ -1,0 +1,21 @@
+﻿  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_dx9.cpp
+  imgui_impl_win32.cpp
+  imgui_widgets.cpp
+  kiero.cpp
+  main.cpp
+C:\Users\bottom_text\source\repos\GMOD\GMOD\vmt.h(58,1): warning C4311: приведение типов: усечение указателя из "void *" в "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\vmt.h(58,1): warning C4302: приведение типов: усечение из "void *" к "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\vmt.h(62,1): warning C4311: приведение типов: усечение указателя из "void *" в "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\vmt.h(62,1): warning C4302: приведение типов: усечение из "void *" к "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\vmt.h(70,1): warning C4311: приведение типов: усечение указателя из "void *" в "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\vmt.h(70,1): warning C4302: приведение типов: усечение из "void *" к "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\vmt.h(71,1): warning C4312: приведение типов: преобразование из "DWORD" в "void *" большего размера
+C:\Users\bottom_text\source\repos\GMOD\GMOD\main.cpp(105,49): error C2065: GWL_WNDPROC: необъявленный идентификатор
+C:\Users\bottom_text\source\repos\GMOD\GMOD\main.cpp(127,54): warning C4311: приведение типов: усечение указателя из "HMODULE" в "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\main.cpp(127,54): warning C4302: приведение типов: усечение из "HMODULE" к "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\main.cpp(128,54): warning C4311: приведение типов: усечение указателя из "HMODULE" в "DWORD"
+C:\Users\bottom_text\source\repos\GMOD\GMOD\main.cpp(128,54): warning C4302: приведение типов: усечение из "HMODULE" к "DWORD"
+  Создание кода...
