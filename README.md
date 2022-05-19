@@ -1,5 +1,6 @@
-# GMOD
-
+# GMOD Cheat
+# Видеообзор:
+https://youtu.be/LQt7m-nebWE
 # Visuals: 
   Lines ( линии к игрокам ) 
 
