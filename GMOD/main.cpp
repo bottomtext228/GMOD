@@ -1,4 +1,4 @@
-#define CHEAT_VERSION 2.0
+#define CHEAT_VERSION 2.1
 #define _CRT_SECURE_NO_WARNINGS
 //#define DEBUG
 #include "includes.h"

@@ -47,6 +47,7 @@ CPed* localPed = NULL;
 #include "engine.h"
 #include "cliententlist.h"
 #include "icliententitylist.h"
+#include "CPrediction.h"
 #include "interfaces.h"
 /*                         */
 

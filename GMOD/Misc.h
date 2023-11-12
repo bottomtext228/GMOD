@@ -142,18 +142,34 @@ public:
 		for (int boneIndex = 0; boneIndex < pStudioHdr->numbones; boneIndex++) {
 			auto bone = pStudioHdr->pBone(boneIndex);
 			if (bone) {
-				if (!strcmp(bone->pszName(), pName))
+				char boneName[64]; // can bone name be more then 64 symbols? :trollge:
+				strcpy(boneName, bone->pszName());
+				for (int i = 0; boneName[i]; i++) { // to lower case https://stackoverflow.com/a/2661788
+					boneName[i] = tolower(boneName[i]);
+				}
+				if (strstr(boneName, pName)) // so we make case insenstive find now because of some bad models
 					return boneIndex;
-
 			}
 		}
 		return -1;
+	}
+	mstudiobbox_t* GetHitboxByGroup(studiohdr_t* pStudioHdr, int group) {
+		for (int i = 0; i < pStudioHdr->numhitboxsets; i++) {
+			auto iHitboxCount = pStudioHdr->iHitboxCount(i);
+			for (int j = 0; j < iHitboxCount; j++) {
+				auto pHitbox = pStudioHdr->pHitbox(j, i);
+				if (pHitbox->group == group) {
+					return pHitbox;
+				}
+			}
+		}
+		return nullptr;
 	}
 	void SetupBones() {
 #ifdef DEBUG
 		debug("SetupBones() \n");
 #endif // DEBUG
-		
+
 		static ULONGLONG ticks = 0;
 		if (GetTickCount64() - ticks > vars::esp::setupBonesDelay) {
 			ticks = GetTickCount64();
@@ -172,7 +188,7 @@ public:
 	}
 	CVector predictEntityOffsetPosition(CVector velocity) {
 		/*  вычисление смещени€ из-за скорости персонажа, очень сильно повышает точность при быстром движении
-			ѕри вычислении смещени€ другого игрока-цели необходимо результат умножить на 0.5 (поделить на 2) 
+			ѕри вычислении смещени€ другого игрока-цели необходимо результат умножить на 0.5 (поделить на 2)
 			((((подобрано экспериментально и вроде неплохо работает)))))
 			ѕри вычислении смещени€ локального вас€на ничего делать не надо
 																											*/
@@ -194,8 +210,9 @@ public:
 		/* ¬сЄ ниже об€зательно дл€ нормальной выгрузки */
 		kiero::shutdown();
 		pDevice->Release();
+		//BTMemory::UnpatchAll();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)(oWndProc));
 	}
-	
+
 }; CMisc* Misc;
 

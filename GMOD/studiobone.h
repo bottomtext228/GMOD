@@ -10,7 +10,7 @@ struct matrix3x4_t {
 struct mstudiobone_t
 {
 	int					sznameindex;
-	inline char* pszName(void) 
+	inline char* pszName(void)
 	{
 		return ((char*)this) + sznameindex;
 	}
@@ -43,6 +43,39 @@ private:
 	// No copy constructors allowed
 	mstudiobone_t(const mstudiobone_t& vOther);
 };
+
+struct mstudiobbox_t {
+
+
+	int					bone;
+	int					group;				// intersection group
+	CVector				bbmin;				// bounding box
+	CVector				bbmax;
+	int					szhitboxnameindex;	// offset to the name of the hitbox.
+	int					unused[8];
+
+	const char* pszHitboxName()
+	{
+		if (szhitboxnameindex == 0)
+			return "";
+
+		return ((const char*)this) + szhitboxnameindex;
+	}
+
+
+};
+
+struct mstudiohitboxset_t {
+
+
+	int					sznameindex;
+	inline char* const	pszName(void) const { return ((char*)this) + sznameindex; }
+	int					numhitboxes;
+	int					hitboxindex;
+	inline mstudiobbox_t* pHitbox(int i) const { return (mstudiobbox_t*)(((byte*)this) + hitboxindex) + i; };
+};
+
+
 struct studiohdr_t {
 	int id;
 	int version;
@@ -72,9 +105,29 @@ struct studiohdr_t {
 	int hitboxsetindex;
 
 	// Look up hitbox set by index
-	void* pHitboxSet(int i) const
+	mstudiohitboxset_t* pHitboxSet(int i) const
 	{
-		return (void*)((((BYTE*)this) + hitboxsetindex) + i);
+		return (mstudiohitboxset_t*)((((BYTE*)this) + hitboxsetindex) + i);
+	};
+
+	// Calls through to hitbox to determine size of specified set
+	inline mstudiobbox_t* pHitbox(int i, int set) const
+	{
+		mstudiohitboxset_t const* s = pHitboxSet(set);
+		if (!s)
+			return NULL;
+
+		return s->pHitbox(i);
+	};
+
+	// Calls through to set to get hitbox count for set
+	inline int			iHitboxCount(int set) const
+	{
+		mstudiohitboxset_t const* s = pHitboxSet(set);
+		if (!s)
+			return 0;
+
+		return s->numhitboxes;
 	};
 
 
@@ -96,7 +149,7 @@ struct studiohdr_t {
 	int					iRelativeAnim(int baseseq, int relanim) const;	// maps seq local anim reference to global anim index
 	int					iRelativeSeq(int baseseq, int relseq) const;		// maps seq local seq reference to global seq index
 
-//private:
+	//private:
 	mutable int			activitylistversion;	// initialization flag - have the sequences been indexed?
 	mutable int			eventsindexed;
 	//public:
@@ -227,6 +280,6 @@ struct studiohdr_t {
 	*/
 	int					bonetablebynameindex;
 	inline const BYTE* GetBoneTableSortedByName() const {
-		 return(BYTE*)this + bonetablebynameindex;
+		return(BYTE*)this + bonetablebynameindex;
 	}
 };

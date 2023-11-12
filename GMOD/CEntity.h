@@ -18,7 +18,7 @@ public:
 	char pad_00A0[4];
 	uint32_t m_iTeamNum; //0x009C
 	char pad_00A[72];
-	CVector m_fViewOffset; 
+	CVector m_fViewOffset;
 	char pad_00F4[60];
 	CVector m_fVelocity; //0x0130
 	char pad_013C[60]; //0x013C
@@ -54,13 +54,13 @@ public:
 			bool PAD7 : 1;
 			bool PAD8 : 1;
 			bool PAD9 : 1;
-			bool PAD10: 1;
+			bool PAD10 : 1;
 			bool IN_WATER : 1;
 			// 1 << 10 - in water
-		} m_flags;		
+		} m_flags;
 	};
 
-	char pad_026C[4244]; //0x0354
+	char pad_026C[4252]; //0x0354
 	uintptr_t boneBase; //0x13E8
 	char pad_13EC[4132]; //0x13EC
 	uint32_t m_iActiveWeapon; //0x2410
@@ -68,7 +68,6 @@ public:
 	CVector m_fViewPunch; //0x24D0
 	char pad_24DC[48]; //0x24DC
 	CVector m_fAimPunch; //0x250
-
 
 	CVector GetBonePosition(unsigned int boneIndex) {
 		CVector bonePos;
@@ -82,7 +81,7 @@ public:
 		return VMT.getvfunc<fn>(this, 130)(this);
 	}
 	IClientRenderable* GetClientRenderable() {
-		typedef IClientRenderable*(__thiscall* fn)(void*);
+		typedef IClientRenderable* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 5)(this);
 	}
 	bool inline isAlive() {
@@ -99,8 +98,8 @@ public:
 	bool IsLineOfSightClear(CVector const& point, int checkType, CPed* ignoredEntity) {
 		typedef bool(__thiscall* fn)(void*, const CVector&, int, CPed*);
 		return VMT.getvfunc<fn>(this, 275)(this, point, checkType, ignoredEntity);
-	 }
-	
+	}
+
 
 	//char pad_0238[4572]; //0x0238
 }; //Size: 0x1414

@@ -4,12 +4,16 @@ public:
 	void Process(CUserCmd* CMD) {
 		if ((vars::aim::smoothAim && CMD->m_buttons.IN_ATTACK2) || (vars::aim::silentAim && CMD->m_buttons.IN_ATTACK)) {
 			int boneId;
-			CVector localPos = localPed->GetEyePosition() + Misc->predictEntityOffsetPosition(localPed->m_fVelocity);
+			//CVector localPos = localPed->GetEyePosition() + Misc->predictEntityOffsetPosition(localPed->m_fVelocity);
+			Interfaces.Prediction->RunCommand(localPed, CMD, 0);
+
+			CVector localPos = localPed->m_fPos + localPed->m_fViewOffset;
 			CPed* ped = getBoneAndNearestPed(localPos, boneId);
 			if (ped && isPedInFOV(ped)) {
 				matrix3x4_t boneMatrix[128];
 				if (!ped->GetClientRenderable()->SetupBones(boneMatrix, 128, 0x100, Interfaces.GlobalVars->curtime))
 					return;
+				//CVector bonePos = ped->m_fPos + ped->m_fViewOffset;
 				CVector bonePos = { boneMatrix[boneId].m[0][3], boneMatrix[boneId].m[1][3], boneMatrix[boneId].m[2][3] };
 				constexpr float tickOffset = 0.5f;
 				bonePos += Misc->predictEntityOffsetPosition(ped->m_fVelocity) * tickOffset;
@@ -25,7 +29,6 @@ public:
 					CMD->m_viewangles.x = aimAngles.y;
 					vars::aim::newAngles = CMD->m_viewangles;
 				}
-
 			}
 		}
 	}
@@ -85,7 +88,7 @@ private:
 		debug("calcSmoothAngles() \n");
 #endif // DEBUG
 
-		CVector2DF smoothAngles;
+		CVector2DF smoothAngles{};
 		if (!vars::aim::rage && vars::aim::aimForce < cmd.DistanceTo(aimAngle)) {
 			CVector2DF vec = cmd - aimAngle;
 			vec.Normalize();
@@ -99,7 +102,7 @@ private:
 
 	}
 	CPed* getBoneAndNearestPed(CVector localPos, int& boneId) { // получение ближайшего к прицелу(середина экрана) педа и кости
-										   // пришлось объединить для адекватной проверки на препятствие
+		// пришлось объединить для адекватной проверки на препятствие
 #ifdef DEBUG
 		debug("getBoneAndNearestPed() \n");
 #endif // DEBUG
@@ -108,20 +111,15 @@ private:
 		float distance = 99999;
 
 		for (int entityIndex = 0; entityIndex < 256; entityIndex++) {
-
 			CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 			if (ped && ped != localPed && ped->isAlive() && ped->isEntityIsPlayer() && ped->m_modelInfo && !Misc->isPlayerInFriendList(entityIndex)) {
 				CVector2D screenPos;
 				CVector pedPos = ped->m_fPos + ped->m_fViewOffset;
-
 				if (Misc->WorldToScreen(pedPos, screenPos)) {
-					int aimBone = -1;
-					aimBone = getTargetedBone(localPos, ped);
-
-					if (aimBone != -1) {
-
-						float newDistance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
-						if (newDistance < distance) {
+					float newDistance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
+					if (newDistance < distance) {
+						int aimBone = getTargetedBone(localPos, ped);
+						if (aimBone != -1) {
 							CVector bonePos1 = ped->GetBonePosition(aimBone);
 							if (!vars::aim::ignoreWalls && !isPointVisible(bonePos1))
 								continue;
@@ -129,32 +127,35 @@ private:
 							distance = newDistance;
 							boneId = aimBone;
 						}
+
 					}
 				}
 			}
-
-
 		}
-
 		return nearestPed;
 	}
 
-		int getTargetedBone(CVector localPos, CPed* ped) {
+	int getTargetedBone(CVector localPos, CPed* ped) {
 #ifdef DEBUG
-			debug("getTargetedBone() \n");
+		debug("getTargetedBone() \n");
 #endif // DEBUG
 
-			if (vars::aim::aimTarget == vars::aim::items[0]) // head
-				return Misc->BoneIndexByName(ped, mainBones[Bones::BONE_HEAD]);
-			if (vars::aim::aimTarget == vars::aim::items[1]) // nearest bone
-				return getNearestBone(localPos, ped);
-			if (vars::aim::aimTarget == vars::aim::items[2]) // body
-				return Misc->BoneIndexByName(ped, mainBones[Bones::BONE_SPINE1]);
-			return -1;
+		if (vars::aim::aimTarget == vars::aim::items[0]) { // head
+			auto boneId = Misc->BoneIndexByName(ped, "head");
+			if (boneId != -1)
+				return boneId;
 		}
+		if (vars::aim::aimTarget == vars::aim::items[2]) {// body
+			auto boneId = Misc->BoneIndexByName(ped, "spine1");
+			if (boneId != -1)
+				return boneId;
+		}
+		return getNearestBone(localPos, ped); // if don't find needed bone( hello to the worst models in the existance created by gmod community ) we find the nearest bone
+
+	}
 
 	int getNearestBone(CVector localPos, CPed* ped) { // получение ближайшей к прицелу(середина экрана) кости
-		
+
 #ifdef DEBUG
 		debug("getNearestBone() \n");
 #endif // DEBUG
@@ -176,7 +177,6 @@ private:
 				CVector2D screenPos;
 				if (Misc->WorldToScreen(bonePos, screenPos)) {
 
-
 					float newDistance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
 					if (newDistance < distance) {
 						nearestBone = boneIndex;
@@ -185,11 +185,11 @@ private:
 				}
 			}
 		}
-		return nearestBone; 
+		return nearestBone;
 
 
 	}
-	
+
 public:
 
 	void ShowTarget() {
@@ -210,7 +210,7 @@ public:
 				draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0), ImVec2((float)screenPos.x, (float)screenPos.y), 0x77FF1E00); // blue
 			}
 		}
-		
+
 	}
 
 	void RenderFOV() {
