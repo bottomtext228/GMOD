@@ -1,7 +1,6 @@
 
-
 class CMenu {
-public: 
+public:
 
 	void Render() {
 		if (vars::menu) {
@@ -16,10 +15,9 @@ public:
 			};
 			enum miscTabs {
 				TAB_FRIENDS,
-				TAB_BHOP,
+				TAB_LUA,
 				TAB_ENTITIES,
 				TAB_MISC
-
 			};
 
 			if (ImGui::Begin("GMOD Cheat", &vars::menu, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings)) {
@@ -43,30 +41,26 @@ public:
 					currentTab = mainTabs::TAB_MISCELLANEOUS;
 
 				ImGui::EndChild();
-		
-				/*
-				static char inputBuffer[128];
-				ImGui::InputText("CMD executor", inputBuffer, 128);
-				if (ImGui::Button("Execute")) {
-					Interfaces.Engine->ExecuteClientCmd(inputBuffer);
-				}
-				*/
-			
+
+
 				ImGui::SetCursorPosY(325);
 				ImGui::Text("By bottom_text");
 				if (ImGui::IsItemClicked()) {
 					system("start https://www.blast.hk/members/217146/");
 				}
-		
+
 				ImGui::SetCursorPos(ImVec2(cursorPos.x + 165, cursorPos.y));
 				ImVec2 windowSize = ImGui::GetWindowSize();
 				ImGui::BeginChild("Functions", ImVec2(windowSize.x - (cursorPos.x + 165) - 10, windowSize.y - 40), true);
-				if (currentTab == mainTabs::TAB_VISUALS) {
+
+				switch (currentTab) {
+				case mainTabs::TAB_VISUALS:
+
 
 
 					ImGui::Checkbox("Lines", &vars::esp::linesState);
 
-		
+
 					ImGui::Checkbox("3D BoxESP", &vars::esp::box3DESP);
 					ImGui::Checkbox("2D BoxESP", &vars::esp::box2DESP);
 					ImGui::Checkbox("Health and nicks", &vars::esp::renderHealthAndNick);
@@ -75,9 +69,9 @@ public:
 					ImGui::SliderInt("Setup delay", &vars::esp::setupBonesDelay, 0, 100);
 					ImGui::Checkbox("Entities", &vars::esp::renderEntity);
 					ImGui::Checkbox("Specific Entities only", &vars::esp::renderSpecificEntities);
+					break;
 
-				}
-				else if (currentTab == mainTabs::TAB_AIM) {
+				case mainTabs::TAB_AIM:
 					ImGui::Checkbox("TriggerBot", &vars::aim::triggerBot);
 					ImGui::Checkbox("Hold or Click", &vars::aim::holdOrClick);
 					ImGui::Checkbox("No Spread", &vars::aim::noSpread);
@@ -94,12 +88,11 @@ public:
 					Combo();
 					ImGui::Checkbox("Render FOV", &vars::aim::renderFOV);
 					ImGui::SliderInt("FOV", &vars::aim::FOV, 0, 1000);
-			
+
 					ImGui::Checkbox("Ignore walls", &vars::aim::ignoreWalls);
 					ImGui::Checkbox("Show target", &vars::aim::showTarget);
-
-				}
-				else if (currentTab == mainTabs::TAB_MISCELLANEOUS) {
+					break;
+				case mainTabs::TAB_MISCELLANEOUS:
 					static int currentMiscTab = -1;
 					ImGui::Spacing();
 					constexpr float miscButtonSizeX = 56.5f;
@@ -107,8 +100,8 @@ public:
 					if (ImGui::Button("Friends", ImVec2(miscButtonSizeX, miscButtonSizeY)))
 						currentMiscTab = miscTabs::TAB_FRIENDS;
 					ImGui::SameLine();
-					if (ImGui::Button("BHop", ImVec2(miscButtonSizeX, miscButtonSizeY)))
-						currentMiscTab = miscTabs::TAB_BHOP;
+					if (ImGui::Button("Lua", ImVec2(miscButtonSizeX, miscButtonSizeY)))
+						currentMiscTab = miscTabs::TAB_LUA;
 					ImGui::SameLine();
 					if (ImGui::Button("Entities", ImVec2(miscButtonSizeX, miscButtonSizeY)))
 						currentMiscTab = miscTabs::TAB_ENTITIES;
@@ -119,26 +112,29 @@ public:
 					ImGui::Separator();
 					ImGui::Spacing();
 
-					if (currentMiscTab == miscTabs::TAB_FRIENDS) {
+					switch (currentMiscTab) {
+					case miscTabs::TAB_FRIENDS:
 						FriendList();
-					}
-					else if (currentMiscTab == miscTabs::TAB_BHOP) {
-						ImGui::Checkbox("Auto Jump", &vars::bhop::autoJump);
-					}
-					else if (currentMiscTab == miscTabs::TAB_ENTITIES) {
+						break;
+					case miscTabs::TAB_LUA:
+						Lua();
+						break;
+					case miscTabs::TAB_ENTITIES:
 						SpecificEntitiesList();
-					}
-					else if (currentMiscTab == miscTabs::TAB_MISC) {
+						break;
+					case miscTabs::TAB_MISC:
 						ImGui::Checkbox("Custom sight", &vars::misc::customSight);
 						ImGui::Checkbox("Auto uncuff", &vars::misc::autoUncuff);
 						ImGui::Checkbox("Ignore teammates", &vars::misc::ignoreLocalTeam);
-
+						ImGui::Checkbox("Auto Jump", &vars::bhop::autoJump);
 						ImGui::SetCursorPosY(280);
 						if (ImGui::Button("Unload")) {
 							vars::misc::DLLUnload = true;
 						}
+						break;
 					}
 
+					break;
 
 				}
 
@@ -151,23 +147,23 @@ public:
 
 		}
 		/* рендер всяких приколюх */
-		if (vars::aim::renderFOV) 
+		if (vars::aim::renderFOV)
 			Aim->RenderFOV();
-		if (vars::misc::customSight) 
+		if (vars::misc::customSight)
 			Misc->CustomSight();
 		if (vars::aim::showTarget)
 			Aim->ShowTarget();
 		/*                        */
-	
-	} 
+
+	}
 	bool Init(LPDIRECT3DDEVICE9 pDevice, HWND window) {
 		/*
 		* this fix IM_ASSERT(g.IO.DisplaySize.x >= 0.0f && g.IO.DisplaySize.y >= 0.0f  && "Invalid DisplaySize value!");
 		* if window == NULL then GetWindowRect return говно значения и выдаётся ассерт
 		*/
-		if (!window) { 
+		if (!window) {
 			return false;
-		}	
+		}
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
@@ -182,6 +178,111 @@ public:
 		return true;
 	}
 private:
+
+
+	static std::string openFile() {
+		std::string filename;
+		filename.resize(MAX_PATH);
+
+		OPENFILENAME ofn;
+		ZeroMemory(&ofn, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.lpstrFilter = "Lua files (.lua)" "\0"  "*.LUA" "\0"
+			"Any File"   "\0"  "*.*"   "\0";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFile = (char*)filename.c_str();
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_CREATEPROMPT | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+
+		if (!GetOpenFileName(&ofn))
+		{
+			return "";
+		}
+
+		std::ifstream f(ofn.lpstrFile);
+		if (!f)
+		{		
+			return "";
+		}
+
+		std::string content((std::istreambuf_iterator<char>(f)),
+			(std::istreambuf_iterator<char>()));
+		return content;
+	}
+
+
+	void Lua() {
+
+
+
+
+		if (ImGui::Button("Dump Lua", ImVec2(251.0f, 0.0f))) {
+			LuaManager.DumpFiles();
+		}
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+
+		static const char* luaInterfaceType[] = { "Client", "Server", "Menu" };
+		static LuaInterfaceType currentType;
+		ImGuiStyle& style = ImGui::GetStyle();
+		float w = ImGui::CalcItemWidth();
+		float spacing = style.ItemInnerSpacing.x;
+		float button_sz = ImGui::GetFrameHeight();
+		ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+
+		if (ImGui::BeginCombo("Lua Interface", luaInterfaceType[(int)currentType], ImGuiComboFlags_NoArrowButton))
+		{
+			for (int n = 0; n < IM_ARRAYSIZE(luaInterfaceType); n++)
+			{
+				bool is_selected = ((int)currentType == n);
+				if (ImGui::Selectable(luaInterfaceType[n], is_selected))
+					currentType = (LuaInterfaceType)n;
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+
+		ImGui::PopItemWidth();
+
+
+
+	
+		static std::mutex bufferMutex;
+		// 267 size child
+		if (ImGui::Button("Browse files", ImVec2(122.f, 0.0f)) && Interfaces.Engine->IsInGame()) {
+
+			std::thread thread([] {
+				std::string fileName = openFile();
+				if (!fileName.empty()) {
+					LuaManager.PushToQueue(currentType, fileName);
+				}
+			});
+
+			thread.detach();
+
+		}
+
+
+		ImGui::SameLine();
+
+		static char inputBuffer[32768];
+
+		if (ImGui::Button("Execute", ImVec2(122.0f, 0.0f)) && Interfaces.Engine->IsInGame()) {
+			LuaManager.PushToQueue(currentType, std::string(inputBuffer));
+		}
+
+
+		ImGui::InputTextMultiline("", inputBuffer, sizeof(inputBuffer), ImVec2(252.0f, 160.0f));
+
+	}
+
+
+
 	void SpecificEntitiesList() {
 
 		static char inputBuffer[128];
@@ -198,7 +299,7 @@ private:
 			}
 		}
 		ImGui::Spacing();
-		ImGui::Separator();								
+		ImGui::Separator();
 		for (int i = 0; i < vars::misc::specificEntities; i++) {
 			ImGui::Text(vars::misc::specificEntitiesList[i]);
 			ImGui::Separator();
@@ -308,7 +409,7 @@ private:
 			Interfaces.Engine->GetPlayerNick(playerNick, playerIndex);
 
 			if (ImGui::Selectable(playerNick)) {
-				
+
 				strcpy(selectedPlayerName, playerNick);
 			}
 
@@ -329,11 +430,11 @@ private:
 		return playersList;
 	}
 	std::vector<std::pair<CPed*, int>> getObjects() {
-	
+
 		std::vector<std::pair<CPed*, int>> objectsList;
 		for (int entityIndex = 0; entityIndex <= Interfaces.ClientEntityList->GetHighestEntityIndex(); entityIndex++) {
 			CPed* entity = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
-			if (entity && entity != localPed) {		
+			if (entity && entity != localPed) {
 				if (!entity->isEntityIsPlayer() && entity->m_modelInfo) // m_modelInfo can be nullptr
 					objectsList.push_back(std::make_pair(entity, entityIndex));
 
@@ -351,7 +452,7 @@ private:
 		deleteFriend.close();
 		vars::misc::friendPlayers--;
 	}
-	
+
 	void addFriend(const char* friendName) {
 		bool isAdded = false;
 		for (int i = 0; i < vars::misc::friendPlayers; i++) {
@@ -402,7 +503,7 @@ private:
 		draw->AddCircle(cursorPos, 10.0f, -1, 36, 3.0f);
 		draw->AddCircleFilled(cursorPos, 4.0f, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
 
-	
+
 	}
 	void AddEllipse(ImVec2 cursorPos, ImVec2 ellipseSize, ImU32 color, float thickness) {
 		ImDrawList* draw = ImGui::GetForegroundDrawList();
@@ -414,19 +515,19 @@ private:
 	void DrawSight(ImVec2 sectionChildSize, int tabs, ImU32 color) {
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
 		cursorPos.x += (sectionChildSize.x - 16) / 2;
-		cursorPos.y += (sectionChildSize.y - 10) / (tabs * 2) ;
+		cursorPos.y += (sectionChildSize.y - 10) / (tabs * 2);
 
 		ImDrawList* draw = ImGui::GetForegroundDrawList();
 		constexpr float sightSize = 15.0f;
 		draw->AddCircle(cursorPos, sightSize, color, 36);
-		
+
 		draw->AddLine(ImVec2(cursorPos.x, cursorPos.y - (sightSize / 2.0f)), ImVec2(cursorPos.x, cursorPos.y - (sightSize / 2.0f + sightSize)), color, 1.0f); // up
 		draw->AddLine(ImVec2(cursorPos.x, cursorPos.y + (sightSize / 2.0f)), ImVec2(cursorPos.x, cursorPos.y + (sightSize / 2.0f + sightSize)), color, 1.0f); // down
 		draw->AddLine(ImVec2(cursorPos.x - (sightSize / 2.0f + sightSize), cursorPos.y), ImVec2(cursorPos.x - (sightSize / 2.0f), cursorPos.y), color, 1.0f); // left
 		draw->AddLine(ImVec2(cursorPos.x + (sightSize / 2.0f + sightSize), cursorPos.y), ImVec2(cursorPos.x + (sightSize / 2.0f), cursorPos.y), color, 1.0f); // right
-		
+
 		draw->AddCircleFilled(cursorPos, sightSize / 5, color, 36);
-		 
+
 	}
 	void Combo() {
 		/* ImGui::Combo xd*/

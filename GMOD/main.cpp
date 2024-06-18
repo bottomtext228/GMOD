@@ -1,4 +1,4 @@
-#define CHEAT_VERSION 2.1
+#define CHEAT_VERSION 2.2
 #define _CRT_SECURE_NO_WARNINGS
 //#define DEBUG
 #include "includes.h"
@@ -22,49 +22,49 @@ WNDPROC oWndProc;
 HWND window = NULL;
 
 
+
+
 LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 
 	if (!vars::init && !Menu->Init(pDevice, window))
 		return oEndScene(pDevice);
 
-	
-		ImGui_ImplDX9_NewFrame();	
-		ImGui_ImplWin32_NewFrame();	
-		ImGui::NewFrame();
+	ImGui_ImplDX9_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
 
-		if (Interfaces.Engine->IsInGame()) {
-			localPed = Interfaces.ClientEntityList->GetClientEntity(Interfaces.Engine->GetLocalPlayer());
-			ESP->Process();
-	
-		}
-		Menu->Render();
+	if (Interfaces.Engine->IsInGame()) {
+		localPed = Interfaces.ClientEntityList->GetClientEntity(Interfaces.Engine->GetLocalPlayer());
+		ESP->Process();
+	}
+	Menu->Render();
+	// TODO:
+	// * check view punch interpolation to make NoSpread even more accurate
+	ImGui::EndFrame();
+	ImGui::Render();
+	ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 
-
-		ImGui::EndFrame();
-		ImGui::Render();
-		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-		
-		if (vars::misc::DLLUnload) {
-			Misc->Unload(pDevice, window, oWndProc);
-		}
+	if (vars::misc::DLLUnload) {
+		Misc->Unload(pDevice, window, oWndProc);
+	}
 	return oEndScene(pDevice);
 }
 
- 
+
 #define menuKey VK_END
 
 LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	
+
 	/*
 	* this fix IM_ASSERT(GImGui != NULL && "No current context. Did you call ImGui::CreateContext() and ImGui::SetCurrentContext() ?");
 	*/
-	if(!ImGui::GetCurrentContext()) 
+	if (!ImGui::GetCurrentContext())
 		return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 
 
 	if (wParam == menuKey) {
 		BOOL repeatFlag = (HIWORD(lParam) & KF_REPEAT) == KF_REPEAT;
-		if (uMsg == WM_KEYDOWN && !repeatFlag){
+		if (uMsg == WM_KEYDOWN && !repeatFlag) {
 			vars::menu = !vars::menu;
 
 		}
@@ -76,34 +76,35 @@ LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 	ImGuiIO& io = ImGui::GetIO();
+
+	if (io.WantCaptureKeyboard) {
+		return true; // we don't want to game know about key input when writing in ImGui::Input() 
+	}
+
 	if (io.WantCaptureMouse && (uMsg == WM_LBUTTONDOWN || uMsg == WM_LBUTTONUP || uMsg == WM_RBUTTONDOWN || uMsg == WM_RBUTTONUP
 		|| uMsg == WM_MBUTTONDOWN || uMsg == WM_MBUTTONUP || uMsg == WM_MOUSEWHEEL || uMsg == WM_MOUSEMOVE)) {
-	
 		return true; // чтобы при нажатии на меню мышкой игра не видела нажатия    
 	}
 
-	
+
 
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
 
-
 DWORD WINAPI MainThread(HMODULE hMod)
 {
-
 	bool attached = false;
 	do
 	{
 		if (kiero::init(kiero::RenderType::D3D9) == kiero::Status::Success)
 		{
-			kiero::bind(42, (void**)& oEndScene, hkEndScene);
+			kiero::bind(42, (void**)&oEndScene, hkEndScene);
 			window = FindWindowA(0, "Garry's Mod");
 			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWL_WNDPROC, (LONG_PTR)WndProc);
 			attached = true;
 		}
 	} while (!attached);
-
 
 	while (!vars::misc::DLLUnload) {
 		Sleep(100);
@@ -120,7 +121,7 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
-	
+
 		vars::client = (DWORD)GetModuleHandle("client.dll");
 		vars::engine = (DWORD)GetModuleHandle("engine.dll");
 		vars::resX = GetSystemMetrics(0);
@@ -136,21 +137,21 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 		}
 #endif // DEBUG
 
-	
+
 #ifdef DEBUG
 		remove("debug.txt");
 		debugFile.open("debug.txt", std::ios::app);
 #endif // DEBUG
 
 
-		Interfaces.GetInterfaces();	
+		Interfaces.GetInterfaces();
 		Hooks.Hook();
 		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)MainThread, hMod, 0, nullptr);
 
 		break;
 	case DLL_PROCESS_DETACH:
 #ifdef DEBUG
-	FreeConsole();
+		FreeConsole();
 #endif // DEBUG
 
 
@@ -161,7 +162,7 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 		debugFile.close();
 #endif // DEBUG
 
-	
+
 		break;
 	}
 	return TRUE;

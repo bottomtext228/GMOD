@@ -1,5 +1,14 @@
 
 class IClientRenderable;
+template <typename T>
+class CInterpolatedVar {
+public:
+	void** m_pVMT;
+	T* m_pValue;
+	void* m_pVarHistory;
+	char padding[8];
+	T* m_pLastNetworkedValue;
+};
 class CPed {
 
 
@@ -63,11 +72,19 @@ public:
 	char pad_026C[4252]; //0x0354
 	uintptr_t boneBase; //0x13E8
 	char pad_13EC[4132]; //0x13EC
-	uint32_t m_iActiveWeapon; //0x2410
+	uint32_t m_iActiveWeapon; //0x2418
 	char pad_2414[188]; //0x2414
-	CVector m_fViewPunch; //0x24D0
-	char pad_24DC[48]; //0x24DC
-	CVector m_fAimPunch; //0x250
+	// float m_fFallSpeed; // 0x24C4
+	CVector m_fViewPunch; //0x24D8 
+	CInterpolatedVar<CVector> m_fViewPunchInterpolated;
+	char pad_24DC[44];
+	//char pad_24DC[48]; 
+	CVector m_fViewPunchVelocity; //0x2514
+	// CVector m_fViewAngles (for local player maybe only) // 0x2678
+
+	inline int GetPredictionRandomSeed() {
+		return *(int*)((uintptr_t)this + 0x2C2C);
+	}
 
 	CVector GetBonePosition(unsigned int boneIndex) {
 		CVector bonePos;
@@ -97,12 +114,16 @@ public:
 	};
 	bool IsLineOfSightClear(CVector const& point, int checkType, CPed* ignoredEntity) {
 		typedef bool(__thiscall* fn)(void*, const CVector&, int, CPed*);
-		return VMT.getvfunc<fn>(this, 275)(this, point, checkType, ignoredEntity);
+		return VMT.getvfunc<fn>(this, 274)(this, point, checkType, ignoredEntity);
 	}
-
-
-	//char pad_0238[4572]; //0x0238
-}; //Size: 0x1414
+	CVector GetViewDirection() {
+		typedef float*(__thiscall* fn)(void*, CVector&, float);
+		CVector viewDirection;
+		constexpr float magicNumber = 0.087155744f;
+		VMT.getvfunc<fn>(this, 288)(this, viewDirection, magicNumber); // view angle + aim/view punch;
+		return viewDirection;
+	}
+}; 
 
 
 
@@ -110,24 +131,31 @@ class C_BaseCombatWeapon
 {
 public:
 	CVector& GetBulletSpread() {
-
 		typedef CVector& (__thiscall* fn)(void*);
-		return VMT.getvfunc<fn>(this, 326)(this);
+		return VMT.getvfunc<fn>(this, 325)(this); 
 
 	}
-	/*
-	int PrimaryAmmoCount() {
-		if (!this) return 0;
-		return *(int*)((uintptr_t)this + 0x1818); // m_iClip1
-	}
-	int SecondaryAmmoCount() {
-		if (!this) return 0;
-		return *(int*)((uintptr_t)this + 0x181C); // m_iClip2
 
+	bool IsScripted() {
+		// can't find how game checks it, but this is analogue of Weapon:IsScripted() Lua method
+		// if it is SWEP than (this + 0x10) stores pointer to SWEP name
+		return *(uintptr_t*)((uintptr_t)this + 0x10) != 0;
 	}
-	*/
+	 	
+	const char* GetName() {
+		typedef const char* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 372)(this);
+	}
 };
 
+/*
+class CScriptedEntity { weapon + 0x18b0 = m_pScriptedEntity
+	char pad[16];
+	char name[???];
+
+	// if you need more info about this class it can be easily found by ReClass
+}
+*/
 
 class modelInfo
 {
@@ -135,5 +163,4 @@ public:
 	char pad_0000[4]; //0x0000
 	char* m_ModelName; //0x0004
 };
-
 

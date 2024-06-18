@@ -14,23 +14,36 @@ public:
 	float operator[](int i) const { if (i == 1) return x; if (i == 2) return y; return z; };
 	float& operator[](int i) { if (i == 1) return x; if (i == 2) return y; return z; };
 
-	bool operator==(const CVector& v) { 
+	bool operator==(const CVector& v) {
 		return (v.x == x && v.y == y && v.z == z);
 	}
 
-	bool operator!=(const CVector& v) { 
+	bool operator!=(const CVector& v) {
 		return (v.x != x || v.y != y || v.z != z);
 	}
+
 	CVector& operator=(const CVector& v) {
 		x = v.x; y = v.y; z = v.z;
 		return *this;
 	}
+
 	CVector toAngle() {
-		return CVector(atan2(-z, hypot(x, y)) * (180 / M_PI),
-			atan2(y, x) *(180 / M_PI),
-			0.0f);
+		return {
+			atan2(-z, hypot(x, y)) * (180 / M_PI),
+			atan2(y, x) * (180 / M_PI),
+			0.0f
+		};
 	}
 
+	CVector toDirection() {
+		float x = this->x * (M_PI / 180);
+		float y = this->y * (M_PI / 180);
+
+		return { cosf(y) * cosf(x),
+			sinf(y) * cosf(x),
+			-sinf(x) };
+
+	}
 
 	inline CVector operator-(const CVector& v) { return CVector(x - v.x, y - v.y, z - v.z); }
 	inline CVector operator+(const CVector& v) { return CVector(x + v.x, y + v.y, z + v.z); }
@@ -60,6 +73,9 @@ public:
 	float DistanceTo(const CVector2D& v) {
 		return sqrtf(powf((float)(x - v.x), 2) + powf((float)(y - v.y), 2));
 	}
+	ImVec2 ToImVec2() {
+		return ImVec2((float)x, (float)y);
+	}
 };
 
 class CVector2DF {
@@ -68,7 +84,7 @@ public:
 	inline CVector2DF operator-(const CVector2DF& v) {
 		return CVector2DF{ x - v.x, y - v.y };
 	}
-	float LengthSqr() { 
+	float LengthSqr() {
 		return sqrt(x * x + y * y);
 	}
 	void Normalize() {
@@ -78,12 +94,15 @@ public:
 			y = y / length;
 		}
 		else {
-			x = 0; 
+			x = 0;
 			y = 0;
-		}	
+		}
 	}
 	float DistanceTo(const CVector2DF& v) {
 		return sqrtf(powf(x - v.x, 2) + powf(y - v.y, 2));
+	}
+	ImVec2 ToImVec2() {
+		return ImVec2(x, y);
 	}
 };
 

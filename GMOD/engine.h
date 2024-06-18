@@ -14,8 +14,6 @@ typedef struct player_info_s {
 class CEngine {
 
 public:
-
-
 	void GetPlayerNick(char* buffer, int entityIndex) {
 		player_info_t pInfo;
 		GetPlayerInfo(&pInfo, entityIndex);		
@@ -39,7 +37,6 @@ public:
 		typedef void(__thiscall* fn)(void*, CVector&);
 		VMT.getvfunc<fn>(this, 19)(this, angles);
 		return angles;
-
 	}
 	void SetViewAngles(CVector angles) {
 		typedef void(__thiscall* fn)(void*, CVector&);

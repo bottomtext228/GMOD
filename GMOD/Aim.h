@@ -4,18 +4,15 @@ public:
 	void Process(CUserCmd* CMD) {
 		if ((vars::aim::smoothAim && CMD->m_buttons.IN_ATTACK2) || (vars::aim::silentAim && CMD->m_buttons.IN_ATTACK)) {
 			int boneId;
-			//CVector localPos = localPed->GetEyePosition() + Misc->predictEntityOffsetPosition(localPed->m_fVelocity);
-			Interfaces.Prediction->RunCommand(localPed, CMD, 0);
-
-			CVector localPos = localPed->m_fPos + localPed->m_fViewOffset;
+			CVector localPos = localPed->GetEyePosition() + Misc->predictEntityOffsetPosition(localPed->m_fVelocity);
+			//Interfaces.Prediction->RunCommand(localPed, CMD, 0); // BUG: calls CreateMove second time
 			CPed* ped = getBoneAndNearestPed(localPos, boneId);
 			if (ped && isPedInFOV(ped)) {
 				matrix3x4_t boneMatrix[128];
 				if (!ped->GetClientRenderable()->SetupBones(boneMatrix, 128, 0x100, Interfaces.GlobalVars->curtime))
 					return;
-				//CVector bonePos = ped->m_fPos + ped->m_fViewOffset;
 				CVector bonePos = { boneMatrix[boneId].m[0][3], boneMatrix[boneId].m[1][3], boneMatrix[boneId].m[2][3] };
-				constexpr float tickOffset = 0.5f;
+				constexpr float tickOffset = 0.5f; // experimently obtained
 				bonePos += Misc->predictEntityOffsetPosition(ped->m_fVelocity) * tickOffset;
 				CVector2DF aimAngles = calcAimAngle(localPos, bonePos);
 				if (vars::aim::smoothAim) {
@@ -80,7 +77,6 @@ private:
 		}
 		float distance = localPos.DistanceTo(bonePos);
 		float angleY = Misc->radiansToDegrees(asinf((localPos.z - bonePos.z) / distance));
-
 		return { angleX, angleY };
 	}
 	CVector2DF calcSmoothAngles(CVector2DF cmd, CVector2DF aimAngle) { // плавная наводка
@@ -91,6 +87,12 @@ private:
 		CVector2DF smoothAngles{};
 		if (!vars::aim::rage && vars::aim::aimForce < cmd.DistanceTo(aimAngle)) {
 			CVector2DF vec = cmd - aimAngle;
+			if (vec.x > 180) { // aim angle can be only in [-180, 180] range, so when it should be > 180 it's actually goes to -180.
+				vec.x -= 360;
+			} 
+			if (vec.x < -180) {
+				vec.x += 360;
+			}
 			vec.Normalize();
 			smoothAngles.x = cmd.x - vec.x * vars::aim::aimForce;
 			smoothAngles.y = cmd.y - vec.y * vars::aim::aimForce;
@@ -207,7 +209,7 @@ public:
 			CVector bonePos = ped->GetBonePosition(boneId);
 			if (Misc->WorldToScreen(bonePos, screenPos)) {
 				ImDrawList* draw = ImGui::GetBackgroundDrawList();
-				draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0), ImVec2((float)screenPos.x, (float)screenPos.y), 0x77FF1E00); // blue
+				draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0), screenPos.ToImVec2(), 0x77FF1E00); // blue
 			}
 		}
 

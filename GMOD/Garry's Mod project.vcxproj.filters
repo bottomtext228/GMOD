@@ -105,9 +105,6 @@
     <ClInclude Include="vector.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="offsets.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="masks.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -160,6 +157,27 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="CGlobalVars.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="CPrediction.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="CLua.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="ConVar.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaManager.h">
+      <Filter>Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="BTMemory.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="CSignatureManager.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="CPlayerResource.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>

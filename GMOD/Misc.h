@@ -1,11 +1,11 @@
+
 class CMisc {
 public:
 	bool WorldToScreen(CVector pos, CVector2D& screen)
 	{
-		//float* matrix = Interfaces.Engine->WorldToScreenMatrix();
 
 		//Matrix-vector Product, multiplying world(eye) coordinates by projection matrix = clipCoords
-		CVector4D clipCoords;
+		CVector4D clipCoords{};
 		clipCoords.x = pos.x * vars::viewMatrix[0] + pos.y * vars::viewMatrix[1] + pos.z * vars::viewMatrix[2] + vars::viewMatrix[3];
 		clipCoords.y = pos.x * vars::viewMatrix[4] + pos.y * vars::viewMatrix[5] + pos.z * vars::viewMatrix[6] + vars::viewMatrix[7];
 		clipCoords.z = pos.x * vars::viewMatrix[8] + pos.y * vars::viewMatrix[9] + pos.z * vars::viewMatrix[10] + vars::viewMatrix[11];
@@ -71,12 +71,11 @@ public:
 
 
 
-	void GetBones(CPed* ped, int* cornerBones) {
+	void GetCornerBones(CPed* ped, int* cornerBones) {
 #ifdef DEBUG
 		debug("GetBones() \n");
 #endif // DEBUG
 
-		int distance = 99999;
 		CVector2D lowestBoneScreenPos, highestBoneScreenPos,
 			rightmostBoneScreenPos, leftmostBoneScreenPos;
 		lowestBoneScreenPos = { 0, 0 };

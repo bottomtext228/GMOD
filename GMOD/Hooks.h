@@ -3,6 +3,7 @@
 #include "NoSpread.h"
 #include "BunnyHop.h"
 
+
 CTriggerBot* TriggerBot;
 CAim* Aim;
 CNoSpread* NoSpread;
@@ -34,11 +35,15 @@ void __fastcall PaintTraverseFn(void* ecx, void* edx, unsigned int panel, bool f
 }
 
 bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* cmd) {
-	
+
+	LuaManager.ExecuteQueue(); // should do it in the game thread or it crashes
+
+	const bool result = oCreateMove(ecx, SampleTime, cmd);
+
 	if (!cmd->m_cmd_nr)
-		return true;
+		return result;
 	if (!localPed || !Interfaces.Engine->IsInGame())
-		return true;
+		return result;
 	
 
 	if (vars::esp::setupBones)
@@ -54,15 +59,15 @@ bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* c
 		BunnyHop->Process(cmd);
 	if (vars::misc::autoUncuff)
 		Misc->AutoUncuff(cmd);
-	
 
-
-	return true;
+	return result;
 }
 
 void __fastcall SetViewAngleFn(void* ecx, void* edx, CVector& angle) { // дл€ silent Aim, чтобы локально персонаж никак не поворачивалс€
 	if ((vars::aim::silentAim || vars::aim::noSpread) && vars::aim::newAngles == angle) // vars::newAngles != angle - фикс замедлени€ поворота персонажа при использовании сайлента
 		return;
+
+	// FIXME: ¬ызвано исключение: нарушение доступа дл€ чтени€. angle было nullptr.
 	oSetViewAngle(ecx, angle);
 }
 
@@ -76,6 +81,8 @@ void __fastcall PaintFn(void* ecx, void* edx, int mode) {
 
 	oPaint(ecx, mode);
 }
+
+
 class CHooks {
 
 public:
@@ -103,8 +110,7 @@ public:
 		/////////////////////////////////////////////////////////////////////////////
 		Paint = new CVMTHookManager(Interfaces.EngineVGUI);
 		oPaint = (paint_t)Paint->HookFunction(13, PaintFn);
-		Paint->HookTable(true);
-	
+		Paint->HookTable(true);			
 	}
 	void UnHook() {
 		ClientHook->~CVMTHookManager();

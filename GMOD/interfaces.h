@@ -15,8 +15,11 @@ public:
 	CPlayerInfoManager* PlayerInfo;
 	CGlobalVarsBase* GlobalVars;
 	void* EngineVGUI;
-	CPrediction* Prediction = (CPrediction*)GetPointer("client.dll", "VClientPrediction");
-	void GetInterfaces()
+	//CPrediction* Prediction = (CPrediction*)GetPointer("client.dll", "VClientPrediction");
+	CLuaShared* LuaShared;
+
+
+	void GetInterfaces() 
 	{
 		Trace = (CTrace*)GetPointer("engine.dll", "EngineTraceClient");
 		Client = GetPointer("client.dll", "VClient");
@@ -26,11 +29,24 @@ public:
 		PanelWrapper = (VPanelWrapper*)GetPointer("vgui2.dll", "VGUI_Panel");
 		ModelInfo = (CModelInfo*)GetPointer("engine.dll", "VModelInfoClient");
 		EngineVGUI = GetPointer("engine.dll", "VEngineVGui");
+		LuaShared = (CLuaShared*)GetPointer("lua_shared.dll", "LUASHARED");
+
+		assert(Trace != NULL && "EngineTraceClient interface is not found.");
+		assert(Client != NULL && "VClient interface is not found.");
+		assert(Engine != NULL && "VEngineClient interface is not found.");
+		assert(UniformRandomStream != NULL && "UniformRandomStream is not found.");
+		assert(PanelWrapper != NULL && "PanelWrapper interface is not found.");
+		assert(ModelInfo != NULL && "VModelInfoClient interface is not found.");
+		assert(EngineVGUI != NULL && "VEngineVGui interface is not found.");
+		assert(LuaShared != NULL && "LUASHARED interface is not found.");
+
 		CreateInterfaceFn CreateInterface = (CreateInterfaceFn)GetProcAddress(GetModuleHandleA("server.dll"), "CreateInterface");
 		// есть ещё PlayerInfoManager001 и он не подходит, поэтому нельзя через GetPointer()
 		PlayerInfo = (CPlayerInfoManager*)CreateInterface("PlayerInfoManager002", NULL);
+		assert(PlayerInfo != NULL && "PlayerInfoManager002 interface is not found.");
 		GlobalVars = PlayerInfo->GetGlobalVars();
 
+	
 	}
 
 	void* GetPointer(const char* Module, const char* InterfaceName)

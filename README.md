@@ -57,7 +57,3 @@ https://youtu.be/LQt7m-nebWE
    `Ignore teammates` ( все игроки в одной команде с локальным игроком будут считаться друзьями (Зависит от мода сервера - может не работать)) 
 
    `Unload` ( выгрузка чита )
-
-
-# Usage
-Inject the DLL file in the game process. Menu opens on `End` button.

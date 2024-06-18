@@ -7,9 +7,18 @@
 #include <Vector>
 #include <array>
 #include <map>
+#include <thread>
+#include <mutex>
+#include <fstream>
+#include <algorithm>
+#include <shlobj.h>
+#include <filesystem>
 #include <d3d9.h>
 #include <d3dx9.h>
 #pragma comment (lib, "D3dx9.lib")
+
+
+#include "BTMemory.h"
 
 /*           DirectX Hook           */
 #include "kiero/kiero.h"
@@ -29,12 +38,14 @@
 
 
 /*           SDK           */
+#include "CSignatureManager.h"
+#include "CPlayerResource.h"
+#include "ConVar.h"
 #include "vmt.h"
 #include "CGlobalVars.h"
 #include "checksum_md5.h"
 #include "bones.h"
 #include "CUniformRandomStream.h"
-#include "offsets.h"
 #include "vector.h"
 #include "CEntity.h"
 CPed* localPed = NULL;
@@ -48,14 +59,17 @@ CPed* localPed = NULL;
 #include "cliententlist.h"
 #include "icliententitylist.h"
 #include "CPrediction.h"
+#include "CLua.h"
+
 #include "interfaces.h"
 /*                         */
 
 
 /*           MAIN           */
 #include "settings.h"
+#include "LuaManager.h"
 #include "Misc.h"
-#include "hooks.h"
+#include "Hooks.h"
 #include "Menu.h"
 #include "ESP.h"
 /*                          */
