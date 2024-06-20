@@ -49,8 +49,9 @@ public:
 		// pistol resets view punch in PrimaryAttack(), so we don't set view punch when using it
 		if (strcmp(weapon->GetName(), "pistol")) {
 			// ViewPunch are angles that are added to our shoot angles to simulate weapon recoil, so we should add them.
-			// localPed->m_fViewPunch here differs from ViewPunch when we are actually shooting, so we should predict its future value by multiplying ViewPunchVelocity on frametime.
-			shootAngles += localPed->m_fViewPunch + localPed->m_fViewPunchVelocity * Interfaces.GlobalVars->frametime;
+			// localPed->m_fViewPunch here differs from ViewPunch when we are actually shooting, 
+			// so we should predict its future value by multiplying ViewPunchVelocity on tick interval.
+			shootAngles += localPed->m_fViewPunch + localPed->m_fViewPunchVelocity * Interfaces.GlobalVars->interval_per_tick;
 		}
 		CVector shootDir = shootAngles.toDirection();
 
