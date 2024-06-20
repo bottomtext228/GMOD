@@ -1,14 +1,6 @@
 
 class IClientRenderable;
-template <typename T>
-class CInterpolatedVar {
-public:
-	void** m_pVMT;
-	T* m_pValue;
-	void* m_pVarHistory;
-	char padding[8];
-	T* m_pLastNetworkedValue;
-};
+
 class CPed {
 
 
@@ -76,8 +68,7 @@ public:
 	char pad_2414[188]; //0x2414
 	// float m_fFallSpeed; // 0x24C4
 	CVector m_fViewPunch; //0x24D8 
-	CInterpolatedVar<CVector> m_fViewPunchInterpolated;
-	char pad_24DC[44];
+	char pad_24DC[48];
 	//char pad_24DC[48]; 
 	CVector m_fViewPunchVelocity; //0x2514
 	// CVector m_fViewAngles (for local player maybe only) // 0x2678

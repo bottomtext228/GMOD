@@ -1,6 +1,6 @@
 #define CHEAT_VERSION 2.2
 #define _CRT_SECURE_NO_WARNINGS
-//#define DEBUG
+#define DEBUG
 #include "includes.h"
 
 
@@ -38,8 +38,7 @@ LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 		ESP->Process();
 	}
 	Menu->Render();
-	// TODO:
-	// * check view punch interpolation to make NoSpread even more accurate
+
 	ImGui::EndFrame();
 	ImGui::Render();
 	ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
