@@ -51,7 +51,9 @@ https://youtu.be/LQt7m-nebWE
   - `Ignore limbs` ( игнорирование конечностей )
   
   - `Sticky Aim` ( при выключенном режиме аим выключается как только прицел на цели )
-  
+
+  - `Ignore Z` ( игнорирование Z координаты цели )
+    
   - `Target type` ( Hitbox/Bone )
 
   - `Keybind` ( Aim keybind )  
@@ -77,14 +79,14 @@ https://youtu.be/LQt7m-nebWE
    
    - `Unload` ( выгрузка чита )
 # Usage ( использование )
-Download GMOD.dll and GMOD.Injector.exe from latest release, place them in one folder and run injector (you can use any injector if you want).
+Download GMOD.dll and GMOD.Injector.exe from [latest release](github.com/bottomtext228/GMOD/releases/latest), place them in one folder and run injector (you can use any injector if you want).
 
 - Menu activation key - `End`.
 - Aim default keybind - `MOUSE5`,
 - Edge Jump - `N`.
 ---
 
-Скачайте GMOD.dll и GMOD.Injector.exe с последнего релиза, положите их в одну папку и запустите инжектор (можете использовать любой при желании).
+Скачайте GMOD.dll и GMOD.Injector.exe с [последнего](github.com/bottomtext228/GMOD/releases/latest), положите их в одну папку и запустите инжектор (можете использовать любой при желании).
 
 - Кнопка активации меню - `End`.
 - Стандартная клавиша аима - `MOUSE5`,
