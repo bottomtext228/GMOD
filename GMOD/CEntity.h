@@ -1,29 +1,28 @@
 
 class IClientRenderable;
+class modelInfo;
+
+#define	FL_ONGROUND				(1<<0)	// At rest / on the ground
+#define FL_DUCKING				(1<<1)	// Player flag -- Player is fully crouched
+#define FL_ANIMDUCKING			(1<<2)	// Player flag -- Player is in the process of crouching or uncrouching but could be in transition
+// examples:                                   Fully ducked:  FL_DUCKING &  FL_ANIMDUCKING
+//           Previously fully ducked, unducking in progress:  FL_DUCKING & !FL_ANIMDUCKING
+//                                           Fully unducked: !FL_DUCKING & !FL_ANIMDUCKING
+//           Previously fully unducked, ducking in progress: !FL_DUCKING &  FL_ANIMDUCKING
+#define	FL_WATERJUMP			(1<<3)	// player jumping out of water
+#define FL_ONTRAIN				(1<<4) // Player is _controlling_ a train, so movement commands should be ignored on client during prediction.
+#define FL_INRAIN				(1<<5)	// Indicates the entity is standing in rain
+#define FL_FROZEN				(1<<6) // Player is frozen for 3rd person camera
+#define FL_ATCONTROLS			(1<<7) // Player can't move, but keeps key inputs for controlling another entity
+#define	FL_CLIENT				(1<<8)	// Is a player
+#define FL_FAKECLIENT			(1<<9)	// Fake client, simulated server side; don't send network messages to them
+// NON-PLAYER SPECIFIC (i.e., not used by GameMovement or the client .dll ) -- Can still be applied to players, though
+#define	FL_INWATER				(1<<10)	// In water
 
 class CPed {
 
 
 public:
-
-	char pad_0000[92]; //0x0000
-	class modelInfo* m_modelInfo; //0x005C
-	char pad_0060[47]; //0x0060
-	uint8_t m_lifeState; //0x008F
-	enum lifeStates {
-		alive = 0,
-		dead = 2,
-	};
-	uint32_t m_iHealth; //0x0090
-	uint32_t m_imaxHealth; //0x0094
-	char pad_00A0[4];
-	uint32_t m_iTeamNum; //0x009C
-	char pad_00A[72];
-	CVector m_fViewOffset;
-	char pad_00F4[60];
-	CVector m_fVelocity; //0x0130
-	char pad_013C[60]; //0x013C
-	uint32_t m_iMoveType; // 0x178
 	enum moveTypes {
 		MOVETYPE_NONE,
 		MOVETYPE_ISOMETRIC,
@@ -38,83 +37,238 @@ public:
 		MOVETYPE_OBSERVER,
 		MOVETYPE_CUSTOM,
 	};
-	char pad_0178[228]; // 0x17C
-	CVector m_fPos; //0x0260
-	float m_fYRot; // 0x026C
-	float m_fXRot; //0x0270
-	char pad_0274[220];  //0x0350
-	union {
-		uint32_t flags;
-		struct {
-			bool ON_GROUND : 1;
-			bool DUCKING : 1;
-			bool PAD3 : 1;
-			bool PAD4 : 1;
-			bool PAD5 : 1;
-			bool PAD6 : 1;
-			bool PAD7 : 1;
-			bool PAD8 : 1;
-			bool PAD9 : 1;
-			bool PAD10 : 1;
-			bool IN_WATER : 1;
-			// 1 << 10 - in water
-		} m_flags;
+
+	enum lifeStates {
+		alive = 0,
+		dead = 2,
 	};
-
-	char pad_026C[4252]; //0x0354
-	uintptr_t boneBase; //0x13E8
-	char pad_13EC[4132]; //0x13EC
-	uint32_t m_iActiveWeapon; //0x2418
-	char pad_2414[188]; //0x2414
-	// float m_fFallSpeed; // 0x24C4
-	CVector m_fViewPunch; //0x24D8 
-	char pad_24DC[48];
-	//char pad_24DC[48]; 
-	CVector m_fViewPunchVelocity; //0x2514
-	// CVector m_fViewAngles (for local player maybe only) // 0x2678
-
-	inline int GetPredictionRandomSeed() {
-		return *(int*)((uintptr_t)this + 0x2C2C);
-	}
 
 	CVector GetBonePosition(unsigned int boneIndex) {
 		CVector bonePos;
-		bonePos.x = *reinterpret_cast<float*>(this->boneBase + 0x30 * boneIndex + 0xC);
-		bonePos.y = *reinterpret_cast<float*>(this->boneBase + 0x30 * boneIndex + 0x1C);
-		bonePos.z = *reinterpret_cast<float*>(this->boneBase + 0x30 * boneIndex + 0x2C);
+		bonePos.x = *reinterpret_cast<float*>(GetCachedBones() + 0x30 * boneIndex + 0xC);
+		bonePos.y = *reinterpret_cast<float*>(GetCachedBones() + 0x30 * boneIndex + 0x1C);
+		bonePos.z = *reinterpret_cast<float*>(GetCachedBones() + 0x30 * boneIndex + 0x2C);
 		return bonePos;
 	}
-	bool isEntityIsPlayer() {
+
+	matrix3x4_t& GetBoneMatrix(unsigned int boneIndex) {
+		return ((matrix3x4_t*)GetCachedBones())[boneIndex];
+	}
+
+	bool IsPlayer() {
 		typedef bool(__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 130)(this);
 	}
+
 	IClientRenderable* GetClientRenderable() {
 		typedef IClientRenderable* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 5)(this);
 	}
-	bool inline isAlive() {
-		return this->m_lifeState == lifeStates::alive;
+
+	bool inline IsAlive() {
+		return this->GetLifeState() == lifeStates::alive;
 	}
+
 	CVector GetEyePosition() {
-		return this->m_fPos + this->m_fViewOffset;
+		return this->GetVecOrigin() + this->GetVecViewOffset();
 	}
+
 	enum LineOfSightCheckType
 	{
 		IGNORE_NOTHING, // игнорирует любые entity, проходя сквозь них. Видит препятстие только в "статичных объектах" (((( в карте ))))
 		IGNORE_ACTORS	// не игнорирует entity на пути
 	};
+
 	bool IsLineOfSightClear(CVector const& point, int checkType, CPed* ignoredEntity) {
 		typedef bool(__thiscall* fn)(void*, const CVector&, int, CPed*);
 		return VMT.getvfunc<fn>(this, 274)(this, point, checkType, ignoredEntity);
 	}
+
 	CVector GetViewDirection() {
-		typedef float*(__thiscall* fn)(void*, CVector&, float);
+		typedef float* (__thiscall* fn)(void*, CVector&, float);
 		CVector viewDirection;
 		constexpr float magicNumber = 0.087155744f;
 		VMT.getvfunc<fn>(this, 288)(this, viewDirection, magicNumber); // view angle + aim/view punch;
 		return viewDirection;
 	}
-}; 
+
+	void SelectItem(const char* pszItem, int iSubType) {
+		typedef void(__thiscall* fn)(void*, const char*, int);
+		VMT.getvfunc<fn>(this, 320)(this, pszItem, iSubType);
+	}
+
+	void PreThink() {
+		typedef void(__thiscall* fn)(void*);
+		VMT.getvfunc<fn>(this, 310)(this);
+	}
+
+	void Think() {
+		typedef void(__thiscall* fn)(void*);
+		VMT.getvfunc<fn>(this, 120)(this);
+	}
+
+	void PostThink() {
+		typedef void(__thiscall* fn)(void*);
+		VMT.getvfunc<fn>(this, 311)(this);
+	}
+
+	void SetScrollSpeed(int scrollSpeed) {
+		typedef void(__thiscall* fn)(void*, int);
+		VMT.getvfunc<fn>(this, 375)(this, scrollSpeed);
+	}
+
+	void UpdateButtonState(int nButtonMask) {
+		typedef void(__thiscall* fn)(void*, int);
+		VMT.getvfunc<fn>(this, 325);
+	}
+
+	void SetLocalViewAngles(CVector& angles) {
+		typedef void(__thiscall* fn)(void*, CVector&);
+		VMT.getvfunc<fn>(this, 351);
+	}
+
+	int GetHealth() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_iHealth");
+		return *(int*)((uintptr_t)this + offset);
+	}
+
+	int GetMaxHealth() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_iMaxHealth");
+		return *(int*)((uintptr_t)this + offset);
+	}
+
+	CVector& GetVecOrigin() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_vecOrigin");
+		return *(CVector*)((uintptr_t)this + offset);
+	}
+
+	CVector& GetAngRotation() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_angRotation");
+		return *(CVector*)((uintptr_t)this + offset);
+	}
+
+	int GetTeamNum() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_iTeamNum");
+		return *(int*)((uintptr_t)this + offset);
+	}
+
+	CVector& GetVecVelocity() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_vecVelocity[0]");
+		return *(CVector*)((uintptr_t)this + offset);
+	}
+
+	uint8_t& GetMoveType() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_iParentAttachment") - 0x2;
+		return *(uint8_t*)((uintptr_t)this + offset);
+	}
+
+	bool IsDormant() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_iParentAttachment") + 0x4;
+		return *(bool*)((uintptr_t)this + offset);
+	}
+
+	int& GetTickBase() {
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_nTickBase");
+		return *(int*)((uintptr_t)this + offset);
+	}
+
+	int& GetImpulse() {
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_nTickBase") - 0x28;
+		return *(int*)((uintptr_t)this + offset);
+	}
+
+	uint8_t* GetButtonsArray() {
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_nTickBase") + 0xD;
+		return (uint8_t*)((uintptr_t)this + offset);
+	}
+
+	float& GetFallVelocity() {
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_Local") + DTManager::GetOffset("DT_Local", "m_flFallVelocity");
+		return *(float*)((uintptr_t)this + offset);
+	}
+
+	CUserCmd*& GetCurrentCommand() {
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_hConstraintEntity") - 0x4;
+		return *(CUserCmd**)((uintptr_t)this + offset);
+	}
+
+	CVector& GetVecPunchAngle() {
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_Local") + DTManager::GetOffset("DT_Local", "m_vecPunchAngle");
+		return *(CVector*)((uintptr_t)this + offset);
+	}
+
+	CVector& GetVecPunchAngleVel() {
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_Local") + DTManager::GetOffset("DT_Local", "m_vecPunchAngleVel");
+		return *(CVector*)((uintptr_t)this + offset);
+	}
+
+	uint8_t GetLifeState() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BasePlayer", "m_lifeState");
+		return *(uint8_t*)((uintptr_t)this + offset);
+	}
+
+	uint8_t& GetFlags() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BasePlayer", "m_fFlags");
+		return *(uint8_t*)((uintptr_t)this + offset);
+	}
+
+	uint32_t GetActiveWeaponHandle() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseCombatCharacter", "m_hActiveWeapon");
+		return *(uint32_t*)((uintptr_t)this + offset);
+	}
+
+	modelInfo* GetModelInfo() {
+		static uintptr_t offset = DTManager::GetOffset("DT_AnimTimeMustBeFirst", "m_flAnimTime") - 0x4;
+		return *(modelInfo**)((uintptr_t)this + offset);
+	}
+
+	uint32_t GetCachedBones() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseAnimating", "m_bClientSideFrameReset") - 0x1C;
+		return *(uint32_t*)((uintptr_t)this + offset);
+	}
+
+	CVector& GetVecViewOffset() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseFlex", "m_vecViewOffset[0]");
+		return *(CVector*)((uintptr_t)this + offset);
+	}
+
+
+	// DT_LocalPlayerExclusive:
+	//	m_nTickBase
+	//	m_Local (m_local + DT_Local = offset)
+
+	// DT_Local:
+	// m_vecPunchAngle
+	// m_vecPunchAngleVel
+	// m_flFallVelocity
+
+	// DT_BaseEntity:
+	//	m_vecOrigin
+	//	m_angRotation
+	//	m_iHealth
+	//	m_iTeamNum
+	//	m_iMaxHealth
+	//	m_vecVelocity[0]
+	//	m_iParentAttachment (m_iParentAttachment - 2 = m_moveType, m_iParentAttachment + 4 = m_bDormant)
+
+	// DT_BasePlayer:
+	//	m_lifeState
+	//	m_fFlags
+	//	pl (DT_PlayerState, localViewAngles = pl + 0x8 )
+	// 
+
+	// DT_BaseCombatCharacter:
+	//	m_hActiveWeapon
+
+	// DT_AnimTimeMustBeFirst
+	//	m_flAnimTime (m_flAnimTime - 4 = GetModelInfo())
+
+	// DT_BaseAnimating
+	//	m_bClientSideFrameReset (m_bClientSideFrameReset - 0x1C = boneBase (m_CachedBones))
+
+	// DT_BaseFlex
+	//	m_vecViewOffset[0]
+};
 
 
 
@@ -123,7 +277,7 @@ class C_BaseCombatWeapon
 public:
 	CVector& GetBulletSpread() {
 		typedef CVector& (__thiscall* fn)(void*);
-		return VMT.getvfunc<fn>(this, 325)(this); 
+		return VMT.getvfunc<fn>(this, 325)(this);
 
 	}
 
@@ -132,10 +286,18 @@ public:
 		// if it is SWEP than (this + 0x10) stores pointer to SWEP name
 		return *(uintptr_t*)((uintptr_t)this + 0x10) != 0;
 	}
-	 	
-	const char* GetName() {
+
+	const char* GetHoldType() {
 		typedef const char* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 372)(this);
+	}
+	const char* GetName() {
+		typedef const char* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 366)(this);
+	}
+	const char* GetPrintName() {
+		typedef const char* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 367)(this);
 	}
 };
 

@@ -1,4 +1,3 @@
-
 class CMenu {
 public:
 
@@ -65,13 +64,16 @@ public:
 					ImGui::Checkbox("2D BoxESP", &vars::esp::box2DESP);
 					ImGui::Checkbox("Health and nicks", &vars::esp::renderHealthAndNick);
 					ImGui::Checkbox("BoneESP", &vars::esp::boneESP);
+					ImGui::Checkbox("Dormant check", &vars::esp::dormantCheck);
+					ImGui::Checkbox("Distance check", &vars::esp::distanceCheck);
+					ImGui::SliderFloat("Distance", &vars::esp::distance, 1000.0f, 15000.0f);
 					ImGui::Checkbox("SetupBones", &vars::esp::setupBones);
 					ImGui::SliderInt("Setup delay", &vars::esp::setupBonesDelay, 0, 100);
 					ImGui::Checkbox("Entities", &vars::esp::renderEntity);
 					ImGui::Checkbox("Specific Entities only", &vars::esp::renderSpecificEntities);
 					break;
 
-				case mainTabs::TAB_AIM:
+				case mainTabs::TAB_AIM: {
 					ImGui::Checkbox("TriggerBot", &vars::aim::triggerBot);
 					ImGui::Checkbox("Hold or Click", &vars::aim::holdOrClick);
 					ImGui::Checkbox("No Spread", &vars::aim::noSpread);
@@ -83,15 +85,23 @@ public:
 						vars::aim::silentAim = false;
 
 
-					ImGui::SliderFloat("AimForce", &vars::aim::aimForce, 0.0, 1.0);
-
-					Combo();
+					ImGui::SliderFloat("Angle speed", &vars::aim::aimAngleSpeed, 1.0f, 100.0f);
+					ImGui::SliderFloat("Smooth steps", &vars::aim::aimSmoothSteps, 1.0f, 50.0f);
+					ComboWithArrows("Aim mode", vars::aim::currentAimMode, vars::aim::aimModes, IM_ARRAYSIZE(vars::aim::aimModes));
+					ComboWithArrows("Aim target", vars::aim::currentAimTarget, vars::aim::aimTargets, IM_ARRAYSIZE(vars::aim::aimTargets));
 					ImGui::Checkbox("Render FOV", &vars::aim::renderFOV);
 					ImGui::SliderInt("FOV", &vars::aim::FOV, 0, 1000);
 
 					ImGui::Checkbox("Ignore walls", &vars::aim::ignoreWalls);
 					ImGui::Checkbox("Show target", &vars::aim::showTarget);
+
+					ImGui::Checkbox("Ignore limbs", &vars::aim::ignoreLimbs);
+					ImGui::Checkbox("Sticky Aim", &vars::aim::stickyAim);
+					ImGui::Checkbox("Ignore Z", &vars::aim::ignoreZ);
+					ComboWithArrows("Target type", vars::aim::currentAimTargetType, vars::aim::targetTypes, IM_ARRAYSIZE(vars::aim::targetTypes));
+					ImGui::Hotkey("Keybind:", vars::aim::aimKeyBind, 100.0f);
 					break;
+				}
 				case mainTabs::TAB_MISCELLANEOUS:
 					static int currentMiscTab = -1;
 					ImGui::Spacing();
@@ -127,6 +137,8 @@ public:
 						ImGui::Checkbox("Auto uncuff", &vars::misc::autoUncuff);
 						ImGui::Checkbox("Ignore teammates", &vars::misc::ignoreLocalTeam);
 						ImGui::Checkbox("Auto Jump", &vars::bhop::autoJump);
+						ImGui::Checkbox("Edge Jump", &vars::misc::edgeJump);
+						ImGui::Hotkey("Edge Jump Key:", vars::misc::edgeJumpKeyBind, 115.0f);
 						ImGui::SetCursorPosY(280);
 						if (ImGui::Button("Unload")) {
 							vars::misc::DLLUnload = true;
@@ -179,7 +191,7 @@ public:
 	}
 private:
 
-
+	// opens Explorer.exe and allows to pick file, returns content of the file
 	static std::string openFile() {
 		std::string filename;
 		filename.resize(MAX_PATH);
@@ -201,7 +213,7 @@ private:
 
 		std::ifstream f(ofn.lpstrFile);
 		if (!f)
-		{		
+		{
 			return "";
 		}
 
@@ -251,17 +263,17 @@ private:
 
 
 
-	
+
 		static std::mutex bufferMutex;
 		// 267 size child
 		if (ImGui::Button("Browse files", ImVec2(122.f, 0.0f)) && Interfaces.Engine->IsInGame()) {
 
 			std::thread thread([] {
-				std::string fileName = openFile();
-				if (!fileName.empty()) {
-					LuaManager.PushToQueue(currentType, fileName);
+				std::string fileContent = openFile();
+				if (!fileContent.empty()) {
+					LuaManager.PushToQueue(currentType, fileContent);
 				}
-			});
+				});
 
 			thread.detach();
 
@@ -272,7 +284,7 @@ private:
 
 		static char inputBuffer[32768];
 
-		if (ImGui::Button("Execute", ImVec2(122.0f, 0.0f)) && Interfaces.Engine->IsInGame()) {
+		if (ImGui::Button("Execute", ImVec2(122.0f, 0.0f))) {
 			LuaManager.PushToQueue(currentType, std::string(inputBuffer));
 		}
 
@@ -315,16 +327,16 @@ private:
 		for (auto& object : getObjects()) {
 
 			CPed* entity = object.first;
-			if (entity->m_modelInfo) { // не смотря на проверку в getObjects() даже здесь может быть nullptr, судя по отладчику visual studio 
+			if (entity->GetModelInfo()) { // не смотря на проверку в getObjects() даже здесь может быть nullptr, судя по отладчику visual studio 
 				int entityIndex = object.second;
 				char selectableText[128];
-				sprintf_s(selectableText, "%s##%d", entity->m_modelInfo->m_ModelName, entityIndex);
+				sprintf_s(selectableText, "%s##%d", entity->GetModelInfo()->m_ModelName, entityIndex);
 				/*	В ImGui в качестве id элемента во всех функциях по типу ImGui::Button() и ImGui::Selectable() используется текст.
 				*	Если передавать одинаковый, то последующие элементы с таким же названием не будут нормально работать,
 				*	фиксится это через ## + любые символы. Они не будут отображаться, но работоспособность вернётся
 				*/
 				if (ImGui::Selectable(selectableText))
-					strcpy(selectedObjectName, entity->m_modelInfo->m_ModelName);
+					strcpy(selectedObjectName, entity->GetModelInfo()->m_ModelName);
 			}
 
 		}
@@ -423,7 +435,7 @@ private:
 		for (int entityIndex = 0; entityIndex < Interfaces.ClientEntityList->GetHighestEntityIndex(); entityIndex++) {
 			CPed* entity = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 			if (entity && entity != localPed) {
-				if (entity->isEntityIsPlayer())
+				if (entity->IsPlayer())
 					playersList.push_back(std::make_pair(entity, entityIndex));
 			}
 		}
@@ -435,7 +447,7 @@ private:
 		for (int entityIndex = 0; entityIndex <= Interfaces.ClientEntityList->GetHighestEntityIndex(); entityIndex++) {
 			CPed* entity = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 			if (entity && entity != localPed) {
-				if (!entity->isEntityIsPlayer() && entity->m_modelInfo) // m_modelInfo can be nullptr
+				if (!entity->IsPlayer() && entity->GetModelInfo()) // GetModelInfo() can be nullptr
 					objectsList.push_back(std::make_pair(entity, entityIndex));
 
 			}
@@ -529,20 +541,19 @@ private:
 		draw->AddCircleFilled(cursorPos, sightSize / 5, color, 36);
 
 	}
-	void Combo() {
-		/* ImGui::Combo xd*/
+	void ComboWithArrows(const char* name, const char*& currentValue, const char** values, int arraySize) {
 		ImGuiStyle& style = ImGui::GetStyle();
 		float w = ImGui::CalcItemWidth();
 		float spacing = style.ItemInnerSpacing.x;
 		float button_sz = ImGui::GetFrameHeight();
 		ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
-		if (ImGui::BeginCombo("Aim target", vars::aim::aimTarget, ImGuiComboFlags_NoArrowButton))
+		if (ImGui::BeginCombo(name, currentValue, ImGuiComboFlags_NoArrowButton))
 		{
-			for (int n = 0; n < IM_ARRAYSIZE(vars::aim::items); n++)
+			for (int n = 0; n < arraySize; n++)
 			{
-				bool is_selected = (vars::aim::aimTarget == vars::aim::items[n]);
-				if (ImGui::Selectable(vars::aim::items[n], is_selected))
-					vars::aim::aimTarget = vars::aim::items[n];
+				bool is_selected = (currentValue == values[n]);
+				if (ImGui::Selectable(values[n], is_selected))
+					currentValue = values[n];
 				if (is_selected)
 					ImGui::SetItemDefaultFocus();
 			}
@@ -550,35 +561,35 @@ private:
 		}
 		ImGui::PopItemWidth();
 		ImGui::SameLine(0, spacing);
-		if (ImGui::ArrowButton("##l", ImGuiDir_Left))
+		char uniqueArrowButtonId[64];
+		strcat(uniqueArrowButtonId, name);
+		if (ImGui::ArrowButton(strcat(uniqueArrowButtonId, "##l"), ImGuiDir_Left))
 		{
-			int arraySize = IM_ARRAYSIZE(vars::aim::items);
-			if (vars::aim::aimTarget == vars::aim::items[0])
-				vars::aim::aimTarget = vars::aim::items[arraySize - 1];
+			if (currentValue == values[0])
+				currentValue = values[arraySize - 1];
 
 			else {
 				for (int n = 1; n < arraySize; n++)
 				{
-					bool is_selected = (vars::aim::aimTarget == vars::aim::items[n]);
+					bool is_selected = (currentValue == values[n]);
 					if (is_selected) {
-						vars::aim::aimTarget = vars::aim::items[n - 1];
+						currentValue = values[n - 1];
 						break;
 					}
 				}
 			}
 		}
 		ImGui::SameLine(0, spacing);
-		if (ImGui::ArrowButton("##r", ImGuiDir_Right))
+		if (ImGui::ArrowButton(strcat(uniqueArrowButtonId, "##r"), ImGuiDir_Right))
 		{
-			int arraySize = IM_ARRAYSIZE(vars::aim::items);
-			if (vars::aim::aimTarget == vars::aim::items[arraySize - 1])
-				vars::aim::aimTarget = vars::aim::items[0];
+			if (currentValue == values[arraySize - 1])
+				currentValue = values[0];
 			else {
 				for (int n = 0; n < (arraySize - 1); n++)
 				{
-					bool is_selected = (vars::aim::aimTarget == vars::aim::items[n]);
+					bool is_selected = (currentValue == values[n]);
 					if (is_selected) {
-						vars::aim::aimTarget = vars::aim::items[n + 1];
+						currentValue = values[n + 1];
 						break;
 					}
 				}
@@ -586,52 +597,166 @@ private:
 		}
 	}
 
-
-	void setImGuiStyle() {
-		ImGuiStyle& style = ImGui::GetStyle();
-		style.Alpha = 1.0;
-		style.ChildRounding = 3.0f;
-		style.WindowRounding = 3.0f;
-		style.GrabRounding = 5.0f;
-		style.GrabMinSize = 8.0f;
-		style.FrameRounding = 3.0f;
-		style.FrameBorderSize = 1.0f;
-		style.Colors[ImGuiCol_Text] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-		style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.00f, 0.40f, 0.41f, 1.00f);
-		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-		style.Colors[ImGuiCol_Border] = ImVec4(0.00f, 1.00f, 1.00f, 0.65f);
-		style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-		style.Colors[ImGuiCol_FrameBg] = ImVec4(0.44f, 0.80f, 0.80f, 0.18f);
-		style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.44f, 0.80f, 0.80f, 0.27f);
-		style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.44f, 0.81f, 0.86f, 0.66f);
-		style.Colors[ImGuiCol_TitleBg] = ImVec4(0.14f, 0.18f, 0.21f, 0.73f);
-		style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.54f);
-		style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.13f);
-		style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.20f);
-		style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.22f, 0.29f, 0.30f, 0.71f);
-		style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.44f);
-		style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
-		style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-		style.Colors[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 1.00f, 0.68f);
-		style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.36f);
-		style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.76f);
-		style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.65f, 0.65f, 0.46f);
-		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.01f, 1.00f, 1.00f, 0.43f);
-		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.62f);
-		style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 1.00f, 1.00f, 0.33f);
-		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.42f);
-		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
-		style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
-		style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
-		style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-		style.Colors[ImGuiCol_PlotLines] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-		style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-		style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 1.00f, 1.00f, 0.22f);
-		style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.04f, 0.10f, 0.09f, 0.51f);
-
+void AimTargetCombo() {
+	/* ImGui::Combo xd*/
+	ImGuiStyle& style = ImGui::GetStyle();
+	float w = ImGui::CalcItemWidth();
+	float spacing = style.ItemInnerSpacing.x;
+	float button_sz = ImGui::GetFrameHeight();
+	ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+	if (ImGui::BeginCombo("Aim target", vars::aim::currentAimTarget, ImGuiComboFlags_NoArrowButton))
+	{
+		for (int n = 0; n < IM_ARRAYSIZE(vars::aim::aimTargets); n++)
+		{
+			bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
+			if (ImGui::Selectable(vars::aim::aimTargets[n], is_selected))
+				vars::aim::currentAimTarget = vars::aim::aimTargets[n];
+			if (is_selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
 	}
+	ImGui::PopItemWidth();
+	ImGui::SameLine(0, spacing);
+	if (ImGui::ArrowButton("##l", ImGuiDir_Left))
+	{
+		int arraySize = IM_ARRAYSIZE(vars::aim::aimTargets);
+		if (vars::aim::currentAimTarget == vars::aim::aimTargets[0])
+			vars::aim::currentAimTarget = vars::aim::aimTargets[arraySize - 1];
+
+		else {
+			for (int n = 1; n < arraySize; n++)
+			{
+				bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
+				if (is_selected) {
+					vars::aim::currentAimTarget = vars::aim::aimTargets[n - 1];
+					break;
+				}
+			}
+		}
+	}
+	ImGui::SameLine(0, spacing);
+	if (ImGui::ArrowButton("##r", ImGuiDir_Right))
+	{
+		int arraySize = IM_ARRAYSIZE(vars::aim::aimTargets);
+		if (vars::aim::currentAimTarget == vars::aim::aimTargets[arraySize - 1])
+			vars::aim::currentAimTarget = vars::aim::aimTargets[0];
+		else {
+			for (int n = 0; n < (arraySize - 1); n++)
+			{
+				bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
+				if (is_selected) {
+					vars::aim::currentAimTarget = vars::aim::aimTargets[n + 1];
+					break;
+				}
+			}
+		}
+	}
+}
+
+void AimTargetTypeCombo() {
+	/* ImGui::Combo xd*/
+	ImGuiStyle& style = ImGui::GetStyle();
+	float w = ImGui::CalcItemWidth();
+	float spacing = style.ItemInnerSpacing.x;
+	float button_sz = ImGui::GetFrameHeight();
+	ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+	if (ImGui::BeginCombo("Target type", vars::aim::currentAimTargetType, ImGuiComboFlags_NoArrowButton))
+	{
+		for (int n = 0; n < IM_ARRAYSIZE(vars::aim::targetTypes); n++)
+		{
+			bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
+			if (ImGui::Selectable(vars::aim::targetTypes[n], is_selected))
+				vars::aim::currentAimTargetType = vars::aim::targetTypes[n];
+			if (is_selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopItemWidth();
+	ImGui::SameLine(0, spacing);
+	if (ImGui::ArrowButton("###l", ImGuiDir_Left))
+	{
+		int arraySize = IM_ARRAYSIZE(vars::aim::targetTypes);
+		if (vars::aim::currentAimTargetType == vars::aim::targetTypes[0])
+			vars::aim::currentAimTargetType = vars::aim::targetTypes[arraySize - 1];
+
+		else {
+			for (int n = 1; n < arraySize; n++)
+			{
+				bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
+				if (is_selected) {
+					vars::aim::currentAimTargetType = vars::aim::targetTypes[n - 1];
+					break;
+				}
+			}
+		}
+	}
+	ImGui::SameLine(0, spacing);
+	if (ImGui::ArrowButton("###r", ImGuiDir_Right))
+	{
+		int arraySize = IM_ARRAYSIZE(vars::aim::targetTypes);
+		if (vars::aim::currentAimTargetType == vars::aim::targetTypes[arraySize - 1])
+			vars::aim::currentAimTargetType = vars::aim::targetTypes[0];
+		else {
+			for (int n = 0; n < (arraySize - 1); n++)
+			{
+				bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
+				if (is_selected) {
+					vars::aim::currentAimTargetType = vars::aim::targetTypes[n + 1];
+					break;
+				}
+			}
+		}
+	}
+}
+
+
+void setImGuiStyle() {
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.Alpha = 1.0;
+	style.ChildRounding = 3.0f;
+	style.WindowRounding = 3.0f;
+	style.GrabRounding = 5.0f;
+	style.GrabMinSize = 8.0f;
+	style.FrameRounding = 3.0f;
+	style.FrameBorderSize = 1.0f;
+	style.Colors[ImGuiCol_Text] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+	style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.00f, 0.40f, 0.41f, 1.00f);
+	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+	style.Colors[ImGuiCol_Border] = ImVec4(0.00f, 1.00f, 1.00f, 0.65f);
+	style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.44f, 0.80f, 0.80f, 0.18f);
+	style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.44f, 0.80f, 0.80f, 0.27f);
+	style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.44f, 0.81f, 0.86f, 0.66f);
+	style.Colors[ImGuiCol_TitleBg] = ImVec4(0.14f, 0.18f, 0.21f, 0.73f);
+	style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.54f);
+	style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.13f);
+	style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.20f);
+	style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.22f, 0.29f, 0.30f, 0.71f);
+	style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.44f);
+	style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
+	style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+	style.Colors[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 1.00f, 0.68f);
+	style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.36f);
+	style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.76f);
+	style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.65f, 0.65f, 0.46f);
+	style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.01f, 1.00f, 1.00f, 0.43f);
+	style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.62f);
+	style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 1.00f, 1.00f, 0.33f);
+	style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.42f);
+	style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
+	style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
+	style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
+	style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+	style.Colors[ImGuiCol_PlotLines] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+	style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+	style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+	style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+	style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 1.00f, 1.00f, 0.22f);
+	style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.04f, 0.10f, 0.09f, 0.51f);
+
+}
 };
 
 CMenu* Menu;

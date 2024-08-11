@@ -1,5 +1,5 @@
 #pragma once
-
+class CPed;
 
 class IMoveHelper;
 
@@ -139,7 +139,9 @@ public:
 	bool			ShouldDumpEntity(CPed* ent);
 
 	void			SmoothViewOnMovingPlatform(CPed* pPlayer, CVector& offset);
-
+	bool			IsEnginePaused() {
+		return *(bool*)((uintptr_t)this + 0xB);
+	}
 
 };
 
@@ -184,4 +186,247 @@ public:
 	float			m_flConstraintSpeedFactor;
 
 	CVector			m_vecAbsOrigin;		// edict::origin
+};
+
+
+
+
+class IGameMovement
+{
+public:
+	virtual			~IGameMovement(void) {}
+
+	// Process the current movement command
+	virtual void	ProcessMovement(CPed* pPlayer, CMoveData* pMove) = 0;
+	virtual void	StartTrackPredictionErrors(CPed* pPlayer) = 0;
+	virtual void	FinishTrackPredictionErrors(CPed* pPlayer) = 0;
+	virtual void	DiffPrint(char const* fmt, ...) = 0;
+
+	// Allows other parts of the engine to find out the normal and ducked player bbox sizes
+	virtual CVector	GetPlayerMins(bool ducked) const = 0;
+	virtual CVector	GetPlayerMaxs(bool ducked) const = 0;
+	virtual CVector  GetPlayerViewOffset(bool ducked) const = 0;
+
+};
+
+
+class CGameMovement : public IGameMovement
+{
+public:
+
+	CGameMovement(void);
+	virtual			~CGameMovement(void);
+
+	virtual void	ProcessMovement(CPed* pPlayer, CMoveData* pMove);
+
+	virtual void	StartTrackPredictionErrors(CPed* pPlayer);
+	virtual void	FinishTrackPredictionErrors(CPed* pPlayer);
+	virtual void	DiffPrint(char const* fmt, ...);
+	virtual CVector	GetPlayerMins(bool ducked) const;
+	virtual CVector	GetPlayerMaxs(bool ducked) const;
+	virtual CVector	GetPlayerViewOffset(bool ducked) const;
+
+	// For sanity checking getting stuck on CMoveData::SetAbsOrigin
+	virtual void	TracePlayerBBox(const CVector& start, const CVector& end, unsigned int fMask, int collisionGroup, trace_t& pm);
+
+	// allows derived classes to exclude entities from trace
+	virtual void	TryTouchGround(const CVector& start, const CVector& end, const CVector& mins, const CVector& maxs, unsigned int fMask, int collisionGroup, trace_t& pm);
+
+
+#define BRUSH_ONLY true
+	virtual unsigned int PlayerSolidMask(bool brushOnly = false);	///< returns the solid mask for the given player, so bots can have a more-restrictive set
+	CPed* player;
+	CMoveData* GetMoveData() { return mv; }
+public:
+	// Input/Output for this movement
+	CMoveData* mv;
+
+	int				m_nOldWaterLevel;
+	float			m_flWaterEntryTime;
+	int				m_nOnLadder;
+
+	CVector			m_vecForward;
+	CVector			m_vecRight;
+	CVector			m_vecUp;
+
+
+	// Does most of the player movement logic.
+	// Returns with origin, angles, and velocity modified in place.
+	// were contacted during the move.
+	virtual void	PlayerMove(void);
+
+	// Set ground data, etc.
+	void			FinishMove(void);
+
+	virtual float	CalcRoll(const CVector& angles, const CVector& velocity, float rollangle, float rollspeed);
+
+	virtual	void	DecayPunchAngle(void);
+
+	virtual void	CheckWaterJump(void);
+
+	virtual void	WaterMove(void);
+
+	void			WaterJump(void);
+
+	// Handles both ground friction and water friction
+	void			Friction(void);
+
+	virtual void	AirAccelerate(CVector& wishdir, float wishspeed, float accel);
+
+	virtual void	AirMove(void);
+	virtual float	GetAirSpeedCap(void) { return 30.f; }
+
+	virtual bool	CanAccelerate();
+	virtual void	Accelerate(CVector& wishdir, float wishspeed, float accel);
+
+	// Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
+	virtual void	WalkMove(void);
+
+	// Try to keep a walking player on the ground when running down slopes etc
+	void			StayOnGround(void);
+
+	// Handle MOVETYPE_WALK.
+	virtual void	FullWalkMove();
+
+	// allow overridden versions to respond to jumping
+	virtual void	OnJump(float fImpulse) {}
+	virtual void	OnLand(float fVelocity) {}
+
+	// Implement this if you want to know when the player collides during OnPlayerMove
+	virtual void	OnTryPlayerMoveCollision(trace_t& tr) {}
+
+	virtual CVector	GetPlayerMins(void) const; // uses local player
+	virtual CVector	GetPlayerMaxs(void) const; // uses local player
+
+	typedef enum
+	{
+		GROUND = 0,
+		STUCK,
+		LADDER
+	} IntervalType_t;
+
+	virtual int		GetCheckInterval(IntervalType_t type);
+
+	// Useful for things that happen periodically. This lets things happen on the specified interval, but
+	// spaces the events onto different frames for different players so they don't all hit their spikes
+	// simultaneously.
+	bool			CheckInterval(IntervalType_t type);
+
+
+	// Decompoosed gravity
+	void			StartGravity(void);
+	void			FinishGravity(void);
+
+	// Apply normal ( undecomposed ) gravity
+	void			AddGravity(void);
+
+	// Handle movement in noclip mode.
+	void			FullNoClipMove(float factor, float maxacceleration);
+
+	// Returns true if he started a jump (ie: should he play the jump animation)?
+	virtual bool	CheckJumpButton(void);	// Overridden by each game.
+
+	// Dead player flying through air., e.g.
+	virtual void    FullTossMove(void);
+
+	// Player is a Observer chasing another player
+	void			FullObserverMove(void);
+
+	// Handle movement when in MOVETYPE_LADDER mode.
+	virtual void	FullLadderMove();
+
+	// The basic solid body movement clip that slides along multiple planes
+	virtual int		TryPlayerMove(CVector* pFirstDest = NULL, trace_t* pFirstTrace = NULL);
+
+	virtual bool	LadderMove(void);
+	virtual bool	OnLadder(trace_t& trace);
+	virtual float	LadderDistance(void);	///< Returns the distance a player can be from a ladder and still attach to it
+	virtual unsigned int LadderMask(void);
+	virtual float	ClimbSpeed(void);
+	virtual float	LadderLateralMultiplier(void);
+
+	// See if the player has a bogus velocity value.
+	void			CheckVelocity(void);
+
+	// Does not change the entities velocity at all
+	void			PushEntity(CVector& push, trace_t* pTrace);
+
+	// Slide off of the impacting object
+	// returns the blocked flags:
+	// 0x01 == floor
+	// 0x02 == step / wall
+	int				ClipVelocity(CVector& in, CVector& normal, CVector& out, float overbounce);
+
+	// If pmove.origin is in a solid position,
+	// try nudging slightly on all axis to
+	// allow for the cut precision of the net coordinates
+	virtual int		CheckStuck(void);
+
+	// Check if the point is in water.
+	// Sets refWaterLevel and refWaterType appropriately.
+	// If in water, applies current to baseVelocity, and returns true.
+	virtual bool			CheckWater(void);
+
+	// Determine if player is in water, on ground, etc.
+	virtual void CategorizePosition(void);
+
+	virtual void	CheckParameters(void);
+
+	virtual	void	ReduceTimers(void);
+
+	virtual void	CheckFalling(void);
+
+	virtual void	PlayerRoughLandingEffects(float fvol);
+
+	void			PlayerWaterSounds(void);
+
+	void ResetGetPointContentsCache();
+	int GetPointContentsCached(const CVector& point, int slot);
+
+	// Ducking
+	virtual void	Duck(void);
+	virtual void	HandleDuckingSpeedCrop();
+	virtual void	FinishUnDuck(void);
+	virtual void	FinishDuck(void);
+	virtual bool	CanUnduck();
+	void			UpdateDuckJumpEyeOffset(void);
+	bool			CanUnDuckJump(trace_t& trace);
+	void			StartUnDuckJump(void);
+	void			FinishUnDuckJump(trace_t& trace);
+	void			SetDuckedEyeOffset(float duckFraction);
+	void			FixPlayerCrouchStuck(bool moveup);
+
+	float			SplineFraction(float value, float scale);
+
+	void			CategorizeGroundSurface(trace_t& pm);
+
+	bool			InWater(void);
+
+	// Commander view movement
+	void			IsometricMove(void);
+
+	// Traces the player bbox as it is swept from start to end
+	virtual void* TestPlayerPosition(const CVector& pos, int collisionGroup, trace_t& pm);
+
+	// Checks to see if we should actually jump 
+	void			PlaySwimSound();
+
+	bool			IsDead(void) const;
+
+	// Figures out how the constraint should slow us down
+	float			ComputeConstraintSpeedFactor(void);
+
+	virtual void	SetGroundEntity(trace_t* pm);
+
+	virtual void	StepMove(CVector& vecDestination, trace_t& trace);
+
+	// when we step on ground that's too steep, search to see if there's any ground nearby that isn't too steep
+	void			TryTouchGroundInQuadrants(const CVector& start, const CVector& end, unsigned int fMask, int collisionGroup, trace_t& pm);
+};
+
+class IMoveHelper {
+private:
+	virtual void UnknownVirtual() = 0;
+public:
+	virtual void SetHost(CPed* host) = 0;
 };

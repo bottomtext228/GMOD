@@ -90,7 +90,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -117,7 +117,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,12 +142,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="imgui\Hotkey.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_dx9.cpp" />
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="imgui\InputUtil.cpp" />
     <ClCompile Include="kiero\kiero.cpp" />
     <ClCompile Include="kiero\minhook\src\buffer.c" />
     <ClCompile Include="kiero\minhook\src\hde\hde32.c" />
@@ -177,19 +179,25 @@
     <ClInclude Include="CPrediction.h" />
     <ClInclude Include="CSignatureManager.h" />
     <ClInclude Include="CUniformRandomStream.h" />
+    <ClInclude Include="DTParser.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="ESP.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="icliententitylist.h" />
+    <ClInclude Include="imgui\Hotkey.h" />
+    <ClInclude Include="imgui\InputUtil.h" />
     <ClInclude Include="Includes.h" />
     <ClInclude Include="interfaces.h" />
     <ClInclude Include="CLua.h" />
+    <ClInclude Include="localization.h" />
     <ClInclude Include="LuaManager.h" />
     <ClInclude Include="masks.h" />
+    <ClInclude Include="math_utils.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="NoSpread.h" />
     <ClInclude Include="panelwrapper.h" />
+    <ClInclude Include="Prediction.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="Aim.h" />
     <ClInclude Include="studiobone.h" />

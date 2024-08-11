@@ -12,8 +12,10 @@ public:
 
 					CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 					if (ped) {
-						if (ped != localPed && ped->isAlive() && ped->isEntityIsPlayer() && ped->m_modelInfo) {
-
+						if (vars::esp::dormantCheck && ped->IsDormant()) return;
+						if (vars::esp::distanceCheck && ped->GetVecOrigin().DistanceTo(localPed->GetVecOrigin()) > vars::esp::distance) return;
+						if (ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo()) {
+							
 							if (vars::esp::box3DESP) {
 								DrawBoxESP(ped, entityIndex);
 							}
@@ -33,7 +35,59 @@ public:
 							if (vars::esp::box2DESP) {
 								Draw2DBoxESP(ped, entityIndex);
 							}
+							
+					/*		auto studioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
 
+							for (int boneIndex = 0; boneIndex < studioHdr->numbones; boneIndex++) {
+
+								auto bone = studioHdr->pBone(boneIndex);
+								if (bone && bone->parent >= 0 && bone->flags & 256) {
+
+									CVector bonePos = ped->GetBonePosition(boneIndex);
+
+									CVector2D screenPos;
+									if (Misc->WorldToScreen(bonePos, screenPos)) {
+										ImGui::GetBackgroundDrawList()->AddText(screenPos.ToImVec2(), -1, bone->pszName());
+										ImGui::GetBackgroundDrawList()->AddCircleFilled(screenPos.ToImVec2(), 1, -1);
+									}
+								}
+							}*/
+							//auto pStudioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
+							//if (!pStudioHdr)
+							//	return;
+
+							//mstudiohitboxset_t* set = pStudioHdr->pHitboxSet(0);//m_nHitboxSet);
+							//if (!set)
+							//	return;
+
+							////Vector position;
+							////QAngle angles;
+
+			
+							//
+							//for (int i = 0; i < set->numhitboxes; i++)
+							//{
+							//	// TODO: check bbmin, bbmax
+							//	mstudiobbox_t* pbox = set->pHitbox(i);
+							//
+							//	auto bone = pStudioHdr->pBone(pbox->bone);
+							//	
+							//	ImGui::Text("%d | %d", pbox->group, pbox->bone);
+						
+							//	auto position = ped->GetBonePosition(pbox->bone);
+							//
+							//	matrix3x4_t& m = ((matrix3x4_t*)ped->boneBase)[pbox->bone];
+
+
+							//	CVector2D screenPos;
+
+							//	if (Misc->WorldToScreen(GetAABBCenter(m, pbox->bbmin, pbox->bbmax), screenPos)) {
+							//		ImGui::GetBackgroundDrawList()->AddCircleFilled(screenPos.ToImVec2(), 1.0f, -1);
+							//	}
+
+
+							//}
+							//
 						}
 						if (vars::esp::renderEntity) {
 							DrawEntities(ped);
@@ -53,13 +107,13 @@ private:
 		debug("DrawLines() \n");
 #endif // DEBUG
 
-		CVector pos = ped->m_fPos;
+		CVector pos = ped->GetVecOrigin();
 		pos.z += 78;
 
 		CVector2D screenPos;
 		if (Misc->WorldToScreen(pos, screenPos)) {
 			ImDrawList* draw = ImGui::GetBackgroundDrawList();
-			draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0.0f), screenPos.ToImVec2(), calcESPColor(ped->m_iHealth, playerIndex));
+			draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0.0f), screenPos.ToImVec2(), calcESPColor(ped->GetHealth(), playerIndex));
 		}
 	}
 	void DrawHealthAndNick(CPed* ped, int playerIndex) {
@@ -67,7 +121,7 @@ private:
 		debug("DrawHealthAndNick\n");
 #endif // DEBUG
 
-		CVector pos = ped->m_fPos;
+		CVector pos = ped->GetVecOrigin();
 		pos.z += 80;
 
 		CVector2D screenPos;
@@ -76,7 +130,7 @@ private:
 			char espText[150];
 			char playerNick[128];
 			Interfaces.Engine->GetPlayerNick(playerNick, playerIndex);
-			sprintf_s(espText, "[%d] %s", ped->m_iHealth, playerNick);
+			sprintf_s(espText, "[%d] %s", ped->GetHealth(), playerNick);
 			ImVec2 textSize = ImGui::CalcTextSize(espText);
 			ImDrawList* draw = ImGui::GetBackgroundDrawList();
 			draw->AddText(ImVec2(screenPos.x - textSize.x / 2, screenPos.y - textSize.y), -1, espText);
@@ -88,10 +142,10 @@ private:
 		debug("DrawEntities()\n");
 #endif // DEBUG
 
-		if (entity->m_iTeamNum == 0 && entity->m_modelInfo) {
+		if (entity->GetTeamNum() == 0 && entity->GetModelInfo()) {
 
 			ImU32 espColor = 0xFFFF7300;
-			if (Misc->isEntityInSpecificEntitiesList(entity->m_modelInfo->m_ModelName)) {
+			if (Misc->isEntityInSpecificEntitiesList(entity->GetModelInfo()->m_ModelName)) {
 				espColor = 0xFF00FF22; // 0073FF  22FF00 <- rgb | abgr -> FFFF7300 FF00FF22
 
 			}
@@ -100,10 +154,10 @@ private:
 					return;
 			}
 			CVector2D entityPos;
-			if (Misc->WorldToScreen(entity->m_fPos, entityPos)) {
+			if (Misc->WorldToScreen(entity->GetVecOrigin(), entityPos)) {
 				ImDrawList* draw = ImGui::GetBackgroundDrawList();
-				ImVec2 textSize = ImGui::CalcTextSize(entity->m_modelInfo->m_ModelName);
-				draw->AddText(ImVec2(entityPos.x - textSize.x / 2, entityPos.y - textSize.y), espColor, entity->m_modelInfo->m_ModelName);
+				ImVec2 textSize = ImGui::CalcTextSize(entity->GetModelInfo()->m_ModelName);
+				draw->AddText(ImVec2(entityPos.x - textSize.x / 2, entityPos.y - textSize.y), espColor, entity->GetModelInfo()->m_ModelName);
 
 			}
 		}
@@ -140,7 +194,7 @@ private:
 		draw->AddRect(
 			ImVec2{ (float)rightmostBoneScreenPos.x, (float)highestBoneScreenPos.y },
 			ImVec2{ (float)leftmostBoneScreenPos.x, (float)lowestBoneScreenPos.y },
-			calcESPColor(ped->m_iHealth, playerIndex)
+			calcESPColor(ped->GetHealth(), playerIndex)
 		);
 
 
@@ -153,9 +207,11 @@ private:
 #endif // DEBUG
 
 
-		ImU32 espColor = calcESPColor(ped->m_iHealth, playerIndex);
+		ImU32 espColor = calcESPColor(ped->GetHealth(), playerIndex);
 
-		auto studioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->m_modelInfo);
+		assert(ped->GetModelInfo() != NULL);
+		auto studioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
+		assert(studioHdr != NULL);
 		for (int boneIndex = 0; boneIndex < studioHdr->numbones; boneIndex++)
 		{
 			auto bone = studioHdr->pBone(boneIndex);
@@ -166,7 +222,7 @@ private:
 				CVector normalParentBonePos = ped->GetBonePosition(bone->parent);
 
 				if (normalBonePos == CVector(0, 0, 0) || normalParentBonePos == CVector(0, 0, 0)
-					|| normalBonePos.DistanceTo(ped->m_fPos) > 150.0f || normalParentBonePos.DistanceTo(ped->m_fPos) > 150.f)
+					|| normalBonePos.DistanceTo(ped->GetVecOrigin()) > 150.0f || normalParentBonePos.DistanceTo(ped->GetVecOrigin()) > 150.f)
 					continue;
 
 				CVector2D bonePosFrom;
@@ -185,7 +241,7 @@ private:
 		debug("DrawBox ESP \n");
 #endif // DEBUG
 
-		CVector pos = ped->m_fPos;
+		CVector pos = ped->GetVecOrigin();
 		CVector2D screenPos[8]{};
 		CVector corners[8];
 
@@ -207,10 +263,10 @@ private:
 		corners[DOWN_RIGHT_NEAR] = { pos.x + vars::boxESPSize, pos.y - vars::boxESPSize, pos.z };
 		corners[DOWN_LEFT_FAR] = { pos.x - vars::boxESPSize, pos.y + vars::boxESPSize, pos.z };
 		corners[DOWN_RIGHT_FAR] = { pos.x + vars::boxESPSize, pos.y + vars::boxESPSize, pos.z };
-		corners[UP_LEFT_NEAR] = { pos.x - vars::boxESPSize, pos.y - vars::boxESPSize, pos.z + ped->m_fViewOffset.z };
-		corners[UP_RIGHT_NEAR] = { pos.x + vars::boxESPSize, pos.y - vars::boxESPSize, pos.z + ped->m_fViewOffset.z };
-		corners[UP_LEFT_FAR] = { pos.x - vars::boxESPSize, pos.y + vars::boxESPSize, pos.z + ped->m_fViewOffset.z };
-		corners[UP_RIGHT_FAR] = { pos.x + vars::boxESPSize, pos.y + vars::boxESPSize, pos.z + ped->m_fViewOffset.z };
+		corners[UP_LEFT_NEAR] = { pos.x - vars::boxESPSize, pos.y - vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
+		corners[UP_RIGHT_NEAR] = { pos.x + vars::boxESPSize, pos.y - vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
+		corners[UP_LEFT_FAR] = { pos.x - vars::boxESPSize, pos.y + vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
+		corners[UP_RIGHT_FAR] = { pos.x + vars::boxESPSize, pos.y + vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
 
 
 		/* типо чтобы не вызывать WorldToScreen лишний раз */
@@ -221,7 +277,7 @@ private:
 		}
 	
 		ImDrawList* draw = ImGui::GetBackgroundDrawList();
-		ImU32 ESPColor = calcESPColor(ped->m_iHealth, playerIndex);
+		ImU32 ESPColor = calcESPColor(ped->GetHealth(), playerIndex);
 
 		constexpr std::array<std::pair<int, int>, 12> cornersSerialNumber = {
 		   std::make_pair(DOWN_LEFT_NEAR, DOWN_RIGHT_NEAR),

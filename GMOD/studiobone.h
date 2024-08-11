@@ -1,11 +1,4 @@
-class Quaternion {
-public:
-	float x, y, z, w;
-};
-
-struct matrix3x4_t {
-	float m[3][4];
-};
+#define BONE_USED_BY_HITBOX 0x100
 
 struct mstudiobone_t
 {
@@ -72,7 +65,7 @@ struct mstudiohitboxset_t {
 	inline char* const	pszName(void) const { return ((char*)this) + sznameindex; }
 	int					numhitboxes;
 	int					hitboxindex;
-	inline mstudiobbox_t* pHitbox(int i) const { return (mstudiobbox_t*)(((byte*)this) + hitboxindex) + i; };
+	inline mstudiobbox_t* pHitbox(int i) const { return (mstudiobbox_t*)(((std::byte*)this) + hitboxindex) + i; };
 };
 
 

@@ -63,6 +63,12 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\InputUtil.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\Hotkey.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="kiero\minhook\dll_resources\MinHook.rc">
@@ -178,6 +184,24 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="CPlayerResource.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="math_utils.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Prediction.h">
+      <Filter>Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="localization.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\Hotkey.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\InputUtil.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="DTParser.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>

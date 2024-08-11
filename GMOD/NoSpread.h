@@ -7,7 +7,7 @@ public:
 		if (!(cmd->m_buttons.IN_ATTACK))
 			return;
 
-		C_BaseCombatWeapon* weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(localPed->m_iActiveWeapon);
+		C_BaseCombatWeapon* weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(localPed->GetActiveWeaponHandle());
 		if (!weapon)
 			return;
 
@@ -15,9 +15,9 @@ public:
 		if (weapon->IsScripted()) // will not work for Lua weapons
 			return;
 
-
+	
 		const char* weaponName = weapon->GetName();
-		if (strcmp(weaponName, "smg") && strcmp(weaponName, "pistol") && strcmp(weaponName, "ar2")) // only work for this HL2 weapons
+		if (strcmp(weaponName, "weapon_smg1") && strcmp(weaponName, "weapon_pistol") && strcmp(weaponName, "weapon_ar2") && strcmp(weaponName, "weapon_357")) // only work for this HL2 weapons
 			return;
 
 		/*
@@ -36,7 +36,7 @@ public:
 		*	CBaseEntity::FireBullets(processShot)
 		*/
 
-		BYTE seed = MD5_PseudoRandom(cmd->m_cmd_nr) & 0xFF;
+		BYTE seed = MD5_PseudoRandom(cmd->m_command_number) & 0xFF;
 
 		Interfaces.UniformRandomStream->SetSeed(seed);
 
@@ -47,11 +47,15 @@ public:
 		CVector shootAngles = cmd->m_viewangles;
 
 		// pistol resets view punch in PrimaryAttack(), so we don't set view punch when using it
-		if (strcmp(weapon->GetName(), "pistol")) {
+		if (strcmp(weaponName, "weapon_pistol")) { // if not pistol
 			// ViewPunch are angles that are added to our shoot angles to simulate weapon recoil, so we should add them.
-			// localPed->m_fViewPunch here differs from ViewPunch when we are actually shooting, 
-			// so we should predict its future value by multiplying ViewPunchVelocity on tick interval.
-			shootAngles += localPed->m_fViewPunch + localPed->m_fViewPunchVelocity * Interfaces.GlobalVars->interval_per_tick;
+			// localPed->GetVecPunchAngle() here differs from ViewPunch when we are actually shooting, 
+			// so we should predict its future value by multiplying ViewPunchVelocity on tick interval.		
+#if USE_ENGINE_PREDICTION
+			shootAngles += localPed->GetVecPunchAngle();
+#else
+			shootAngles += localPed->GetVecPunchAngle() + localPed->GetVecPunchAngleVel() * Interfaces.GlobalVars->interval_per_tick;
+#endif // USE_ENGINE_PREDICTION		
 		}
 		CVector shootDir = shootAngles.toDirection();
 
@@ -65,8 +69,11 @@ public:
 
 		fnShotManipulator_constructor((float*)&shotInfo, (float*)&shotInfo[3], (float*)&shotInfo[6]); // see CShotManipulator in source engine for more info
 
-
-		CVector bulletDirection = fnShotManipulator_ApplySpread((float*)&shotInfo, weapon->GetBulletSpread(), 1.0f);
+		CVector weaponSpread{ 0.0f, 0.0f, 0.0f };
+		if (strcmp(weaponName, "weapon_357")) // revolver doesn't set spread in PrimaryAttack(), so we use (0.0, 0.0, 0.0)
+			weaponSpread = weapon->GetBulletSpread(); 
+		
+		CVector bulletDirection = fnShotManipulator_ApplySpread((float*)&shotInfo, weaponSpread, 1.0f);
 
 		CVector bulletAngles = bulletDirection.toAngle();
 		CVector difference = cmd->m_viewangles - bulletAngles;

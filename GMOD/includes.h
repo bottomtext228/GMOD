@@ -29,6 +29,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx9.h"
+#include "imgui/InputUtil.h" 
+#include "imgui/Hotkey.h" 
 /*                                */
 
 
@@ -38,7 +40,11 @@
 
 
 /*           SDK           */
+#include "vector.h"
+#include "math_utils.h"
+#include "usercmd.h"
 #include "CSignatureManager.h"
+#include "DTParser.h"
 #include "CPlayerResource.h"
 #include "ConVar.h"
 #include "vmt.h"
@@ -46,21 +52,19 @@
 #include "checksum_md5.h"
 #include "bones.h"
 #include "CUniformRandomStream.h"
-#include "vector.h"
 #include "CEntity.h"
 CPed* localPed = NULL;
 #include "studiobone.h"
 #include "CModelInfo.h"
 #include "clientrenderable.h"
 #include "panelwrapper.h"
-#include "usercmd.h"
 #include "trace.h"
 #include "engine.h"
 #include "cliententlist.h"
 #include "icliententitylist.h"
 #include "CPrediction.h"
 #include "CLua.h"
-
+#include "localization.h"
 #include "interfaces.h"
 /*                         */
 

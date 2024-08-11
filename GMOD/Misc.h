@@ -44,7 +44,7 @@ public:
 
 		if (vars::misc::ignoreLocalTeam) {
 			CPed* playerPed = Interfaces.ClientEntityList->GetClientEntity(playerIndex);
-			if (playerPed->m_iTeamNum == localPed->m_iTeamNum) // same team
+			if (playerPed->GetTeamNum() == localPed->GetTeamNum()) // same team
 				return true;
 		}
 		char playerNick[128];
@@ -89,17 +89,17 @@ public:
 			rightmostBone, leftmostBone;
 		lowestBone = highestBone =
 			rightmostBone = leftmostBone = -1;
-		auto studioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->m_modelInfo);
+		auto studioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
 
 		for (int boneIndex = 0; boneIndex < studioHdr->numbones; boneIndex++)
 		{
 			auto bone = studioHdr->pBone(boneIndex);
-			if (bone && bone->parent >= 0 && bone->flags & 256)
+			if (bone && bone->parent >= 0 && bone->flags & BONE_USED_BY_HITBOX)
 			{
 				CVector2D screenPos;
 				CVector bonePos = ped->GetBonePosition(boneIndex);
 
-				if (bonePos != CVector(0.0, 0.0, 0.0) && bonePos.DistanceTo(ped->m_fPos) < 150.0 && WorldToScreen(bonePos, screenPos)) {
+				if (bonePos != CVector(0.0, 0.0, 0.0) && bonePos.DistanceTo(ped->GetVecOrigin()) < 150.0 && WorldToScreen(bonePos, screenPos)) {
 					if (screenPos.y > lowestBoneScreenPos.y) {
 						lowestBoneScreenPos.y = screenPos.y;
 						lowestBone = boneIndex;
@@ -136,7 +136,7 @@ public:
 		debug("BoneIndexByName() \n");
 #endif // DEBUG
 
-		auto pStudioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->m_modelInfo);
+		auto pStudioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
 
 		for (int boneIndex = 0; boneIndex < pStudioHdr->numbones; boneIndex++) {
 			auto bone = pStudioHdr->pBone(boneIndex);
@@ -152,18 +152,25 @@ public:
 		}
 		return -1;
 	}
-	mstudiobbox_t* GetHitboxByGroup(studiohdr_t* pStudioHdr, int group) {
-		for (int i = 0; i < pStudioHdr->numhitboxsets; i++) {
-			auto iHitboxCount = pStudioHdr->iHitboxCount(i);
-			for (int j = 0; j < iHitboxCount; j++) {
-				auto pHitbox = pStudioHdr->pHitbox(j, i);
-				if (pHitbox->group == group) {
-					return pHitbox;
-				}
+	mstudiobbox_t* HitboxByBoneName(CPed* ped, char const* pName) {
+		auto pStudioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
+		auto set = pStudioHdr->pHitboxSet(0);
+		for (int hitboxIndex = 0; hitboxIndex < set->numhitboxes; hitboxIndex++) {
+			auto hitbox = set->pHitbox(hitboxIndex);
+			auto bone = pStudioHdr->pBone(hitbox->bone);
+
+			char boneName[64]; // can bone name be more then 64 symbols? :trollge:
+			strcpy(boneName, bone->pszName());
+			for (int i = 0; boneName[i]; i++) { // to lower case https://stackoverflow.com/a/2661788
+				boneName[i] = tolower(boneName[i]);
 			}
+			if (strstr(boneName, pName)) // so we make case insenstive find now because of some bad models
+				return hitbox;
 		}
 		return nullptr;
 	}
+
+
 	void SetupBones() {
 #ifdef DEBUG
 		debug("SetupBones() \n");
@@ -175,10 +182,10 @@ public:
 			for (int entityIndex = 0; entityIndex < 256; entityIndex++) {
 
 				CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
-				if (ped && ped->isEntityIsPlayer() && ped->isAlive() && ped != localPed) {
+				if (ped && ped->IsPlayer() && ped->IsAlive() && ped != localPed) {
 					auto renderAble = ped->GetClientRenderable();
 					if ((uintptr_t)renderAble > 0x1000) {// якобы предотвращает возможный краш
-						renderAble->SetupBones(NULL, -1, 0x100, Interfaces.GlobalVars->curtime);
+						renderAble->SetupBones(NULL, -1, BONE_USED_BY_HITBOX, Interfaces.GlobalVars->curtime);
 
 					}
 				}
@@ -209,7 +216,7 @@ public:
 		/* Всё ниже обязательно для нормальной выгрузки */
 		kiero::shutdown();
 		pDevice->Release();
-		//BTMemory::UnpatchAll();
+		BTMemory::UnpatchAll();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)(oWndProc));
 	}
 

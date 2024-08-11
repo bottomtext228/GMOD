@@ -1,4 +1,5 @@
 #define  Assert( _exp ) ((void)0)
+constexpr float MAX_TRACE_LENGTH = 56754.0f; // https://developer.valvesoftware.com/wiki/UTIL_TraceLine
 
 #include "masks.h"
 class __declspec(align(16))VectorAligned : public CVector
@@ -68,6 +69,7 @@ class ITraceFilter
 public:
 	virtual bool			ShouldHitEntity(void* pEntity, int mask) = 0;
 	virtual TraceType_t            GetTraceType() const = 0;
+	virtual int Unknown() const = 0;
 };
 
 
@@ -82,6 +84,10 @@ public:
 	TraceType_t GetTraceType() const
 	{
 		return TRACE_EVERYTHING;
+	}
+
+	int Unknown() const {
+		return 0;
 	}
 
 	void* pSkip1;

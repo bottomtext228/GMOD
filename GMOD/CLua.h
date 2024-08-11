@@ -80,6 +80,11 @@ public:
 		return VMT.getvfunc<fn>(this, 77)(this);
 	}
 
+	void PushNumber(double value) {
+		typedef void(__thiscall* fn)(void*, double);
+		return VMT.getvfunc<fn>(this, 30)(this, value);
+	}
+
 	//int PrintLuaError(const char* a1, ...) {
 	///*	typedef int(__cdecl* fn)(void*, const char*, ...);
 	//	return VMT.getvfunc<fn>(this, 113)(this, a1, args);*/

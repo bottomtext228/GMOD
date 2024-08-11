@@ -2,19 +2,20 @@
 class CTriggerBot {
 public:
 	void Process(CUserCmd* CMD) {
-	
-		constexpr float MAX_TRACE_LENGTH = 56754.0f; // https://developer.valvesoftware.com/wiki/UTIL_TraceLine
-
-		CVector localPos = localPed->GetEyePosition() + Misc->predictEntityOffsetPosition(localPed->m_fVelocity);
-
-		CVector targetPos = { localPed->m_fPos.x + MAX_TRACE_LENGTH * cosf(Misc->degreesToRadians(CMD->m_viewangles.y)),
-			localPed->m_fPos.y + MAX_TRACE_LENGTH * sinf(Misc->degreesToRadians(CMD->m_viewangles.y)),
-			localPed->m_fPos.z + localPed->m_fViewOffset.z - MAX_TRACE_LENGTH * tanf(Misc->degreesToRadians(CMD->m_viewangles.x)) };
-
-		trace_t trace = Interfaces.Trace->TraceRayWrapper(localPos, targetPos, localPed); // trace.hitbox == 0 - head maybe;
+#if USE_ENGINE_PREDICTION
+		CVector localPos = localPed->GetEyePosition();
+#else
+		CVector localPos = localPed->GetEyePosition() + Misc->predictEntityOffsetPosition(localPed->GetVecVelocity());
+#endif // USE_ENGINE_PREDICTION	
+		CVector targetDir = {
+				localPed->GetVecOrigin().x + MAX_TRACE_LENGTH * cosf(Misc->degreesToRadians(CMD->m_viewangles.y)),
+				localPed->GetVecOrigin().y + MAX_TRACE_LENGTH * sinf(Misc->degreesToRadians(CMD->m_viewangles.y)),
+				localPed->GetVecOrigin().z + localPed->GetVecViewOffset().z - MAX_TRACE_LENGTH * tanf(Misc->degreesToRadians(CMD->m_viewangles.x))
+		};
+		trace_t trace = Interfaces.Trace->TraceRayWrapper(localPos, targetDir, localPed); // trace.hitbox == 0 - head maybe;
 		CPed* ped = trace.ped;
 
-		if (ped && ped != localPed && ped->isAlive() && ped->isEntityIsPlayer() && !Misc->isPlayerInFriendList(GetPlayerIndexByPed(ped))) {
+		if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && !Misc->isPlayerInFriendList(GetPlayerIndexByPed(ped))) {
 
 			if (vars::aim::triggerBot) {
 				if (vars::aim::holdOrClick) {

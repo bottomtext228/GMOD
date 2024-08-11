@@ -1,5 +1,4 @@
 #define M_PI 3.14159265358979323846f
-
 class CVector
 {
 public:
@@ -45,6 +44,18 @@ public:
 
 	}
 
+	void Normalize() {
+		float length = LengthSqr();
+		if (length > 0) {
+			x = x / length;
+			y = y / length;
+		}
+		else {
+			x = 0;
+			y = 0;
+		}
+	}
+
 	inline CVector operator-(const CVector& v) { return CVector(x - v.x, y - v.y, z - v.z); }
 	inline CVector operator+(const CVector& v) { return CVector(x + v.x, y + v.y, z + v.z); }
 	inline CVector operator*(const int n) { return CVector(x * n, y * n, z * n); }
@@ -53,6 +64,10 @@ public:
 	inline CVector operator/(const float n) { return CVector(x / n, y / n, z / n); }
 
 	inline CVector operator-() { return CVector(-x, -y, -z); }
+	inline CVector& operator*=(const int n) { x *= n; y *= n; z *= n; return *this; }
+	inline CVector& operator*=(const float n) { x *= n; y *= n; z *= n; return *this; }
+	inline CVector& operator/=(const int n) { x /= n; y /= n; z /= n; return *this; }
+	inline CVector& operator/=(const float n) { x /= n; y /= n; z /= n; return *this; }
 	inline CVector& operator+=(const CVector& v) { x += v.x; y += v.y; z += v.z; return *this; }
 	inline CVector& operator-=(const CVector& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 	float LengthSqr(void) { return (x * x + y * y + z * z); }
@@ -105,4 +120,3 @@ public:
 		return ImVec2(x, y);
 	}
 };
-

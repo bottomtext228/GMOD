@@ -1,8 +1,9 @@
+#define USE_ENGINE_PREDICTION 1
 #include "TriggerBot.h"
 #include "Aim.h"
 #include "NoSpread.h"
 #include "BunnyHop.h"
-
+#include "Prediction.h"
 
 CTriggerBot* TriggerBot;
 CAim* Aim;
@@ -24,39 +25,63 @@ paintTreverse_t oPaintTraverse;
 typedef void(__thiscall* paint_t)(void*, int);
 paint_t oPaint;
 
+typedef void(__thiscall* runCommand_t)(void*, CPed* player, CUserCmd* ucmd, IMoveHelper* moveHelper);
+runCommand_t oRunCommand;
+
+typedef void(__thiscall* postThink_t)(void*);
+postThink_t oPostThink;
 
 void __fastcall PaintTraverseFn(void* ecx, void* edx, unsigned int panel, bool forceRepaint, bool allowForce) {
 
 	const char* panelName = Interfaces.PanelWrapper->GetName(panel);
+
+	if (!strcmp(panelName, "FocusOverlayPanel")) {
+		LuaManager.ExecuteQueue(); // should do it in game thread or it crashes
+	}
+
 	if (vars::misc::customSight && !strcmp(panelName, "HudCrosshair")) // скрытие оригинального прицела
 		return;
 
 	oPaintTraverse(ecx, panel, forceRepaint, allowForce);
 }
 
+
 bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* cmd) {
 
-	LuaManager.ExecuteQueue(); // should do it in the game thread or it crashes
 
 	const bool result = oCreateMove(ecx, SampleTime, cmd);
 
-	if (!cmd->m_cmd_nr)
+	if (!cmd->m_command_number)
 		return result;
 	if (!localPed || !Interfaces.Engine->IsInGame())
 		return result;
-	
 
+
+	static CPredictionSystem PredictionSystem;
+	
 	if (vars::esp::setupBones)
 		Misc->SetupBones(); // вызов вне хука виртуальной функции может привести к спонтанному крашу
 
 	if (vars::aim::triggerBot || vars::misc::customSight)
 		TriggerBot->Process(cmd);
+	if (vars::bhop::autoJump) 	// TODO: попытаться сделать бхоп полноценный
+		BunnyHop->Process(cmd);
+
+	PredictionSystem.StartPrediction(cmd);
+	
+
+	if (vars::misc::edgeJump && vars::misc::edgeJumpKeyBind.isDown() && 
+		localPed->GetMoveType() != localPed->MOVETYPE_NOCLIP && localPed->GetMoveType() != localPed->MOVETYPE_LADDER &&
+		!cmd->m_buttons.IN_JUMP && (PredictionSystem.m_flags & FL_ONGROUND) && !(localPed->GetFlags() & FL_ONGROUND)) {
+		cmd->m_buttons.IN_JUMP = true;
+	}
+
 	if (vars::aim::smoothAim || vars::aim::silentAim)
 		Aim->Process(cmd);
 	if (vars::aim::noSpread)
 		NoSpread->Process(cmd);
-	if (vars::bhop::autoJump) 	// TODO: попытаться сделать бхоп полноценный
-		BunnyHop->Process(cmd);
+	PredictionSystem.EndPrediction();
+
 	if (vars::misc::autoUncuff)
 		Misc->AutoUncuff(cmd);
 
@@ -82,6 +107,10 @@ void __fastcall PaintFn(void* ecx, void* edx, int mode) {
 	oPaint(ecx, mode);
 }
 
+void __fastcall RunCommandFn(void* ecx, void* edx, CPed* player, CUserCmd* ucmd, IMoveHelper* moveHelper) {
+	oRunCommand(ecx, player, ucmd, moveHelper);
+}
+
 
 class CHooks {
 
@@ -90,6 +119,8 @@ public:
 	CVMTHookManager* SetViewAngleHook;
 	CVMTHookManager* PaintTreverse;
 	CVMTHookManager* Paint;
+	CVMTHookManager* RunCommand;
+	CVMTHookManager* ItemPostFrame;
 	void Hook() {
 	
 	
@@ -111,12 +142,19 @@ public:
 		Paint = new CVMTHookManager(Interfaces.EngineVGUI);
 		oPaint = (paint_t)Paint->HookFunction(13, PaintFn);
 		Paint->HookTable(true);			
+		/////////////////////////////////////////////////////////////////////////////
+#if USE_ENGINE_PREDICTION
+		RunCommand = new CVMTHookManager(Interfaces.Prediction);
+		oRunCommand = (runCommand_t)RunCommand->HookFunction(17, RunCommandFn);
+		RunCommand->HookTable(true);
+#endif
 	}
 	void UnHook() {
 		ClientHook->~CVMTHookManager();
 		SetViewAngleHook->~CVMTHookManager();
 		PaintTreverse->~CVMTHookManager();
 		Paint->~CVMTHookManager();
+		RunCommand->~CVMTHookManager();
 	}
 
 };

@@ -2,8 +2,6 @@ namespace vars {
 	bool init = false;
 
 	namespace esp {
-
-
 		bool linesState = false;
 		bool box3DESP = false;
 		bool box2DESP = false; 
@@ -13,6 +11,9 @@ namespace vars {
 		bool boneESP = false;
 		bool setupBones = false;
 		int setupBonesDelay = 0;
+		bool dormantCheck = false;
+		bool distanceCheck = false;
+		float distance = 2500.0f;
 	};
 
 	
@@ -24,16 +25,24 @@ namespace vars {
 		bool smoothAim = false;
 		bool silentAim = false;
 		bool rage = false;
-		float aimForce = 0.1f;
+		float aimAngleSpeed = 30.0f; // angles per second
+		float aimSmoothSteps = 10.0f;
+		const char* aimModes[] = {"Smooth steps", "Angle speed"};
+		const char* currentAimMode = aimModes[0];
 		int FOV = 200;
 		bool renderFOV = false;
-		const char* items[] = { "Head", "Nearest bone", "Body" };
-		const char* aimTarget = vars::aim::items[0];
+		const char* aimTargets[] = { "Head", "Nearest", "Body"};
+		const char* targetTypes[] = {"Hitbox", "Bone"};
+		bool ignoreLimbs = true;
+		const char* currentAimTarget = vars::aim::aimTargets[0];
+		const char* currentAimTargetType = vars::aim::targetTypes[0];
 		bool ignoreWalls = false;
 		bool triggerBot = false;
 		bool holdOrClick = false; // false = hold - триггербот зажимает атаку, true - зажимает и отжимает атаку; для корректной работы на 9мм пистолете
 		bool noSpread = false;
-
+		KeyBindToggle aimKeyBind = KeyBindToggle(KeyBind::KeyCode::MOUSE5); 
+		bool ignoreZ = false;
+		bool stickyAim = true;
 	};
 
 	namespace bhop {
@@ -52,10 +61,12 @@ namespace vars {
 		bool autoUncuff = false;
 		bool ignoreLocalTeam = false;
 		bool DLLUnload = false;
+		bool edgeJump = false;
+		KeyBindToggle edgeJumpKeyBind = KeyBindToggle(KeyBind::KeyCode::N);
 	}
 
 
-
+	bool* bSendPacket = nullptr;
 	bool menu = false;
 	float boxESPSize = 15.0;
 	int resX;

@@ -24,7 +24,6 @@ public:
 		VMT.getvfunc<fn>(this, 8)(this, ent_num, pInfo);
 	}
 	float* WorldToScreenMatrix() {
-		//return reinterpret_cast<float*>(*reinterpret_cast<uintptr_t*>(vars::engine + offsets::viewMatrix) + offsets::viewMatrixOffset);
 		typedef float*(__thiscall* fn)(void*);
 		 return VMT.getvfunc<fn>(this, 36)(this);
 	}

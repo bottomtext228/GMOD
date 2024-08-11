@@ -28,27 +28,34 @@ struct CMDButtons {
 };
 
 
-
+// thanks to copypaste from UnknownCheats
 class CUserCmd {
 public:
-	int		m_cmd_nr;
-	int		m_tick_count;
-	CVector	m_viewangles;
-	float	m_forwardmove;
-	float	m_sidemove;
-	float	m_upmove;
+	int		m_command_number; // 0x0
+	int		m_tick_count; // 0x4
+	CVector	m_viewangles; // 0x8
+	float	m_forwardmove; // 0x14
+	float	m_sidemove;	// 0x18
+	float	m_upmove; // 0x1C
 	union {
-		int m_ibuttons;
+		int m_ibuttons; // 0x20
 		CMDButtons m_buttons;
 	};
 
-	uint8_t m_impulse;
-	int		m_weaponselect;
-	int		m_weaponsubtype;
-	int		m_random_seed;
-	short	m_mousedx;
-	short	m_mousedy;
-	bool	m_predicted;
+	uint8_t m_impulse; // 0x24
+	int		m_weaponselect; // 0x28
+	int		m_weaponsubtype; // 0x2C
+	int		m_random_seed; // 0x30
+	short	m_mousedx; // 0x34
+	short	m_mousedy; // 0x36
+	bool	m_predicted; // 0x38
+	uint8_t m_buttons_pressed[5]; // 0x39
+	int8_t m_scroll_wheel_speed; // 0x3E
+	bool m_world_clicking; // 0x3D
+	CVector m_world_click_direction; 
+	bool m_is_typing; 
+	CVector m_motion_sensor_positions[20]; 
+	bool m_forced; 
 };
 
 

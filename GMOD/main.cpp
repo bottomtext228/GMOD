@@ -1,6 +1,6 @@
-#define CHEAT_VERSION 2.2
+#define CHEAT_VERSION 2.3
 #define _CRT_SECURE_NO_WARNINGS
-#define DEBUG
+//#define DEBUG
 #include "includes.h"
 
 
@@ -10,7 +10,7 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 std::ofstream debugFile;
 
 void inline debug(const char* msg) {
-	debugFile << msg;
+	//debugFile << msg;
 	//	printf(msg);
 }
 #endif //  DEBUG
@@ -32,10 +32,10 @@ LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
+	
 	if (Interfaces.Engine->IsInGame()) {
 		localPed = Interfaces.ClientEntityList->GetClientEntity(Interfaces.Engine->GetLocalPlayer());
-		ESP->Process();
+		ESP->Process();	
 	}
 	Menu->Render();
 
@@ -104,7 +104,11 @@ DWORD WINAPI MainThread(HMODULE hMod)
 			attached = true;
 		}
 	} while (!attached);
+	
 
+	// TODO:
+	// * maybe make aim distance check
+	// * try to get proper hostname
 	while (!vars::misc::DLLUnload) {
 		Sleep(100);
 	}
@@ -125,6 +129,10 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 		vars::engine = (DWORD)GetModuleHandle("engine.dll");
 		vars::resX = GetSystemMetrics(0);
 		vars::resY = GetSystemMetrics(1);
+		vars::bSendPacket = (bool*)(SignatureManager.pbSendPacket + 0x3);
+		DWORD oldProtection;
+		VirtualProtect(vars::bSendPacket, sizeof(bool), PAGE_EXECUTE_READWRITE, &oldProtection);
+		
 #ifdef DEBUG
 		if (AllocConsole())
 		{
@@ -144,6 +152,7 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 
 
 		Interfaces.GetInterfaces();
+		//MH_Initialize();
 		Hooks.Hook();
 		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)MainThread, hMod, 0, nullptr);
 
