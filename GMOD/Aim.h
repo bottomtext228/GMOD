@@ -6,7 +6,7 @@ public:
 #if USE_ENGINE_PREDICTION
 			CVector localPos = localPed->GetEyePosition();
 #else
-			CVector localPos = localPed->GetEyePosition() + Misc->predictEntityOffsetPosition(localPed->GetVecVelocity());
+			CVector localPos = localPed->GetEyePosition() + Utils::predictEntityOffsetPosition(localPed->GetVecVelocity());
 #endif // USE_ENGINE_PREDICTION	
 			mstudiobbox_t* hitbox = nullptr;
 			int boneId = -1;
@@ -21,9 +21,9 @@ public:
 			if (ped && isPedInFOV(ped)) {
 				if (!vars::aim::stickyAim) {
 					CVector targetDir = {
-						localPed->GetVecOrigin().x + MAX_TRACE_LENGTH * cosf(Misc->degreesToRadians(CMD->m_viewangles.y)),
-						localPed->GetVecOrigin().y + MAX_TRACE_LENGTH * sinf(Misc->degreesToRadians(CMD->m_viewangles.y)),
-						localPed->GetVecOrigin().z + localPed->GetVecViewOffset().z - MAX_TRACE_LENGTH * tanf(Misc->degreesToRadians(CMD->m_viewangles.x))
+						localPed->GetVecOrigin().x + MAX_TRACE_LENGTH * cosf(Utils::degreesToRadians(CMD->m_viewangles.y)),
+						localPed->GetVecOrigin().y + MAX_TRACE_LENGTH * sinf(Utils::degreesToRadians(CMD->m_viewangles.y)),
+						localPed->GetVecOrigin().z + localPed->GetVecViewOffset().z - MAX_TRACE_LENGTH * tanf(Utils::degreesToRadians(CMD->m_viewangles.x))
 					};
 
 					trace_t trace = Interfaces.Trace->TraceRayWrapper(localPos, targetDir, localPed); // trace.hitbox == 0 - head maybe;
@@ -41,7 +41,7 @@ public:
 					targetPos = { boneMatrix[boneId].m[0][3], boneMatrix[boneId].m[1][3], boneMatrix[boneId].m[2][3] };
 				}
 				constexpr float tickOffset = 0.5f; // experimently obtained
-				targetPos += Misc->predictEntityOffsetPosition(ped->GetVecVelocity()) * tickOffset;
+				targetPos += Utils::predictEntityOffsetPosition(ped->GetVecVelocity()) * tickOffset;
 				CVector2DF aimAngles = calcAimAngle(localPos, targetPos);
 				if (vars::aim::smoothAim) {
 					CVector2DF smoothAngles = calcSmoothAngles(CVector2DF{ CMD->m_viewangles.y, CMD->m_viewangles.x }, aimAngles);
@@ -73,7 +73,7 @@ private:
 			if (bone && bone->parent >= 0 && bone->flags & 256) {
 				CVector2D screenPos;
 				CVector bonePos = ped->GetBonePosition(boneIndex);
-				if (Misc->WorldToScreen(bonePos, screenPos)) {
+				if (Utils::WorldToScreen(bonePos, screenPos)) {
 					float distance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
 					if (distance < vars::aim::FOV) {
 						return true;
@@ -103,12 +103,12 @@ private:
 #endif // DEBUG
 
 		float multiplX = sqrtf(powf(localPos.x - bonePos.x, 2) + powf(localPos.y - bonePos.y, 2));
-		float angleX = ((Misc->radiansToDegrees(asinf((localPos.x - bonePos.x) / multiplX))) + 90.0f);
+		float angleX = ((Utils::radiansToDegrees(asinf((localPos.x - bonePos.x) / multiplX))) + 90.0f);
 		if (localPos.y - bonePos.y > 0) { // I am more white than you
 			angleX = -angleX;
 		}
 		float distance = localPos.DistanceTo(bonePos);
-		float angleY = Misc->radiansToDegrees(asinf((localPos.z - bonePos.z) / distance));
+		float angleY = Utils::radiansToDegrees(asinf((localPos.z - bonePos.z) / distance));
 		return { angleX, angleY };
 	}
 	CVector2DF calcSmoothAngles(CVector2DF cmd, CVector2DF aimAngle) { // плавная наводка
@@ -155,10 +155,10 @@ private:
 
 		for (int entityIndex = 0; entityIndex < 256; entityIndex++) {
 			CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
-			if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo() && !Misc->isPlayerInFriendList(entityIndex)) {
+			if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo() && !Utils::isPlayerInFriendList(entityIndex)) {
 				CVector2D screenPos;
 				CVector pedPos = ped->GetVecOrigin() + ped->GetVecViewOffset();
-				if (Misc->WorldToScreen(pedPos, screenPos)) {
+				if (Utils::WorldToScreen(pedPos, screenPos)) {
 					float newDistance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
 					if (newDistance < distance) {
 						mstudiobbox_t* aimHitbox = getTargetedHitbox(ped);
@@ -189,10 +189,10 @@ private:
 
 		for (int entityIndex = 0; entityIndex < 256; entityIndex++) {
 			CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
-			if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo() && !Misc->isPlayerInFriendList(entityIndex)) {
+			if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo() && !Utils::isPlayerInFriendList(entityIndex)) {
 				CVector2D screenPos;
 				CVector pedPos = ped->GetVecOrigin() + ped->GetVecViewOffset();
-				if (Misc->WorldToScreen(pedPos, screenPos)) {
+				if (Utils::WorldToScreen(pedPos, screenPos)) {
 					float newDistance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
 					if (newDistance < distance) {
 						int aimBone = getTargetedBone(ped);
@@ -218,12 +218,12 @@ private:
 #endif // DEBUG
 
 		if (vars::aim::currentAimTarget == vars::aim::aimTargets[0]) { // head
-			auto boneId = Misc->BoneIndexByName(ped, "head");
+			auto boneId = Utils::BoneIndexByName(ped, "head");
 			if (boneId != -1)
 				return boneId;
 		}
 		if (vars::aim::currentAimTarget == vars::aim::aimTargets[2]) {// body
-			auto boneId = Misc->BoneIndexByName(ped, "spine1");
+			auto boneId = Utils::BoneIndexByName(ped, "spine1");
 			if (boneId != -1)
 				return boneId;
 		}
@@ -236,12 +236,12 @@ private:
 #endif // DEBUG
 
 		if (vars::aim::currentAimTarget == vars::aim::aimTargets[0]) { // head
-			auto hitbox = Misc->HitboxByBoneName(ped, "head");
+			auto hitbox = Utils::HitboxByBoneName(ped, "head");
 			if (hitbox)
 				return hitbox;
 		}
 		if (vars::aim::currentAimTarget == vars::aim::aimTargets[2]) {// body
-			auto hitbox = Misc->HitboxByBoneName(ped, "spine2");
+			auto hitbox = Utils::HitboxByBoneName(ped, "spine2");
 			if (hitbox)
 				return hitbox;
 		}
@@ -279,7 +279,7 @@ private:
 				if (!vars::aim::ignoreWalls && !isPointVisible(bonePos))
 					continue;
 				CVector2D screenPos;
-				if (Misc->WorldToScreen(bonePos, screenPos)) {
+				if (Utils::WorldToScreen(bonePos, screenPos)) {
 
 					float newDistance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
 					if (newDistance < distance) {
@@ -326,7 +326,7 @@ private:
 			if (!vars::aim::ignoreWalls && !isPointVisible(hitboxPos))
 				continue;
 			CVector2D screenPos;
-			if (Misc->WorldToScreen(hitboxPos, screenPos)) {
+			if (Utils::WorldToScreen(hitboxPos, screenPos)) {
 
 				float newDistance = CVector2D{ vars::resX / 2, vars::resY / 2 }.DistanceTo(screenPos);
 				if (newDistance < distance) {
@@ -341,28 +341,6 @@ private:
 	}
 
 public:
-
-	//	void ShowTarget() {
-	//#ifdef DEBUG
-	//		debug("ShowTarget() \n");
-	//#endif // DEBUG
-	//
-	//		if (!localPed)
-	//			return;
-	//		CVector localPos = localPed->GetVecOrigin() + localPed->GetVecViewOffset();
-	//		int boneId;
-	//		CPed* ped = getBoneAndNearestPed(localPos, boneId);
-	//		if (ped && isPedInFOV(ped)) {
-	//			CVector2D screenPos;
-	//			CVector bonePos = ped->GetBonePosition(boneId);
-	//			if (Misc->WorldToScreen(bonePos, screenPos)) {
-	//				ImDrawList* draw = ImGui::GetBackgroundDrawList();
-	//				draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0), screenPos.ToImVec2(), 0x77FF1E00); // blue
-	//			}
-	//		}
-	//
-	//	}
-
 	void ShowTarget() {
 #ifdef DEBUG
 		debug("ShowTarget() \n");
@@ -389,7 +367,7 @@ public:
 			if (vars::aim::currentAimTargetType == vars::aim::targetTypes[1]) {
 				targetPos = ped->GetBonePosition(boneId);
 			}
-			if (Misc->WorldToScreen(targetPos, screenPos)) {
+			if (Utils::WorldToScreen(targetPos, screenPos)) {
 				ImDrawList* draw = ImGui::GetBackgroundDrawList();
 				draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0), screenPos.ToImVec2(), 0x77FF1E00); // blue
 			}

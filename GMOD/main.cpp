@@ -105,10 +105,9 @@ DWORD WINAPI MainThread(HMODULE hMod)
 		}
 	} while (!attached);
 	
-
 	// TODO:
-	// * maybe make aim distance check
-	// * try to get proper hostname
+	// * try to get proper hostname/servername (maybe via Lua)
+
 	while (!vars::misc::DLLUnload) {
 		Sleep(100);
 	}

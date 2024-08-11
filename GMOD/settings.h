@@ -45,9 +45,7 @@ namespace vars {
 		bool stickyAim = true;
 	};
 
-	namespace bhop {
-		bool autoJump = false;
-	}
+
 	namespace misc {
 		/* Friend List */
 		char friendList[20][128];
@@ -62,6 +60,7 @@ namespace vars {
 		bool ignoreLocalTeam = false;
 		bool DLLUnload = false;
 		bool edgeJump = false;
+		bool autoJump = false;
 		KeyBindToggle edgeJumpKeyBind = KeyBindToggle(KeyBind::KeyCode::N);
 	}
 

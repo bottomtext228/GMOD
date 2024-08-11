@@ -99,9 +99,6 @@
     <ClInclude Include="ESP.h">
       <Filter>Functions</Filter>
     </ClInclude>
-    <ClInclude Include="BunnyHop.h">
-      <Filter>Functions</Filter>
-    </ClInclude>
     <ClInclude Include="checksum_md5.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -203,6 +200,9 @@
     </ClInclude>
     <ClInclude Include="DTParser.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Functions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

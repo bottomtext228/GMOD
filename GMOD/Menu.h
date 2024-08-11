@@ -136,7 +136,7 @@ public:
 						ImGui::Checkbox("Custom sight", &vars::misc::customSight);
 						ImGui::Checkbox("Auto uncuff", &vars::misc::autoUncuff);
 						ImGui::Checkbox("Ignore teammates", &vars::misc::ignoreLocalTeam);
-						ImGui::Checkbox("Auto Jump", &vars::bhop::autoJump);
+						ImGui::Checkbox("Auto Jump", &vars::misc::autoJump);
 						ImGui::Checkbox("Edge Jump", &vars::misc::edgeJump);
 						ImGui::Hotkey("Edge Jump Key:", vars::misc::edgeJumpKeyBind, 115.0f);
 						ImGui::SetCursorPosY(280);

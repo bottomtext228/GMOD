@@ -2,13 +2,11 @@
 #include "TriggerBot.h"
 #include "Aim.h"
 #include "NoSpread.h"
-#include "BunnyHop.h"
 #include "Prediction.h"
 
 CTriggerBot* TriggerBot;
 CAim* Aim;
 CNoSpread* NoSpread;
-CBunnyHop* BunnyHop;
 
 typedef bool(__thiscall* createMove_t)(void*, float, CUserCmd*);
 createMove_t oCreateMove;
@@ -25,11 +23,14 @@ paintTreverse_t oPaintTraverse;
 typedef void(__thiscall* paint_t)(void*, int);
 paint_t oPaint;
 
+
 typedef void(__thiscall* runCommand_t)(void*, CPed* player, CUserCmd* ucmd, IMoveHelper* moveHelper);
 runCommand_t oRunCommand;
 
+
 typedef void(__thiscall* postThink_t)(void*);
 postThink_t oPostThink;
+
 
 void __fastcall PaintTraverseFn(void* ecx, void* edx, unsigned int panel, bool forceRepaint, bool allowForce) {
 
@@ -58,28 +59,26 @@ bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* c
 
 
 	static CPredictionSystem PredictionSystem;
-	
+
 	if (vars::esp::setupBones)
-		Misc->SetupBones(); // вызов вне хука виртуальной функции может привести к спонтанному крашу
+		Utils::SetupBones(); // вызов вне хука виртуальной функции может привести к спонтанному крашу
 
 	if (vars::aim::triggerBot || vars::misc::customSight)
 		TriggerBot->Process(cmd);
-	if (vars::bhop::autoJump) 	// TODO: попытаться сделать бхоп полноценный
-		BunnyHop->Process(cmd);
+	
+	if (vars::misc::autoJump) 
+		Misc->AutoJump(cmd);
 
 	PredictionSystem.StartPrediction(cmd);
-	
 
-	if (vars::misc::edgeJump && vars::misc::edgeJumpKeyBind.isDown() && 
-		localPed->GetMoveType() != localPed->MOVETYPE_NOCLIP && localPed->GetMoveType() != localPed->MOVETYPE_LADDER &&
-		!cmd->m_buttons.IN_JUMP && (PredictionSystem.m_flags & FL_ONGROUND) && !(localPed->GetFlags() & FL_ONGROUND)) {
-		cmd->m_buttons.IN_JUMP = true;
-	}
+	if (vars::misc::edgeJump)
+		Misc->EdgeJump(cmd, PredictionSystem.m_flags);
 
 	if (vars::aim::smoothAim || vars::aim::silentAim)
 		Aim->Process(cmd);
 	if (vars::aim::noSpread)
 		NoSpread->Process(cmd);
+
 	PredictionSystem.EndPrediction();
 
 	if (vars::misc::autoUncuff)
@@ -99,8 +98,8 @@ void __fastcall SetViewAngleFn(void* ecx, void* edx, CVector& angle) { // для si
 void __fastcall PaintFn(void* ecx, void* edx, int mode) {
 	constexpr int PAINT_INGAMEPANELS = (1 << 1);
 	if (mode & PAINT_INGAMEPANELS) {
-		float* pMatrix = Interfaces.Engine->WorldToScreenMatrix(); 
-	   /* матрица ВНЕ хука (причём даже в хуке PaintTraverse может быть неправильная матрица) на некоторых серверах возращаётся поломанная, поэтому делаем такое */
+		float* pMatrix = Interfaces.Engine->WorldToScreenMatrix();
+		/* матрица ВНЕ хука (причём даже в хуке PaintTraverse может быть неправильная матрица) на некоторых серверах возращаётся поломанная, поэтому делаем такое */
 		memcpy(vars::viewMatrix, pMatrix, 64); // копируем 16 float = 16 * 4 = 64 байт
 	}
 
@@ -122,8 +121,8 @@ public:
 	CVMTHookManager* RunCommand;
 	CVMTHookManager* ItemPostFrame;
 	void Hook() {
-	
-	
+
+
 		void* ClientShared = **reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(Interfaces.Client))[10] + 5);
 
 
@@ -137,11 +136,11 @@ public:
 		/////////////////////////////////////////////////////////////////////////////
 		PaintTreverse = new CVMTHookManager(Interfaces.PanelWrapper);
 		oPaintTraverse = (paintTreverse_t)PaintTreverse->HookFunction(41, PaintTraverseFn);
-		PaintTreverse->HookTable(true);	
+		PaintTreverse->HookTable(true);
 		/////////////////////////////////////////////////////////////////////////////
 		Paint = new CVMTHookManager(Interfaces.EngineVGUI);
 		oPaint = (paint_t)Paint->HookFunction(13, PaintFn);
-		Paint->HookTable(true);			
+		Paint->HookTable(true);
 		/////////////////////////////////////////////////////////////////////////////
 #if USE_ENGINE_PREDICTION
 		RunCommand = new CVMTHookManager(Interfaces.Prediction);

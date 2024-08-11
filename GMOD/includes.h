@@ -72,6 +72,7 @@ CPed* localPed = NULL;
 /*           MAIN           */
 #include "settings.h"
 #include "LuaManager.h"
+#include "Utils.h"
 #include "Misc.h"
 #include "Hooks.h"
 #include "Menu.h"

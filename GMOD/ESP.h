@@ -15,7 +15,7 @@ public:
 						if (vars::esp::dormantCheck && ped->IsDormant()) return;
 						if (vars::esp::distanceCheck && ped->GetVecOrigin().DistanceTo(localPed->GetVecOrigin()) > vars::esp::distance) return;
 						if (ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo()) {
-							
+
 							if (vars::esp::box3DESP) {
 								DrawBoxESP(ped, entityIndex);
 							}
@@ -34,60 +34,7 @@ public:
 
 							if (vars::esp::box2DESP) {
 								Draw2DBoxESP(ped, entityIndex);
-							}
-							
-					/*		auto studioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
-
-							for (int boneIndex = 0; boneIndex < studioHdr->numbones; boneIndex++) {
-
-								auto bone = studioHdr->pBone(boneIndex);
-								if (bone && bone->parent >= 0 && bone->flags & 256) {
-
-									CVector bonePos = ped->GetBonePosition(boneIndex);
-
-									CVector2D screenPos;
-									if (Misc->WorldToScreen(bonePos, screenPos)) {
-										ImGui::GetBackgroundDrawList()->AddText(screenPos.ToImVec2(), -1, bone->pszName());
-										ImGui::GetBackgroundDrawList()->AddCircleFilled(screenPos.ToImVec2(), 1, -1);
-									}
-								}
-							}*/
-							//auto pStudioHdr = Interfaces.ModelInfo->GetStudiomodel(ped->GetModelInfo());
-							//if (!pStudioHdr)
-							//	return;
-
-							//mstudiohitboxset_t* set = pStudioHdr->pHitboxSet(0);//m_nHitboxSet);
-							//if (!set)
-							//	return;
-
-							////Vector position;
-							////QAngle angles;
-
-			
-							//
-							//for (int i = 0; i < set->numhitboxes; i++)
-							//{
-							//	// TODO: check bbmin, bbmax
-							//	mstudiobbox_t* pbox = set->pHitbox(i);
-							//
-							//	auto bone = pStudioHdr->pBone(pbox->bone);
-							//	
-							//	ImGui::Text("%d | %d", pbox->group, pbox->bone);
-						
-							//	auto position = ped->GetBonePosition(pbox->bone);
-							//
-							//	matrix3x4_t& m = ((matrix3x4_t*)ped->boneBase)[pbox->bone];
-
-
-							//	CVector2D screenPos;
-
-							//	if (Misc->WorldToScreen(GetAABBCenter(m, pbox->bbmin, pbox->bbmax), screenPos)) {
-							//		ImGui::GetBackgroundDrawList()->AddCircleFilled(screenPos.ToImVec2(), 1.0f, -1);
-							//	}
-
-
-							//}
-							//
+							}							
 						}
 						if (vars::esp::renderEntity) {
 							DrawEntities(ped);
@@ -111,7 +58,7 @@ private:
 		pos.z += 78;
 
 		CVector2D screenPos;
-		if (Misc->WorldToScreen(pos, screenPos)) {
+		if (Utils::WorldToScreen(pos, screenPos)) {
 			ImDrawList* draw = ImGui::GetBackgroundDrawList();
 			draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0.0f), screenPos.ToImVec2(), calcESPColor(ped->GetHealth(), playerIndex));
 		}
@@ -125,7 +72,7 @@ private:
 		pos.z += 80;
 
 		CVector2D screenPos;
-		if (Misc->WorldToScreen(pos, screenPos)) {
+		if (Utils::WorldToScreen(pos, screenPos)) {
 
 			char espText[150];
 			char playerNick[128];
@@ -145,7 +92,7 @@ private:
 		if (entity->GetTeamNum() == 0 && entity->GetModelInfo()) {
 
 			ImU32 espColor = 0xFFFF7300;
-			if (Misc->isEntityInSpecificEntitiesList(entity->GetModelInfo()->m_ModelName)) {
+			if (Utils::isEntityInSpecificEntitiesList(entity->GetModelInfo()->m_ModelName)) {
 				espColor = 0xFF00FF22; // 0073FF  22FF00 <- rgb | abgr -> FFFF7300 FF00FF22
 
 			}
@@ -154,7 +101,7 @@ private:
 					return;
 			}
 			CVector2D entityPos;
-			if (Misc->WorldToScreen(entity->GetVecOrigin(), entityPos)) {
+			if (Utils::WorldToScreen(entity->GetVecOrigin(), entityPos)) {
 				ImDrawList* draw = ImGui::GetBackgroundDrawList();
 				ImVec2 textSize = ImGui::CalcTextSize(entity->GetModelInfo()->m_ModelName);
 				draw->AddText(ImVec2(entityPos.x - textSize.x / 2, entityPos.y - textSize.y), espColor, entity->GetModelInfo()->m_ModelName);
@@ -170,7 +117,7 @@ private:
 		int lowestBone, highestBone,
 			rightmostBone, leftmostBone;
 		int cornerBones[4];
-		Misc->GetCornerBones(ped, cornerBones);
+		Utils::GetCornerBones(ped, cornerBones);
 		lowestBone = cornerBones[0];
 		highestBone = cornerBones[1];
 		rightmostBone = cornerBones[2];
@@ -184,10 +131,10 @@ private:
 
 		CVector2D lowestBoneScreenPos, highestBoneScreenPos,
 			rightmostBoneScreenPos, leftmostBoneScreenPos;
-		Misc->WorldToScreen(lowestBonePos, lowestBoneScreenPos);
-		Misc->WorldToScreen(highestBonePos, highestBoneScreenPos);
-		Misc->WorldToScreen(rightmostBonePos, rightmostBoneScreenPos);
-		Misc->WorldToScreen(leftmostBonePos, leftmostBoneScreenPos);
+		Utils::WorldToScreen(lowestBonePos, lowestBoneScreenPos);
+		Utils::WorldToScreen(highestBonePos, highestBoneScreenPos);
+		Utils::WorldToScreen(rightmostBonePos, rightmostBoneScreenPos);
+		Utils::WorldToScreen(leftmostBonePos, leftmostBoneScreenPos);
 
 
 		ImDrawList* draw = ImGui::GetBackgroundDrawList();
@@ -227,7 +174,7 @@ private:
 
 				CVector2D bonePosFrom;
 				CVector2D parentBonePos;
-				if (!Misc->WorldToScreen(normalBonePos, bonePosFrom) || !Misc->WorldToScreen(normalParentBonePos, parentBonePos))
+				if (!Utils::WorldToScreen(normalBonePos, bonePosFrom) || !Utils::WorldToScreen(normalParentBonePos, parentBonePos))
 					continue;
 				ImDrawList* draw = ImGui::GetBackgroundDrawList();
 				draw->AddLine(bonePosFrom.ToImVec2(), parentBonePos.ToImVec2(), espColor, 1);
@@ -271,7 +218,7 @@ private:
 
 		/* типо чтобы не вызывать WorldToScreen лишний раз */
 		for (unsigned int i = 0; i < 8; i++) {
-			if (!Misc->WorldToScreen(corners[i], screenPos[i])) {
+			if (!Utils::WorldToScreen(corners[i], screenPos[i])) {
 				return;
 			}
 		}
@@ -308,7 +255,7 @@ private:
 		debug("calcESPColor() \n");
 #endif // DEBUG
 
-		if (Misc->isPlayerInFriendList(playerIndex))
+		if (Utils::isPlayerInFriendList(playerIndex))
 			return 0xFFCC0099; // <- ABGR | RGB -> #9900cc
 
 		if (health >= 100.0f)
@@ -320,8 +267,6 @@ private:
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(clrR, clrG, 0.0f, 1.0f));
 		return color;
 	}
-
-
 };
 
 CESP* ESP;

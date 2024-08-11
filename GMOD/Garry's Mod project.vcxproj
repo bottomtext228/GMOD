@@ -167,7 +167,6 @@
   <ItemGroup>
     <ClInclude Include="bones.h" />
     <ClInclude Include="BTMemory.h" />
-    <ClInclude Include="BunnyHop.h" />
     <ClInclude Include="CEntity.h" />
     <ClInclude Include="CGlobalVars.h" />
     <ClInclude Include="checksum_md5.h" />
@@ -204,6 +203,7 @@
     <ClInclude Include="trace.h" />
     <ClInclude Include="TriggerBot.h" />
     <ClInclude Include="usercmd.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="vmt.h" />
   </ItemGroup>
