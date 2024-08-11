@@ -12,6 +12,10 @@ https://youtu.be/LQt7m-nebWE
 
   - `BoneESP` ( вх на кости )
 
+  - `Dormant check` ( проверка на "обновляемость" игроков )
+  
+  - `Distance check` ( проверка на расстояние до игроков )
+  
   - `SetupBones` ( принудительное обновление костей у моделей игроков ( на дальней дистанции игра может не обновлять положение костей ). Снижает FPS, поэтому есть возможность установки задержки между вызывами - `SetupDelay` )
 
   - `Entities` (  показ названий моделей объектов )
@@ -23,13 +27,16 @@ https://youtu.be/LQt7m-nebWE
 
   - `Hold or Click` ( при включённом этом параметре триггербот вместо "зажима" стрельбы будет прокликивать, что на 9мм пистолете позволяет очень быстро стрелять )
 
-  - `No Spread` ( убирает отдачу у огнестрельного оружия из Half Life 2 )
+  - `No Spread` ( убирает разброс у огнестрельного оружия из Half Life 2 )
 
   - `Silent Aim` ( при выстреле ( при зажатой кнопке стрельбы ) невидимая локально мгновенная наводка на цель  ) 
 
   - `Smooth Aim` ( плавная наводка на цель )
 
-  - `AimForce` ( плавность наводки Smooth Aim)
+  - `Aim mode` ( Smooth Aim modes: Angle speed (constant angle speed) and Smooth steps (the closer to the target, the smoother the aiming ) ( режимы работы Smooth Aim: Angle speed (постоянная угловая скорость) и Smooth steps (чем ближе к цели, тем плавнее наводка) )
+  - `Angle speed` ( угловая скорость наводки Smooth Aim в режиме angle speed )
+    
+  - `Smooth steps` ( количество шагов наводки на цель в режиме smooth steps )
 
   - `Aim Target` ( цель аима ) 
 
@@ -39,7 +46,15 @@ https://youtu.be/LQt7m-nebWE
 
   - `Ignore Walls` ( игнорирование препятствий при поиске аимом цели ) 
 
-  - `Show target` ( показ текущей цели (кости игрока) аима ) 
+  - `Show target` ( показ текущей цели (кости игрока) аима )
+  
+  - `Ignore limbs` ( игнорирование конечностей )
+  
+  - `Sticky Aim` ( при выключенном режиме аим выключается как только прицел на цели )
+  
+  - `Target type` ( Hitbox/Bone )
+
+  - `Keybind` ( Aim keybind )  
 
 # Miscellaneous: 
   - `Friends` ( добавление игроков по нику в белый список аима. Также друзья подсвечиваются особым цветом в WH )
@@ -58,15 +73,21 @@ https://youtu.be/LQt7m-nebWE
 
    - `Auto Jump` ( автопрыжок )
    
+   - `Edge Jump` ( прыжок с края ) 
+   
    - `Unload` ( выгрузка чита )
 # Usage ( использование )
 Download GMOD.dll and GMOD.Injector.exe from latest release, place them in one folder and run injector (you can use any injector if you want).
 
-Menu activation key - `End`.
-
+- Menu activation key - `End`.
+- Aim default keybind - `MOUSE5`,
+- Edge Jump - `N`.
 ---
 
 Скачайте GMOD.dll и GMOD.Injector.exe с последнего релиза, положите их в одну папку и запустите инжектор (можете использовать любой при желании).
 
-Кнопка активации меню - `End`.
-
+- Кнопка активации меню - `End`.
+- Стандартная клавиша аима - `MOUSE5`,
+- Edge Jump - `N`.
+# Notes 
+Works only on x86 Garry's Mod version.
