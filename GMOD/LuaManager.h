@@ -30,13 +30,14 @@ public:
 
 		serverFolderFullPath = path;
 
-		std::string hostname = ConVarManager.GetConVar("hostname")->m_pStringValue;
+		std::string hostname = Utils::GetHostName();
 		serverFolderFullPath /= "Lua Dumper";
 		serverFolderFullPath /= hostname;
 
 #ifdef DEBUG
 		std::cout << "[DUMBER]: Dumping to " << serverFolderFullPath << '\n';
 #endif
+		
 		std::filesystem::create_directories(serverFolderFullPath);
 
 		for (int i = 0; i < Interfaces.LuaShared->m_iFilesInCache; i++) {

@@ -200,4 +200,14 @@ namespace Utils {
 		}
 		return -1;
 	}
+
+	const char* GetHostName() {
+		auto LUA = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+		LUA->PushSpecial(CLuaInterface::SPECIAL_GLOB);
+		LUA->GetField(-1, "GetHostName");
+		LUA->Call(0, 1);
+		const char* hostName = LUA->GetString(-1);
+		LUA->Pop(2); // pop the global table and the return value
+		return hostName;
+	}
 }

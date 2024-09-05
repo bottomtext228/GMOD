@@ -49,7 +49,6 @@ void __fastcall PaintTraverseFn(void* ecx, void* edx, unsigned int panel, bool f
 
 bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* cmd) {
 
-
 	const bool result = oCreateMove(ecx, SampleTime, cmd);
 
 	if (!cmd->m_command_number)
@@ -107,6 +106,7 @@ void __fastcall PaintFn(void* ecx, void* edx, int mode) {
 }
 
 void __fastcall RunCommandFn(void* ecx, void* edx, CPed* player, CUserCmd* ucmd, IMoveHelper* moveHelper) {
+	if (g_bIsPredicting) return;
 	oRunCommand(ecx, player, ucmd, moveHelper);
 }
 

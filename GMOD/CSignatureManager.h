@@ -20,10 +20,6 @@ public:
 	uintptr_t fnCPredictableIdHelper_Reset;
 	uintptr_t pm_nPredictionRandomSeed;
 	uintptr_t pm_pPredictionPlayer;
-	uintptr_t pLuaGameMode;
-	uintptr_t fnCLuaGamemode_CallFinish;
-	uintptr_t fnCLuaGamemode_CallWithArgs;
-	uintptr_t fnPushEntity;
 	uintptr_t fnCBaseEntity_PhysicsRunThink;
 	uintptr_t fnCBaseEntity_GetNextThinkTick;
 	uintptr_t fnCBaseEntity_SetNextThink;
@@ -53,17 +49,6 @@ public:
 		pm_pPredictionPlayer = BTMemory::FindSignature("client.dll", "\x83\xC4\x04\x89\x3D\x00\x00\x00\x00", "xxxxx????");
 		// must add + 0x5;
 
-		pLuaGameMode = BTMemory::FindSignature("client.dll", "\x72\xF1\x8B\x0D\x00\x00\x00\x00", "xxxx????");
-		// must add + 0x4;
-		fnCLuaGamemode_CallWithArgs = pLuaGameMode + 0xE;
-		// fnCLuaGamemode_CallWithArgs + *(fnCLuaGamemode_CallWithArgs + 0x1) + 0x5;
-
-		fnCLuaGamemode_CallFinish = BTMemory::FindSignature("client.dll", "\xE8\x00\x00\x00\x00\x83\x7D\xCC\x00", "x????xxxx");
-		// fnCLuaGamemode_CallFinish + *(fnCLuaGamemode_CallFinish + 0x1) + 0x5;
-
-		fnPushEntity = BTMemory::FindSignature("client.dll", "\x74\x64\x8B\x4D\x08", "xxxxx");
-		// must sub - 0xD;
-
 		fnCBaseEntity_PhysicsRunThink = BTMemory::FindSignature("client.dll", "\xE8\x00\x00\x00\x00\x84\xC0\x0F\x84\x00\x00\x00\x00\xF3\x0F\x10\x87\x00\x00\x00\x00", "x????xxxx????xxxx????");
 		// fnCBaseEntity_PhysicsRunThink + *(fnCBaseEntity_PhysicsRunThink + 0x1) + 0x5;
 
@@ -85,10 +70,7 @@ public:
 		SignatureAssert(fnCPredictableIdHelper_Reset);
 		SignatureAssert(pm_nPredictionRandomSeed);
 		SignatureAssert(pm_pPredictionPlayer);
-		SignatureAssert(pLuaGameMode);
-		SignatureAssert(fnPushEntity);
 		SignatureAssert(pDTStore);
-		SignatureAssert(fnCLuaGamemode_CallFinish);
 		SignatureAssert(fnCBaseEntity_PhysicsRunThink);
 		SignatureAssert(fnCBaseEntity_GetNextThinkTick);
 		SignatureAssert(fnCBaseEntity_SetNextThink);

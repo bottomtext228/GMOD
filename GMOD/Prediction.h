@@ -49,70 +49,6 @@ void CPredictionSystem::StartPrediction(CUserCmd* cmd) {
 
 	localPed->SetScrollSpeed(cmd->m_scroll_wheel_speed);
 
-	static void* pLuaGameMode = **(void***)(SignatureManager.pLuaGameMode + 0x4);
-
-
-	typedef bool(__thiscall* CLuaGamemodeCallWithArgsFn)(void*, int);
-	static CLuaGamemodeCallWithArgsFn CallWithArgs = (CLuaGamemodeCallWithArgsFn)(
-		SignatureManager.fnCLuaGamemode_CallWithArgs + *(uintptr_t*)(SignatureManager.fnCLuaGamemode_CallWithArgs + 0x1) + 0x5);
-
-	typedef void(__cdecl* PushEntityFn)(CPed*);
-	static PushEntityFn PushEntity = (PushEntityFn)(SignatureManager.fnPushEntity - 0xD);
-
-	typedef void(__thiscall* CLuaGamemodeCallFinishFn)(void*, int);
-	static CLuaGamemodeCallFinishFn CallFinish = (CLuaGamemodeCallFinishFn)(
-		SignatureManager.fnCLuaGamemode_CallFinish + *(uintptr_t*)(SignatureManager.fnCLuaGamemode_CallFinish + 0x1) + 0x5);
-
-
-
-	// iterate m_buttons_pressed
-	for (int cmdIterator = 0; cmdIterator < 5; cmdIterator++) {
-		auto cmdButton = cmd->m_buttons_pressed[cmdIterator];
-		if (!cmdButton) break;
-		// try to find current cmdButton in player buttons
-		bool findFlag = false;
-		for (int playerIterator = 0; playerIterator < 5; playerIterator++) {
-			auto playerButton = localPed->GetButtonsArray()[playerIterator];
-			if (cmdButton == playerButton) {
-				findFlag = true;
-			}
-		}
-		if (!findFlag) { // if not found
-			// call lua stuff
-
-			if (pLuaGameMode && CallWithArgs(pLuaGameMode, 78))
-			{
-				PushEntity(localPed);
-				Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT)->PushNumber(cmdButton);
-				CallFinish(pLuaGameMode, 2);
-			}
-		}
-	}
-
-	// iterate player buttons
-	for (int playerIterator = 0; playerIterator < 5; playerIterator++) {
-		auto playerButton = localPed->GetButtonsArray()[playerIterator];
-		if (!playerButton) break;
-		// try to find current player button in cmd->m_buttons_pressed
-		bool findFlag = false;
-		for (int cmdIterator = 0; cmdIterator < 5; cmdIterator++) {
-			auto cmdButton = cmd->m_buttons_pressed[cmdIterator];
-			if (cmdButton == playerButton) {
-				findFlag = true;
-			}
-		}
-		if (!findFlag) { // if not found
-			// call lua stuff
-
-			if (pLuaGameMode && CallWithArgs(pLuaGameMode, 79))
-			{
-				PushEntity(localPed);
-				Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT)->PushNumber(playerButton);
-				CallFinish(pLuaGameMode, 2);
-			}
-		}
-	}
-
 	if (cmd->m_impulse) {
 		localPed->GetImpulse() = cmd->m_impulse;
 	}
@@ -137,10 +73,10 @@ void CPredictionSystem::StartPrediction(CUserCmd* cmd) {
 		localPed->SelectItem(weapon->GetName(), cmd->m_weaponsubtype);
 	}
 
-
 	if (PhysicsRunThink(localPed, 0)) {
 		localPed->PreThink();
 	}
+
 	int thinkTick = GetNextThinkTick(localPed, 0);
 	if (thinkTick > 0 && thinkTick <= localPed->GetTickBase())
 	{

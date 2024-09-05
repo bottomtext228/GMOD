@@ -225,9 +225,6 @@ private:
 
 	void Lua() {
 
-
-
-
 		if (ImGui::Button("Dump Lua", ImVec2(251.0f, 0.0f))) {
 			LuaManager.DumpFiles();
 		}
@@ -235,7 +232,6 @@ private:
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
-
 
 		static const char* luaInterfaceType[] = { "Client", "Server", "Menu" };
 		static LuaInterfaceType currentType;
@@ -245,10 +241,8 @@ private:
 		float button_sz = ImGui::GetFrameHeight();
 		ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
 
-		if (ImGui::BeginCombo("Lua Interface", luaInterfaceType[(int)currentType], ImGuiComboFlags_NoArrowButton))
-		{
-			for (int n = 0; n < IM_ARRAYSIZE(luaInterfaceType); n++)
-			{
+		if (ImGui::BeginCombo("Lua Interface", luaInterfaceType[(int)currentType], ImGuiComboFlags_NoArrowButton)) {
+			for (int n = 0; n < IM_ARRAYSIZE(luaInterfaceType); n++) {
 				bool is_selected = ((int)currentType == n);
 				if (ImGui::Selectable(luaInterfaceType[n], is_selected))
 					currentType = (LuaInterfaceType)n;
@@ -258,11 +252,7 @@ private:
 			ImGui::EndCombo();
 		}
 
-
 		ImGui::PopItemWidth();
-
-
-
 
 		static std::mutex bufferMutex;
 		// 267 size child
@@ -279,7 +269,6 @@ private:
 
 		}
 
-
 		ImGui::SameLine();
 
 		static char inputBuffer[32768];
@@ -288,41 +277,42 @@ private:
 			LuaManager.PushToQueue(currentType, std::string(inputBuffer));
 		}
 
-
 		ImGui::InputTextMultiline("", inputBuffer, sizeof(inputBuffer), ImVec2(252.0f, 160.0f));
-
 	}
-
-
 
 	void SpecificEntitiesList() {
 
 		static char inputBuffer[128];
 
 		ImGui::InputText("Entity list", inputBuffer, 128);
+
 		if (ImGui::Button("Add entity")) {
 			addEntity(inputBuffer);
 		}
+
 		if (vars::misc::specificEntities > 0) {
 			ImGui::SameLine();
 			if (ImGui::Button("Delete")) {
 				deleteLastEntity();
-
 			}
 		}
+
 		ImGui::Spacing();
 		ImGui::Separator();
+
 		for (int i = 0; i < vars::misc::specificEntities; i++) {
 			ImGui::Text(vars::misc::specificEntitiesList[i]);
 			ImGui::Separator();
 		}
 
 		ImGui::Spacing();
+
 		static char selectedObjectName[128] = "none";
 		ImGui::Text("Selected entity: %s", selectedObjectName);
 		if (ImGui::Button("Add entity##")) {
 			addEntity(selectedObjectName);
 		}
+
 		ImGui::BeginChild("ObjectList", ImVec2(252, 100), true, ImGuiWindowFlags_HorizontalScrollbar);
 		for (auto& object : getObjects()) {
 
@@ -340,8 +330,10 @@ private:
 			}
 
 		}
+
 		ImGui::EndChild();
 	}
+
 	void loadSpecificEntitiesList() {
 		std::ifstream loadSpecificEntitiesListFile("SpecificEntitiesList.txt");
 		if (loadSpecificEntitiesListFile.is_open()) {
@@ -362,9 +354,8 @@ private:
 		}
 		deleteEntity.close();
 		vars::misc::specificEntities--;
-
-
 	}
+
 	void addEntity(const char* entityName) {
 		bool isAdded = false;
 		for (int i = 0; i < vars::misc::specificEntities; i++) {
@@ -384,14 +375,17 @@ private:
 			saveEntity.close();
 		}
 	}
+
 	void FriendList() {
 
 		static char inputBuffer[128];
 
 		ImGui::InputText("Friend list", inputBuffer, 128);
+
 		if (ImGui::Button("Add friend")) {
 			addFriend(inputBuffer);
 		}
+
 		if (vars::misc::friendPlayers > 0) {
 			ImGui::SameLine();
 			if (ImGui::Button("Delete")) {
@@ -399,20 +393,25 @@ private:
 
 			}
 		}
+
 		ImGui::Spacing();
 		ImGui::Separator();
+
 		for (int i = 0; i < vars::misc::friendPlayers; i++) {
 			ImGui::Text(vars::misc::friendList[i]);
 			ImGui::Separator();
 
 		}
+
 		ImGui::Spacing();
 		static char selectedPlayerName[128] = "none";
 		ImGui::Text("Selected player: %s", selectedPlayerName);
 		if (ImGui::Button("Add friend##")) {
 			addFriend(selectedPlayerName);
 		}
+
 		ImGui::BeginChild("PlayerList", ImVec2(252, 100), true);
+
 		for (auto& player : getPlayers()) {
 
 			char playerNick[128];
@@ -428,8 +427,10 @@ private:
 
 
 		}
+
 		ImGui::EndChild();
 	}
+
 	std::vector<std::pair<CPed*, int>> getPlayers() {
 		std::vector<std::pair<CPed*, int>> playersList;
 		for (int entityIndex = 0; entityIndex < Interfaces.ClientEntityList->GetHighestEntityIndex(); entityIndex++) {
@@ -441,6 +442,7 @@ private:
 		}
 		return playersList;
 	}
+
 	std::vector<std::pair<CPed*, int>> getObjects() {
 
 		std::vector<std::pair<CPed*, int>> objectsList;
@@ -455,6 +457,7 @@ private:
 		return objectsList;
 
 	}
+
 	void deleteLastFriend() {
 		memset(vars::misc::friendList[vars::misc::friendPlayers], 0, 128);
 		std::ofstream deleteFriend("friendList.txt");
@@ -484,6 +487,7 @@ private:
 			saveFriend.close();
 		}
 	}
+
 	void loadFriendList() {
 		std::ifstream loadFriendList("friendList.txt");
 		if (loadFriendList.is_open()) {
@@ -514,9 +518,8 @@ private:
 		AddEllipse(cursorPos, ImVec2(30.0f, 25.0f), ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), 1.0f);
 		draw->AddCircle(cursorPos, 10.0f, -1, 36, 3.0f);
 		draw->AddCircleFilled(cursorPos, 4.0f, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
-
-
 	}
+
 	void AddEllipse(ImVec2 cursorPos, ImVec2 ellipseSize, ImU32 color, float thickness) {
 		ImDrawList* draw = ImGui::GetForegroundDrawList();
 		draw->AddBezierCurve(ImVec2(cursorPos.x - ellipseSize.x, cursorPos.y), ImVec2(cursorPos.x - ellipseSize.x, cursorPos.y - ellipseSize.y),
@@ -524,6 +527,7 @@ private:
 		draw->AddBezierCurve(ImVec2(cursorPos.x - ellipseSize.x, cursorPos.y), ImVec2(cursorPos.x - ellipseSize.x, cursorPos.y + ellipseSize.y),
 			ImVec2(cursorPos.x + ellipseSize.x, cursorPos.y + ellipseSize.y), ImVec2(cursorPos.x + ellipseSize.x, cursorPos.y), color, thickness);
 	}
+
 	void DrawSight(ImVec2 sectionChildSize, int tabs, ImU32 color) {
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
 		cursorPos.x += (sectionChildSize.x - 16) / 2;
@@ -541,6 +545,7 @@ private:
 		draw->AddCircleFilled(cursorPos, sightSize / 5, color, 36);
 
 	}
+
 	void ComboWithArrows(const char* name, const char*& currentValue, const char** values, int arraySize) {
 		ImGuiStyle& style = ImGui::GetStyle();
 		float w = ImGui::CalcItemWidth();
@@ -563,11 +568,9 @@ private:
 		ImGui::SameLine(0, spacing);
 		char uniqueArrowButtonId[64];
 		strcat(uniqueArrowButtonId, name);
-		if (ImGui::ArrowButton(strcat(uniqueArrowButtonId, "##l"), ImGuiDir_Left))
-		{
+		if (ImGui::ArrowButton(strcat(uniqueArrowButtonId, "##l"), ImGuiDir_Left)) {
 			if (currentValue == values[0])
 				currentValue = values[arraySize - 1];
-
 			else {
 				for (int n = 1; n < arraySize; n++)
 				{
@@ -580,8 +583,7 @@ private:
 			}
 		}
 		ImGui::SameLine(0, spacing);
-		if (ImGui::ArrowButton(strcat(uniqueArrowButtonId, "##r"), ImGuiDir_Right))
-		{
+		if (ImGui::ArrowButton(strcat(uniqueArrowButtonId, "##r"), ImGuiDir_Right)) {
 			if (currentValue == values[arraySize - 1])
 				currentValue = values[0];
 			else {
@@ -597,166 +599,161 @@ private:
 		}
 	}
 
-void AimTargetCombo() {
-	/* ImGui::Combo xd*/
-	ImGuiStyle& style = ImGui::GetStyle();
-	float w = ImGui::CalcItemWidth();
-	float spacing = style.ItemInnerSpacing.x;
-	float button_sz = ImGui::GetFrameHeight();
-	ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
-	if (ImGui::BeginCombo("Aim target", vars::aim::currentAimTarget, ImGuiComboFlags_NoArrowButton))
-	{
-		for (int n = 0; n < IM_ARRAYSIZE(vars::aim::aimTargets); n++)
+	void AimTargetCombo() {
+		/* ImGui::Combo xd*/
+		ImGuiStyle& style = ImGui::GetStyle();
+		float w = ImGui::CalcItemWidth();
+		float spacing = style.ItemInnerSpacing.x;
+		float button_sz = ImGui::GetFrameHeight();
+		ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+		if (ImGui::BeginCombo("Aim target", vars::aim::currentAimTarget, ImGuiComboFlags_NoArrowButton))
 		{
-			bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
-			if (ImGui::Selectable(vars::aim::aimTargets[n], is_selected))
-				vars::aim::currentAimTarget = vars::aim::aimTargets[n];
-			if (is_selected)
-				ImGui::SetItemDefaultFocus();
-		}
-		ImGui::EndCombo();
-	}
-	ImGui::PopItemWidth();
-	ImGui::SameLine(0, spacing);
-	if (ImGui::ArrowButton("##l", ImGuiDir_Left))
-	{
-		int arraySize = IM_ARRAYSIZE(vars::aim::aimTargets);
-		if (vars::aim::currentAimTarget == vars::aim::aimTargets[0])
-			vars::aim::currentAimTarget = vars::aim::aimTargets[arraySize - 1];
-
-		else {
-			for (int n = 1; n < arraySize; n++)
+			for (int n = 0; n < IM_ARRAYSIZE(vars::aim::aimTargets); n++)
 			{
 				bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
-				if (is_selected) {
-					vars::aim::currentAimTarget = vars::aim::aimTargets[n - 1];
-					break;
+				if (ImGui::Selectable(vars::aim::aimTargets[n], is_selected))
+					vars::aim::currentAimTarget = vars::aim::aimTargets[n];
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+		ImGui::SameLine(0, spacing);
+		if (ImGui::ArrowButton("##l", ImGuiDir_Left)) {
+			int arraySize = IM_ARRAYSIZE(vars::aim::aimTargets);
+			if (vars::aim::currentAimTarget == vars::aim::aimTargets[0])
+				vars::aim::currentAimTarget = vars::aim::aimTargets[arraySize - 1];
+			else {
+				for (int n = 1; n < arraySize; n++)
+				{
+					bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
+					if (is_selected) {
+						vars::aim::currentAimTarget = vars::aim::aimTargets[n - 1];
+						break;
+					}
+				}
+			}
+		}
+		ImGui::SameLine(0, spacing);
+		if (ImGui::ArrowButton("##r", ImGuiDir_Right)) {
+			int arraySize = IM_ARRAYSIZE(vars::aim::aimTargets);
+			if (vars::aim::currentAimTarget == vars::aim::aimTargets[arraySize - 1])
+				vars::aim::currentAimTarget = vars::aim::aimTargets[0];
+			else {
+				for (int n = 0; n < (arraySize - 1); n++)
+				{
+					bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
+					if (is_selected) {
+						vars::aim::currentAimTarget = vars::aim::aimTargets[n + 1];
+						break;
+					}
 				}
 			}
 		}
 	}
-	ImGui::SameLine(0, spacing);
-	if (ImGui::ArrowButton("##r", ImGuiDir_Right))
-	{
-		int arraySize = IM_ARRAYSIZE(vars::aim::aimTargets);
-		if (vars::aim::currentAimTarget == vars::aim::aimTargets[arraySize - 1])
-			vars::aim::currentAimTarget = vars::aim::aimTargets[0];
-		else {
-			for (int n = 0; n < (arraySize - 1); n++)
-			{
-				bool is_selected = (vars::aim::currentAimTarget == vars::aim::aimTargets[n]);
-				if (is_selected) {
-					vars::aim::currentAimTarget = vars::aim::aimTargets[n + 1];
-					break;
-				}
-			}
-		}
-	}
-}
 
-void AimTargetTypeCombo() {
-	/* ImGui::Combo xd*/
-	ImGuiStyle& style = ImGui::GetStyle();
-	float w = ImGui::CalcItemWidth();
-	float spacing = style.ItemInnerSpacing.x;
-	float button_sz = ImGui::GetFrameHeight();
-	ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
-	if (ImGui::BeginCombo("Target type", vars::aim::currentAimTargetType, ImGuiComboFlags_NoArrowButton))
-	{
-		for (int n = 0; n < IM_ARRAYSIZE(vars::aim::targetTypes); n++)
+	void AimTargetTypeCombo() {
+		/* ImGui::Combo xd*/
+		ImGuiStyle& style = ImGui::GetStyle();
+		float w = ImGui::CalcItemWidth();
+		float spacing = style.ItemInnerSpacing.x;
+		float button_sz = ImGui::GetFrameHeight();
+		ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+		if (ImGui::BeginCombo("Target type", vars::aim::currentAimTargetType, ImGuiComboFlags_NoArrowButton)) {
+			for (int n = 0; n < IM_ARRAYSIZE(vars::aim::targetTypes); n++)
+			{
+				bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
+				if (ImGui::Selectable(vars::aim::targetTypes[n], is_selected))
+					vars::aim::currentAimTargetType = vars::aim::targetTypes[n];
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::SameLine(0, spacing);
+
+		if (ImGui::ArrowButton("###l", ImGuiDir_Left)) {
+			int arraySize = IM_ARRAYSIZE(vars::aim::targetTypes);
+			if (vars::aim::currentAimTargetType == vars::aim::targetTypes[0])
+				vars::aim::currentAimTargetType = vars::aim::targetTypes[arraySize - 1];
+
+			else {
+				for (int n = 1; n < arraySize; n++)
+				{
+					bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
+					if (is_selected) {
+						vars::aim::currentAimTargetType = vars::aim::targetTypes[n - 1];
+						break;
+					}
+				}
+			}
+		}
+		ImGui::SameLine(0, spacing);
+		if (ImGui::ArrowButton("###r", ImGuiDir_Right))
 		{
-			bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
-			if (ImGui::Selectable(vars::aim::targetTypes[n], is_selected))
-				vars::aim::currentAimTargetType = vars::aim::targetTypes[n];
-			if (is_selected)
-				ImGui::SetItemDefaultFocus();
-		}
-		ImGui::EndCombo();
-	}
-	ImGui::PopItemWidth();
-	ImGui::SameLine(0, spacing);
-	if (ImGui::ArrowButton("###l", ImGuiDir_Left))
-	{
-		int arraySize = IM_ARRAYSIZE(vars::aim::targetTypes);
-		if (vars::aim::currentAimTargetType == vars::aim::targetTypes[0])
-			vars::aim::currentAimTargetType = vars::aim::targetTypes[arraySize - 1];
-
-		else {
-			for (int n = 1; n < arraySize; n++)
-			{
-				bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
-				if (is_selected) {
-					vars::aim::currentAimTargetType = vars::aim::targetTypes[n - 1];
-					break;
+			int arraySize = IM_ARRAYSIZE(vars::aim::targetTypes);
+			if (vars::aim::currentAimTargetType == vars::aim::targetTypes[arraySize - 1])
+				vars::aim::currentAimTargetType = vars::aim::targetTypes[0];
+			else {
+				for (int n = 0; n < (arraySize - 1); n++)
+				{
+					bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
+					if (is_selected) {
+						vars::aim::currentAimTargetType = vars::aim::targetTypes[n + 1];
+						break;
+					}
 				}
 			}
 		}
 	}
-	ImGui::SameLine(0, spacing);
-	if (ImGui::ArrowButton("###r", ImGuiDir_Right))
-	{
-		int arraySize = IM_ARRAYSIZE(vars::aim::targetTypes);
-		if (vars::aim::currentAimTargetType == vars::aim::targetTypes[arraySize - 1])
-			vars::aim::currentAimTargetType = vars::aim::targetTypes[0];
-		else {
-			for (int n = 0; n < (arraySize - 1); n++)
-			{
-				bool is_selected = (vars::aim::currentAimTargetType == vars::aim::targetTypes[n]);
-				if (is_selected) {
-					vars::aim::currentAimTargetType = vars::aim::targetTypes[n + 1];
-					break;
-				}
-			}
-		}
+
+	void setImGuiStyle() {
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.Alpha = 1.0;
+		style.ChildRounding = 3.0f;
+		style.WindowRounding = 3.0f;
+		style.GrabRounding = 5.0f;
+		style.GrabMinSize = 8.0f;
+		style.FrameRounding = 3.0f;
+		style.FrameBorderSize = 1.0f;
+		style.Colors[ImGuiCol_Text] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.00f, 0.40f, 0.41f, 1.00f);
+		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		style.Colors[ImGuiCol_Border] = ImVec4(0.00f, 1.00f, 1.00f, 0.65f);
+		style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		style.Colors[ImGuiCol_FrameBg] = ImVec4(0.44f, 0.80f, 0.80f, 0.18f);
+		style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.44f, 0.80f, 0.80f, 0.27f);
+		style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.44f, 0.81f, 0.86f, 0.66f);
+		style.Colors[ImGuiCol_TitleBg] = ImVec4(0.14f, 0.18f, 0.21f, 0.73f);
+		style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.54f);
+		style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.13f);
+		style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.20f);
+		style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.22f, 0.29f, 0.30f, 0.71f);
+		style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.44f);
+		style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
+		style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 1.00f, 0.68f);
+		style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.36f);
+		style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.76f);
+		style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.65f, 0.65f, 0.46f);
+		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.01f, 1.00f, 1.00f, 0.43f);
+		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.62f);
+		style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 1.00f, 1.00f, 0.33f);
+		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.42f);
+		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
+		style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
+		style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
+		style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_PlotLines] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+		style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 1.00f, 1.00f, 0.22f);
+		style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.04f, 0.10f, 0.09f, 0.51f);
 	}
-}
-
-
-void setImGuiStyle() {
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.Alpha = 1.0;
-	style.ChildRounding = 3.0f;
-	style.WindowRounding = 3.0f;
-	style.GrabRounding = 5.0f;
-	style.GrabMinSize = 8.0f;
-	style.FrameRounding = 3.0f;
-	style.FrameBorderSize = 1.0f;
-	style.Colors[ImGuiCol_Text] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.00f, 0.40f, 0.41f, 1.00f);
-	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-	style.Colors[ImGuiCol_Border] = ImVec4(0.00f, 1.00f, 1.00f, 0.65f);
-	style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.44f, 0.80f, 0.80f, 0.18f);
-	style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.44f, 0.80f, 0.80f, 0.27f);
-	style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.44f, 0.81f, 0.86f, 0.66f);
-	style.Colors[ImGuiCol_TitleBg] = ImVec4(0.14f, 0.18f, 0.21f, 0.73f);
-	style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.54f);
-	style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.13f);
-	style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.20f);
-	style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.22f, 0.29f, 0.30f, 0.71f);
-	style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.44f);
-	style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
-	style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 1.00f, 0.68f);
-	style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.00f, 1.00f, 1.00f, 0.36f);
-	style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.76f);
-	style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.65f, 0.65f, 0.46f);
-	style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.01f, 1.00f, 1.00f, 0.43f);
-	style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.62f);
-	style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 1.00f, 1.00f, 0.33f);
-	style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.42f);
-	style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
-	style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
-	style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.74f);
-	style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_PlotLines] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 1.00f, 1.00f, 0.22f);
-	style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.04f, 0.10f, 0.09f, 0.51f);
-
-}
 };
 
 CMenu* Menu;
