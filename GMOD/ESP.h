@@ -12,8 +12,8 @@ public:
 
 					CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 					if (ped) {
-						if (vars::esp::dormantCheck && ped->IsDormant()) return;
-						if (vars::esp::distanceCheck && ped->GetVecOrigin().DistanceTo(localPed->GetVecOrigin()) > vars::esp::distance) return;
+						if (vars::esp::dormantCheck && ped->IsDormant()) continue;
+						if (vars::esp::distanceCheck && ped->GetVecOrigin().DistanceTo(localPed->GetVecOrigin()) > vars::esp::distance) continue;
 						if (ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo()) {
 
 							if (vars::esp::box3DESP) {
