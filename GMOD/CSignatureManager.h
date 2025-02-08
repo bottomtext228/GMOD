@@ -27,16 +27,18 @@ public:
 	uintptr_t pDTStore;
 	CSignatureManager() {
 		fnShotManipulator_ApplySpread = BTMemory::FindSignature("client.dll", "\x55\x8B\xEC\xF3\x0F\x10\x05\x00\x00\x00\x00\x83\xEC\x14\xF3\x0F\x10\x4D\x00\x0F\x2F\xC8\x56\x8B\xF1\x77\x08\x0F\x57\xC0\x0F\x2F\xC1", "xxxxxxx????xxxxxxx?xxxxxxxxxxxxxx");// reinterpret_cast<CShotManipulator_ApplySpread>(vars::client + 0x1515A0);
-		fnShotManipulator_constructor = BTMemory::FindSignature("client.dll", "\x55\x8B\xEC\x8B\x4D\x08\x0F\x57\xDB\x8B\x55\x10\x56\xF3\x0F\x10\x01\x0F\x2E\xC3\x9F\xF6\xC4\x44\x7A\x49\xF3\x0F\x10\x41\x00\x0F\x2E\xC3", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx?xxx");//reinterpret_cast<CShotManipulator_constructor>(vars::client + 0x3B7A10);
+		fnShotManipulator_constructor = BTMemory::FindSignature("client.dll", "\x0F\x28\xDC\xC7\x00\x00\x00\x00\x00", "xxxxx????"); //reinterpret_cast<CShotManipulator_constructor>(vars::client + 0x3B7A10);
+		// must sub 0x2F
+
 		pCVarSig = BTMemory::FindSignature("engine.dll", "\x8B\x0D\x00\x00\x00\x00\x33\xC0\x89\x45\xF8\x83\xC4\x04\x89\x45\xF4", "xx????xxxxxxxxxxx");
 		//pPlayerResource = BTMemory::FindSignature("client.dll", "\x89\x3D\x00\x00\x00\x00\x8B\xCF\x8B\x17\xFF\x75\x0C\xFF\x75\x08\xFF\x92\x00\x00\x00\x00\x33\xC0\x85\xFF\x0F\x44\xF0", "xx????xxxxxxxxxxxx????xxxxxxx");
-		
+
 		// must add + 0x2
 		pMoveHelperClient = BTMemory::FindSignature("client.dll", "\x8B\x0D\x00\x00\x00\x00\x8B\x46\x08\x68", "xx????xxxx");
-		
+
 		pGlobalVars = BTMemory::FindSignature("client.dll", "\xA1\x00\x00\x00\x00\x83\xC4\x04\x89\x3D\x00\x00\x00\x00", "x????xxxxx????");
 		// must add + 0x1
-		
+
 		pbSendPacket = BTMemory::FindSignature("engine.dll", "\xC6\x45\xFF\x01\x8B\x01\x8B\x40\x18", "xxxxxxxxx");
 		// must add + 0x3
 
@@ -45,7 +47,7 @@ public:
 
 		pm_nPredictionRandomSeed = BTMemory::FindSignature("client.dll", "\x75\x0C\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\x5D", "xxxx????????x");
 		// must add + 0x4;
-		
+
 		pm_pPredictionPlayer = BTMemory::FindSignature("client.dll", "\x83\xC4\x04\x89\x3D\x00\x00\x00\x00", "xxxxx????");
 		// must add + 0x5;
 
@@ -59,7 +61,7 @@ public:
 		// fnCBaseEntity_SetNextThink + *(fnCBaseEntity_SetNextThink + 0x1) + 0x5;
 
 		fnCBasePlayer_SetPlayerCollisionBounds = BTMemory::FindSignature("client.dll", "\x8B\x91\x00\x00\x00\x00\xB8\x00\x00\x00\x00\x56", "xx????x????x");
-		
+
 		pDTStore = BTMemory::FindSignature("engine.dll", "\x8B\x7D\x08\x8B\x0D\x00\x00\x00\x00\x8D\x64\x24\x00", "xxxxx????xxxx");
 		// must add 0x5;
 
@@ -78,6 +80,6 @@ public:
 		SignatureAssert(pGlobalVars);
 		SignatureAssert(pbSendPacket);
 
-		
+
 	}
 } SignatureManager;
