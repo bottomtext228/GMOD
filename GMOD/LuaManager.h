@@ -4,12 +4,18 @@ class CLuaManager {
 public:
 	std::vector<std::pair<LuaInterfaceType, std::string>> m_luaQueue;
 	std::mutex m_luaMutex;
+	bool m_shouldDumpFiles;
 	void PushToQueue(LuaInterfaceType type, std::string code) {
 		const std::lock_guard<std::mutex> lock(LuaManager.m_luaMutex);
 		m_luaQueue.push_back({ type, code });
 	}
 
 	void ExecuteQueue() {
+		if (m_shouldDumpFiles) {
+			m_shouldDumpFiles = false;
+			DumpFiles();
+		}
+
 		const std::lock_guard<std::mutex> lock(LuaManager.m_luaMutex);
 		for (auto& [type, code] : m_luaQueue) {
 			auto pLuaInterface = Interfaces.LuaShared->GetLuaInterface(type);
@@ -20,8 +26,12 @@ public:
 		m_luaQueue.clear();
 	}
 
+	void RequestDumpingFiles() {
+		m_shouldDumpFiles = true;
+	}
 
 	void DumpFiles() {
+		if (!Interfaces.Engine->IsInGame()) return;
 
 		std::filesystem::path serverFolderFullPath;
 
@@ -31,28 +41,40 @@ public:
 		serverFolderFullPath = path;
 
 		std::string hostname = Utils::GetHostName();
+		if (hostname.empty()) return;
+
 		serverFolderFullPath /= "Lua Dumper";
-		serverFolderFullPath /= hostname;
+		serverFolderFullPath /= Utils::sanitize_utf8_path(hostname);
 
 #ifdef DEBUG
-		std::cout << "[DUMBER]: Dumping to " << serverFolderFullPath << '\n';
+		std::cout << "[DUMPER]: Dumping to " << serverFolderFullPath.string() << '\n';
 #endif
-		
-		std::filesystem::create_directories(serverFolderFullPath);
+		try {
+			std::filesystem::create_directories(Utils::utf8_to_utf16(serverFolderFullPath.string()));
+		}
+		catch (std::exception e) {
+			std::cerr << "Failed to create dump folder:\n" << e.what() << '\n';
+			return;
+		}
 
 		for (int i = 0; i < Interfaces.LuaShared->m_iFilesInCache; i++) {
 			CLuaFile* luaFile = Interfaces.LuaShared->m_pFiles[i];
+			if ((uintptr_t)luaFile->m_pContent == 0x2D2D) continue; // I don't know why pointer can be equal to 0x2D2D 
 			std::string fileName(luaFile->m_pFileName);
 			std::replace(fileName.begin(), fileName.end(), '/', ' ');
 
 #ifdef DEBUG
 			std::cout << "[DUMPER]: Lua file: " << fileName << '\n';
 #endif
-			std::ofstream file;
-			file.open(serverFolderFullPath / fileName);
-			file << luaFile->m_pContent;
-			file.close();
-
+			try {
+				std::ofstream file;
+				file.open(Utils::utf8_to_utf16((serverFolderFullPath / fileName).string()));
+				file << luaFile->m_pContent;
+				file.close();
+			}
+			catch (std::exception e) {
+				std::cerr << "Failed to dump file:\n" << e.what() << '\n';
+			}
 		}
 
 	}

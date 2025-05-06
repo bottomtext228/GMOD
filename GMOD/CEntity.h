@@ -1,7 +1,6 @@
 
 class IClientRenderable;
 class modelInfo;
-
 #define	FL_ONGROUND				(1<<0)	// At rest / on the ground
 #define FL_DUCKING				(1<<1)	// Player flag -- Player is fully crouched
 #define FL_ANIMDUCKING			(1<<2)	// Player flag -- Player is in the process of crouching or uncrouching but could be in transition
@@ -18,6 +17,8 @@ class modelInfo;
 #define FL_FAKECLIENT			(1<<9)	// Fake client, simulated server side; don't send network messages to them
 // NON-PLAYER SPECIFIC (i.e., not used by GameMovement or the client .dll ) -- Can still be applied to players, though
 #define	FL_INWATER				(1<<10)	// In water
+
+#define MAX_WEAPONS 256
 
 class CPed {
 
@@ -114,7 +115,7 @@ public:
 
 	void SetScrollSpeed(int scrollSpeed) {
 		typedef void(__thiscall* fn)(void*, int);
-		VMT.getvfunc<fn>(this, 375)(this, scrollSpeed);
+		VMT.getvfunc<fn>(this, 374)(this, scrollSpeed);
 	}
 
 	void UpdateButtonState(int nButtonMask) {
@@ -217,6 +218,18 @@ public:
 		return *(uint32_t*)((uintptr_t)this + offset);
 	}
 
+	uintptr_t* GetWeaponHandles() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseCombatCharacter", "m_hMyWeapons");
+		return (uint32_t*)((uintptr_t)this + offset);
+	}
+
+	uintptr_t GetWeaponHandle(int i) {
+		if (i < 0 || i >= MAX_WEAPONS) return NULL;
+		auto weapons = GetWeaponHandles();
+		auto weaponHandle = weapons[i];
+		return weaponHandle;
+	}
+
 	modelInfo* GetModelInfo() {
 		static uintptr_t offset = DTManager::GetOffset("DT_AnimTimeMustBeFirst", "m_flAnimTime") - 0x4;
 		return *(modelInfo**)((uintptr_t)this + offset);
@@ -232,6 +245,32 @@ public:
 		return *(CVector*)((uintptr_t)this + offset);
 	}
 
+	int& GetObserverMode() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BasePlayer", "m_iObserverMode");
+		return *(int*)((uintptr_t)this + offset);
+	}
+
+	bool IsObserver() {
+		return GetObserverMode() != OBS_MODE_NONE;
+	}
+
+	uintptr_t GetObserverTarget() {
+		static uintptr_t offset = DTManager::GetOffset("DT_BasePlayer", "m_hObserverTarget");
+		return *(uintptr_t*)((uintptr_t)this + offset);
+	}
+
+	enum {
+		OBS_MODE_NONE = 0,	// not in spectator mode
+		OBS_MODE_DEATHCAM,	// special mode for death cam animation
+		OBS_MODE_FREEZECAM,	// zooms to a target, and freeze-frames on them
+		OBS_MODE_FIXED,		// view from a fixed camera position
+		OBS_MODE_IN_EYE,	// follow a player in first person view
+		OBS_MODE_CHASE,		// follow a player in third person view
+		OBS_MODE_POI,		// PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
+		OBS_MODE_ROAMING,	// free roaming
+
+		NUM_OBSERVER_MODES,
+	};
 
 	// DT_LocalPlayerExclusive:
 	//	m_nTickBase
@@ -259,6 +298,7 @@ public:
 
 	// DT_BaseCombatCharacter:
 	//	m_hActiveWeapon
+	//	m_hMyWeapons
 
 	// DT_AnimTimeMustBeFirst
 	//	m_flAnimTime (m_flAnimTime - 4 = GetModelInfo())
@@ -278,7 +318,6 @@ public:
 	CVector& GetBulletSpread() {
 		typedef CVector& (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 325)(this);
-
 	}
 
 	bool IsScripted() {

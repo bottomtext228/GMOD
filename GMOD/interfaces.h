@@ -19,8 +19,8 @@ public:
 	CGameMovement* GameMovement;
 	CLuaShared* LuaShared;
 	IMoveHelper* MoveHelper;
-
-	void GetInterfaces() 
+	/*ILocalize* Localize;*/
+	void GetInterfaces()
 	{
 		Trace = (CTrace*)GetPointer("engine.dll", "EngineTraceClient");
 		Client = GetPointer("client.dll", "VClient");
@@ -34,7 +34,7 @@ public:
 		Prediction = (CPrediction*)GetPointer("client.dll", "VClientPrediction");
 		GameMovement = (CGameMovement*)GetPointer("client.dll", "GameMovement");
 		MoveHelper = **(IMoveHelper***)(SignatureManager.pMoveHelperClient + 0x2);
-
+		/*Localize = (ILocalize*)GetPointer("vgui2.dll", "VGUI_Localize");*/
 		assert(Trace != NULL && "EngineTraceClient interface is not found.");
 		assert(Client != NULL && "VClient interface is not found.");
 		assert(Engine != NULL && "VEngineClient interface is not found.");
@@ -45,14 +45,14 @@ public:
 		assert(LuaShared != NULL && "LUASHARED interface is not found.");
 		assert(Prediction != NULL && "Prediction interface is not found.");
 		assert(GameMovement != NULL && "GameMovement interface is not found.");
-
+		/*assert(Localize != NULL && "Localize interface is not found.");*/
 		CreateInterfaceFn CreateInterface = (CreateInterfaceFn)GetProcAddress(GetModuleHandleA("server.dll"), "CreateInterface");
 		// есть ещё PlayerInfoManager001 и он не подходит, поэтому нельзя через GetPointer()
 		PlayerInfo = (CPlayerInfoManager*)CreateInterface("PlayerInfoManager002", NULL);
 		assert(PlayerInfo != NULL && "PlayerInfoManager002 interface is not found.");
 		GlobalVars = **(CGlobalVarsBase***)(SignatureManager.pGlobalVars + 0x1);//PlayerInfo->GetGlobalVars();
 
-	
+
 	}
 
 	void* GetPointer(const char* Module, const char* InterfaceName)

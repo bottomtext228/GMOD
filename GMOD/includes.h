@@ -42,7 +42,7 @@
 /*           SDK           */
 #include "vector.h"
 #include "math_utils.h"
-#include "usercmd.h"
+#include "usercmd.h" 
 #include "CSignatureManager.h"
 #include "DTParser.h"
 #include "CPlayerResource.h"

@@ -14,7 +14,6 @@ public:
 
 		if (weapon->IsScripted()) // will not work for Lua weapons
 			return;
-
 	
 		const char* weaponName = weapon->GetName();
 		if (strcmp(weaponName, "weapon_smg1") && strcmp(weaponName, "weapon_pistol") && strcmp(weaponName, "weapon_ar2") && strcmp(weaponName, "weapon_357")) // only work for this HL2 weapons

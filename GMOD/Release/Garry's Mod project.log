@@ -1,2 +1,7 @@
 ﻿  main.cpp
-LINK : fatal error LNK1104: cannot open file '..\Release\GMOD.dll'
+  Generating code
+  0 of 2244 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  Garry's Mod project.vcxproj -> F:\Users\bottom_text\source\repos\GMOD\Release\GMOD.dll

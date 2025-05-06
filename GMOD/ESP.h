@@ -3,48 +3,58 @@ class CESP {
 public:
 
 	void Process() {
+		if (!localPed) return;
 
 		if (vars::esp::boneESP || vars::esp::linesState || vars::esp::box3DESP ||
-			vars::esp::box2DESP || vars::esp::renderHealthAndNick || vars::esp::renderEntity) { // чтобы каждый кадр не проверял EntityList просто так 
-			if (localPed) {
+			vars::esp::box2DESP || vars::esp::renderHealth || vars::esp::renderGameNick
+			|| vars::esp::renderSteamNick || vars::esp::renderCurrentWeapon || vars::esp::renderWeapons || vars::esp::renderEntity) { // чтобы каждый кадр не проверялся EntityList просто так 
 
-				for (int entityIndex = 0; entityIndex <= Interfaces.ClientEntityList->GetHighestEntityIndex(); entityIndex++) {
+			// if render entities we should do for loop until highest entity index, if only players we should use maxClients global var
 
-					CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
-					if (ped) {
-						if (vars::esp::dormantCheck && ped->IsDormant()) continue;
-						if (vars::esp::distanceCheck && ped->GetVecOrigin().DistanceTo(localPed->GetVecOrigin()) > vars::esp::distance) continue;
-						if (ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo()) {
+			int maxIndex = vars::esp::renderEntity ? Interfaces.ClientEntityList->GetHighestEntityIndex() : Interfaces.GlobalVars->maxClients;
 
-							if (vars::esp::box3DESP) {
-								DrawBoxESP(ped, entityIndex);
-							}
+			for (int entityIndex = 0; entityIndex <= maxIndex; entityIndex++) {
 
-							if (vars::esp::linesState) {
-								DrawLines(ped, entityIndex);
-							}
+				CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
+				if (ped) {
 
-							if (vars::esp::boneESP) {
-								DrawBoneESP(ped, entityIndex);
-							}
+					if (vars::esp::dormantCheck && ped->IsDormant()) continue;
+					if (vars::esp::distanceCheck && ped->GetVecOrigin().DistanceTo(localPed->GetVecOrigin()) > vars::esp::distance) continue;
 
-							if (vars::esp::renderHealthAndNick) {
-								DrawHealthAndNick(ped, entityIndex);
-							}
+					if (ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo()) {
 
-							if (vars::esp::box2DESP) {
-								Draw2DBoxESP(ped, entityIndex);
-							}							
-						}
-						if (vars::esp::renderEntity) {
-							DrawEntities(ped);
+						// do not draw on spectated player
+						if (Interfaces.ClientEntityList->GetClientEntityFromHandle(localPed->GetObserverTarget()) == ped) continue;
+						
+						if (vars::esp::box3DESP) {
+							DrawBoxESP(ped, entityIndex);
 						}
 
-					} // end of if (ped)
+						if (vars::esp::linesState) {
+							DrawLines(ped, entityIndex);
+						}
 
-				}
+						if (vars::esp::boneESP) {
+							DrawBoneESP(ped, entityIndex);
+						}
+
+						if (vars::esp::renderHealth || vars::esp::renderGameNick || vars::esp::renderSteamNick || vars::esp::renderCurrentWeapon) {
+							DrawPlayerInfo(ped, entityIndex);
+						}
+
+						if (vars::esp::box2DESP) {
+							Draw2DBoxESP(ped, entityIndex);
+						}
+					}
+					if (vars::esp::renderEntity) {
+						DrawEntities(ped);
+					}
+
+				} // end of if (ped)
 
 			}
+
+
 		}
 	}
 
@@ -63,25 +73,63 @@ private:
 			draw->AddLine(ImVec2((float)vars::resX / 2.0f, 0.0f), screenPos.ToImVec2(), calcESPColor(ped->GetHealth(), playerIndex));
 		}
 	}
-	void DrawHealthAndNick(CPed* ped, int playerIndex) {
+	void DrawPlayerInfo(CPed* ped, int playerIndex) {
 #ifdef DEBUG
-		debug("DrawHealthAndNick\n");
-#endif // DEBUG
+		debug("DrawPlayerInfo()\n");
+#endif
 
 		CVector pos = ped->GetVecOrigin();
 		pos.z += 80;
 
 		CVector2D screenPos;
-		if (Utils::WorldToScreen(pos, screenPos)) {
+		if (!Utils::WorldToScreen(pos, screenPos))
+			return;
 
-			char espText[150];
-			char playerNick[128];
-			Interfaces.Engine->GetPlayerNick(playerNick, playerIndex);
-			sprintf_s(espText, "[%d] %s", ped->GetHealth(), playerNick);
-			ImVec2 textSize = ImGui::CalcTextSize(espText);
+		std::string espText;
+
+		if (vars::esp::renderHealth) {
+			if (vars::esp::renderMaxHealth) espText += "[" + std::to_string(ped->GetHealth()) + "/" + std::to_string(ped->GetMaxHealth()) + "]\n";
+			else espText += "[" + std::to_string(ped->GetHealth()) + "]\n";
+		}
+
+		char playerNick[128] = {};
+		Interfaces.Engine->GetPlayerNick(playerNick, playerIndex);
+		std::string nickStr(playerNick);
+
+		if (vars::esp::renderGameNick) {
+			auto& gameNick = g_Nicknames.at(playerIndex);
+			if (!gameNick.empty()) espText += gameNick + "\n";
+		}
+
+		if (vars::esp::renderSteamNick) {
+			espText += nickStr + "\n";
+		}
+
+		if (vars::esp::renderCurrentWeapon) {
+			auto weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(ped->GetActiveWeaponHandle());
+			if (weapon)
+				espText += std::string(weapon->GetName()) + "\n";
+		}
+
+		if (vars::esp::renderWeapons) {
+			for (int i = 0; i < 256; i++) {
+				auto weaponHandle = ped->GetWeaponHandle(i);
+				if (weaponHandle != -1) {
+					auto weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(weaponHandle);
+					if (weapon)
+						espText += std::string(weapon->GetName()) + "\n";
+				}
+			}
+		}
+
+		if (!espText.empty()) {
+			ImVec2 textSize = ImGui::CalcTextSize(espText.c_str());
+			ImVec2 textPos(screenPos.x - textSize.x / 2, screenPos.y - textSize.y);
 			ImDrawList* draw = ImGui::GetBackgroundDrawList();
-			draw->AddText(ImVec2(screenPos.x - textSize.x / 2, screenPos.y - textSize.y), -1, espText);
 
+			// Optional: text shadow
+			draw->AddText(ImVec2(textPos.x + 1, textPos.y + 1), IM_COL32(0, 0, 0, 255), espText.c_str());
+			draw->AddText(textPos, IM_COL32(255, 255, 255, 255), espText.c_str());
 		}
 	}
 	void DrawEntities(CPed* entity) {
@@ -222,7 +270,7 @@ private:
 				return;
 			}
 		}
-	
+
 		ImDrawList* draw = ImGui::GetBackgroundDrawList();
 		ImU32 ESPColor = calcESPColor(ped->GetHealth(), playerIndex);
 
@@ -267,6 +315,7 @@ private:
 		ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(clrR, clrG, 0.0f, 1.0f));
 		return color;
 	}
+
 };
 
 CESP* ESP;

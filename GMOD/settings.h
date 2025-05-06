@@ -1,12 +1,17 @@
-namespace vars { 
+namespace vars {
 	bool init = false;
 
 	namespace esp {
 		bool linesState = false;
 		bool box3DESP = false;
-		bool box2DESP = false; 
-		bool renderHealthAndNick = false;
+		bool box2DESP = false;
+		bool renderGameNick = false;
+		bool renderSteamNick = false;
+		bool renderHealth = false;
+		bool renderMaxHealth = false;
 		bool renderEntity = false;
+		bool renderCurrentWeapon = false;
+		bool renderWeapons = false;
 		bool renderSpecificEntities = false;
 		bool boneESP = false;
 		bool setupBones = false;
@@ -16,7 +21,7 @@ namespace vars {
 		float distance = 2500.0f;
 	};
 
-	
+
 
 	float viewMatrix[16];
 	namespace aim {
@@ -27,12 +32,12 @@ namespace vars {
 		bool rage = false;
 		float aimAngleSpeed = 30.0f; // angles per second
 		float aimSmoothSteps = 10.0f;
-		const char* aimModes[] = {"Smooth steps", "Angle speed"};
+		const char* aimModes[] = { "Smooth steps", "Angle speed" };
 		const char* currentAimMode = aimModes[0];
 		int FOV = 200;
 		bool renderFOV = false;
-		const char* aimTargets[] = { "Head", "Nearest", "Body"};
-		const char* targetTypes[] = {"Hitbox", "Bone"};
+		const char* aimTargets[] = { "Head", "Nearest", "Body" };
+		const char* targetTypes[] = { "Hitbox", "Bone" };
 		bool ignoreLimbs = true;
 		const char* currentAimTarget = vars::aim::aimTargets[0];
 		const char* currentAimTargetType = vars::aim::targetTypes[0];
@@ -40,7 +45,7 @@ namespace vars {
 		bool triggerBot = false;
 		bool holdOrClick = false; // false = hold - триггербот зажимает атаку, true - зажимает и отжимает атаку; для корректной работы на 9мм пистолете
 		bool noSpread = false;
-		KeyBindToggle aimKeyBind = KeyBindToggle(KeyBind::KeyCode::MOUSE5); 
+		KeyBindToggle aimKeyBind = KeyBindToggle(KeyBind::KeyCode::MOUSE5);
 		bool ignoreZ = false;
 		bool stickyAim = true;
 	};
@@ -72,4 +77,8 @@ namespace vars {
 	int resY;
 	DWORD client;
 	DWORD engine;
+};
+
+class ConfigSystem {
+
 };

@@ -2,8 +2,9 @@
 
 
 class ILocalize {
+public:
 	const char* Find(const char* name) {
-		// converts strings like #Valve_Hud_HEALTH to localized version used in HUD
+		// converts strings like #Valve_Hud_HEALTH to localized version used in HUD (!NOTE!: returned string is utf-16)
 		typedef const char* (__thiscall* fn)(void*, const char*);
 		return VMT.getvfunc<fn>(this, 2)(this, name);
 	}

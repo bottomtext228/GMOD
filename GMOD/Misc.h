@@ -1,4 +1,3 @@
-
 class CMisc {
 public:
 	void AutoJump(CUserCmd* cmd) {
@@ -36,5 +35,6 @@ public:
 		BTMemory::UnpatchAll();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)(oWndProc));
 	}
+
 }; CMisc* Misc;
 

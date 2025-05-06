@@ -1,6 +1,7 @@
-#define CHEAT_VERSION 2.3
+#define CHEAT_VERSION 2.4
 #define _CRT_SECURE_NO_WARNINGS
-#define DEBUG
+//#define DEBUG
+#pragma execution_character_set("utf-8")
 #include "includes.h"
 
 
@@ -22,8 +23,6 @@ WNDPROC oWndProc;
 HWND window = NULL;
 
 
-
-
 LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 
 	if (!vars::init && !Menu->Init(pDevice, window))
@@ -35,7 +34,7 @@ LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 
 	if (Interfaces.Engine->IsInGame()) {
 		localPed = Interfaces.ClientEntityList->GetClientEntity(Interfaces.Engine->GetLocalPlayer());
-		ESP->Process();
+		ESP->Process();	
 	}
 	Menu->Render();
 
@@ -65,7 +64,6 @@ LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		BOOL repeatFlag = (HIWORD(lParam) & KF_REPEAT) == KF_REPEAT;
 		if (uMsg == WM_KEYDOWN && !repeatFlag) {
 			vars::menu = !vars::menu;
-
 		}
 		return 0; // блокируем все взаимодействия с клавишей активации чтобы не спалится
 	}
@@ -104,7 +102,11 @@ DWORD WINAPI MainThread(HMODULE hMod)
 			attached = true;
 		}
 	} while (!attached);
-
+	/* TODO:
+	* maybe make new smooth mode 
+	* improve menu (Functions tab)
+	* make config system
+	*/
 	while (!vars::misc::DLLUnload) {
 		Sleep(100);
 	}
@@ -121,13 +123,14 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
 
-		vars::client = (DWORD)GetModuleHandle("client.dll");
-		vars::engine = (DWORD)GetModuleHandle("engine.dll");
+		vars::client = (DWORD)GetModuleHandle(L"client.dll");
+		vars::engine = (DWORD)GetModuleHandle(L"engine.dll");
 		vars::resX = GetSystemMetrics(0);
 		vars::resY = GetSystemMetrics(1);
 		vars::bSendPacket = (bool*)(SignatureManager.pbSendPacket + 0x3);
 		DWORD oldProtection;
 		VirtualProtect(vars::bSendPacket, sizeof(bool), PAGE_EXECUTE_READWRITE, &oldProtection);
+
 
 #ifdef DEBUG
 		if (AllocConsole())
@@ -136,6 +139,11 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 			(void)freopen("CONOUT$", "w", stdout);
 			(void)freopen("CONOUT$", "w", stderr);
 			printf("INJECTED!\n");
+
+			SetConsoleOutputCP(CP_UTF8);
+
+			// Enable buffering to prevent VS from chopping up UTF-8 byte sequences
+			setvbuf(stdout, nullptr, _IOFBF, 1000);
 
 		}
 #endif // DEBUG
@@ -148,7 +156,6 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 
 
 		Interfaces.GetInterfaces();
-		//MH_Initialize();
 		Hooks.Hook();
 		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)MainThread, hMod, 0, nullptr);
 

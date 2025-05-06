@@ -25,6 +25,7 @@ public:
 	uintptr_t fnCBaseEntity_SetNextThink;
 	uintptr_t fnCBasePlayer_SetPlayerCollisionBounds;
 	uintptr_t pDTStore;
+
 	CSignatureManager() {
 		fnShotManipulator_ApplySpread = BTMemory::FindSignature("client.dll", "\x55\x8B\xEC\xF3\x0F\x10\x05\x00\x00\x00\x00\x83\xEC\x14\xF3\x0F\x10\x4D\x00\x0F\x2F\xC8\x56\x8B\xF1\x77\x08\x0F\x57\xC0\x0F\x2F\xC1", "xxxxxxx????xxxxxxx?xxxxxxxxxxxxxx");// reinterpret_cast<CShotManipulator_ApplySpread>(vars::client + 0x1515A0);
 		fnShotManipulator_constructor = BTMemory::FindSignature("client.dll", "\x0F\x28\xDC\xC7\x00\x00\x00\x00\x00", "xxxxx????"); //reinterpret_cast<CShotManipulator_constructor>(vars::client + 0x3B7A10);
@@ -79,7 +80,5 @@ public:
 		SignatureAssert(fnCBasePlayer_SetPlayerCollisionBounds);
 		SignatureAssert(pGlobalVars);
 		SignatureAssert(pbSendPacket);
-
-
 	}
 } SignatureManager;

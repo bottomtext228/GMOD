@@ -62,7 +62,12 @@ public:
 
 					ImGui::Checkbox("3D BoxESP", &vars::esp::box3DESP);
 					ImGui::Checkbox("2D BoxESP", &vars::esp::box2DESP);
-					ImGui::Checkbox("Health and nicks", &vars::esp::renderHealthAndNick);
+					ImGui::Checkbox("Health", &vars::esp::renderHealth);
+					ImGui::Checkbox("Max health", &vars::esp::renderMaxHealth);
+					ImGui::Checkbox("Game nick", &vars::esp::renderGameNick);
+					ImGui::Checkbox("Steam nick", &vars::esp::renderSteamNick);
+					ImGui::Checkbox("Current weapon", &vars::esp::renderCurrentWeapon);
+					ImGui::Checkbox("All weapons", &vars::esp::renderWeapons);
 					ImGui::Checkbox("BoneESP", &vars::esp::boneESP);
 					ImGui::Checkbox("Dormant check", &vars::esp::dormantCheck);
 					ImGui::Checkbox("Distance check", &vars::esp::distanceCheck);
@@ -84,9 +89,10 @@ public:
 					if (ImGui::Checkbox("Smooth Aim", &vars::aim::smoothAim))
 						vars::aim::silentAim = false;
 
-
-					ImGui::SliderFloat("Angle speed", &vars::aim::aimAngleSpeed, 1.0f, 100.0f);
-					ImGui::SliderFloat("Smooth steps", &vars::aim::aimSmoothSteps, 1.0f, 50.0f);
+					ImGui::Text("Angle speed:");
+					ImGui::SliderFloat("##aimAngleSpeed", &vars::aim::aimAngleSpeed, 1.0f, 100.0f);
+					ImGui::Text("Smooth steps:");
+					ImGui::SliderFloat("##aimSmoothSteps", &vars::aim::aimSmoothSteps, 1.0f, 50.0f);
 					ComboWithArrows("Aim mode", vars::aim::currentAimMode, vars::aim::aimModes, IM_ARRAYSIZE(vars::aim::aimModes));
 					ComboWithArrows("Aim target", vars::aim::currentAimTarget, vars::aim::aimTargets, IM_ARRAYSIZE(vars::aim::aimTargets));
 					ImGui::Checkbox("Render FOV", &vars::aim::renderFOV);
@@ -199,10 +205,10 @@ private:
 		OPENFILENAME ofn;
 		ZeroMemory(&ofn, sizeof(ofn));
 		ofn.lStructSize = sizeof(ofn);
-		ofn.lpstrFilter = "Lua files (.lua)" "\0"  "*.LUA" "\0"
+		ofn.lpstrFilter = L"Lua files (.lua)" "\0"  "*.LUA" "\0"
 			"Any File"   "\0"  "*.*"   "\0";
 		ofn.nFilterIndex = 1;
-		ofn.lpstrFile = (char*)filename.c_str();
+		ofn.lpstrFile = (wchar_t*)filename.c_str();
 		ofn.nMaxFile = MAX_PATH;
 		ofn.Flags = OFN_CREATEPROMPT | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
 
@@ -226,7 +232,7 @@ private:
 	void Lua() {
 
 		if (ImGui::Button("Dump Lua", ImVec2(251.0f, 0.0f))) {
-			LuaManager.DumpFiles();
+			LuaManager.RequestDumpingFiles();
 		}
 
 		ImGui::Spacing();
