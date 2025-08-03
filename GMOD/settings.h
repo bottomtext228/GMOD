@@ -75,8 +75,8 @@ namespace vars {
 	float boxESPSize = 15.0;
 	int resX;
 	int resY;
-	DWORD client;
-	DWORD engine;
+	uintptr_t client;
+	uintptr_t engine;
 };
 
 class ConfigSystem {

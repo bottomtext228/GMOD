@@ -1,6 +1,6 @@
 #define CHEAT_VERSION 2.4
 #define _CRT_SECURE_NO_WARNINGS
-//#define DEBUG
+#define DEBUG
 #pragma execution_character_set("utf-8")
 #include "includes.h"
 
@@ -59,7 +59,7 @@ LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (!ImGui::GetCurrentContext())
 		return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 
-
+	
 	if (wParam == menuKey) {
 		BOOL repeatFlag = (HIWORD(lParam) & KF_REPEAT) == KF_REPEAT;
 		if (uMsg == WM_KEYDOWN && !repeatFlag) {
@@ -98,7 +98,7 @@ DWORD WINAPI MainThread(HMODULE hMod)
 		{
 			kiero::bind(42, (void**)&oEndScene, hkEndScene);
 			window = FindWindowA(0, "Garry's Mod");
-			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWL_WNDPROC, (LONG_PTR)WndProc);
+			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
 			attached = true;
 		}
 	} while (!attached);
@@ -123,8 +123,8 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
 
-		vars::client = (DWORD)GetModuleHandle(L"client.dll");
-		vars::engine = (DWORD)GetModuleHandle(L"engine.dll");
+		vars::client = (uintptr_t)GetModuleHandle(L"client.dll");
+		vars::engine = (uintptr_t)GetModuleHandle(L"engine.dll");
 		vars::resX = GetSystemMetrics(0);
 		vars::resY = GetSystemMetrics(1);
 		vars::bSendPacket = (bool*)(SignatureManager.pbSendPacket + 0x3);

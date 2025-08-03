@@ -220,7 +220,7 @@ public:
 
 	uintptr_t* GetWeaponHandles() {
 		static uintptr_t offset = DTManager::GetOffset("DT_BaseCombatCharacter", "m_hMyWeapons");
-		return (uint32_t*)((uintptr_t)this + offset);
+		return (uintptr_t*)((uintptr_t)this + offset);
 	}
 
 	uintptr_t GetWeaponHandle(int i) {

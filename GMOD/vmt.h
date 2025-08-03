@@ -1,12 +1,12 @@
 class CVMT
 {
 public:
-	template< typename Function > Function getvfunc(PVOID Base, DWORD Index)
+	template< typename Function > Function getvfunc(PVOID Base, uintptr_t Index)
 	{
 
-		PDWORD* VTablePointer = (PDWORD*)Base;
-		PDWORD VTableFunctionBase = *VTablePointer;
-		DWORD dwAddress = VTableFunctionBase[Index];
+		uintptr_t** VTablePointer = (uintptr_t**)Base;
+		uintptr_t* VTableFunctionBase = *VTablePointer;
+		uintptr_t dwAddress = VTableFunctionBase[Index];
 		return (Function)(dwAddress);
 	}
 	template<typename T>
@@ -47,7 +47,7 @@ public:
 		this->count = this->GetCount();
 		pCopyTable = malloc(sizeof(void*) * count);
 		memcpy(pCopyTable, pOrgTable, sizeof(void*) * count);
-		pObject = (DWORD*)Interface;
+		pObject = (uintptr_t*)Interface;
 		return true;
 	}
 	/*Hook/Unhook*/
@@ -55,11 +55,11 @@ public:
 	{
 		if (hooked)
 		{
-			*pObject = (DWORD)pCopyTable;
+			*pObject = (uintptr_t)pCopyTable;
 		}
 		else
 		{
-			*pObject = (DWORD)pOrgTable;
+			*pObject = (uintptr_t)pOrgTable;
 		}
 	}
 	/*Hooks function*/
@@ -67,8 +67,8 @@ public:
 	{
 		if (Index < this->count && Index >= 0)
 		{
-			((DWORD*)pCopyTable)[Index] = (DWORD)hkFunction;
-			return (void*)((DWORD*)pOrgTable)[Index];
+			((uintptr_t*)pCopyTable)[Index] = (uintptr_t)hkFunction;
+			return (void*)((uintptr_t*)pOrgTable)[Index];
 		}
 		return NULL;
 	}
@@ -96,6 +96,6 @@ private:
 	}
 	int count;
 	void* pCopyTable;
-	DWORD* pObject;
+	uintptr_t* pObject;
 	void* pOrgTable;
 };
