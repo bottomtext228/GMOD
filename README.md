@@ -8,8 +8,18 @@ https://youtu.be/LQt7m-nebWE
   
   - `2DBoxESP` ( 2д коробки на игроках )
 
-  - `Health and nicks` ( имя и здоровье )
+  - `Health` ( здоровье )
+  
+  - `Max health` ( максимальное здоровье )
 
+  - `Game nick` ( "игровой" ник на дарк рп (Player:Nick()) )
+
+  - `Steam nick` ( стимовский ник )
+
+  - `Current weapon` ( текущее оружие в руках )
+
+  - `All weapons` ( всё оружие в инвентаре )
+    
   - `BoneESP` ( вх на кости )
 
   - `Dormant check` ( проверка на "обновляемость" игроков )
@@ -86,7 +96,7 @@ Download GMOD.dll and GMOD.Injector.exe from [latest release](https://github.com
 - Edge Jump - `N`.
 ---
 
-Скачайте GMOD.dll и GMOD.Injector.exe с [последнего](https://github.com/bottomtext228/GMOD/releases/latest), положите их в одну папку и запустите инжектор (можете использовать любой при желании).
+Скачайте GMOD.dll и GMOD.Injector.exe с [последнего релиза](https://github.com/bottomtext228/GMOD/releases/latest), положите их в одну папку и запустите инжектор (можете использовать любой при желании).
 
 - Кнопка активации меню - `End`.
 - Стандартная клавиша аима - `MOUSE5`,
