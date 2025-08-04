@@ -46,7 +46,7 @@ public:
 
 namespace DTManager {
     DT* GetDTByName(const char* name) {
-        static DTStore* g_pDTStore = **(DTStore***)(SignatureManager.pDTStore + 0x2);
+        static DTStore* g_pDTStore = (DTStore*)(SignatureManager.pDTStore);
         int i = 0;
 
         while (true) {  

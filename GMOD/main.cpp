@@ -1,6 +1,6 @@
-#define CHEAT_VERSION 2.4
+#define CHEAT_VERSION 2.4.1
 #define _CRT_SECURE_NO_WARNINGS
-#define DEBUG
+//#define DEBUG
 #pragma execution_character_set("utf-8")
 #include "includes.h"
 
@@ -127,7 +127,7 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 		vars::engine = (uintptr_t)GetModuleHandle(L"engine.dll");
 		vars::resX = GetSystemMetrics(0);
 		vars::resY = GetSystemMetrics(1);
-		vars::bSendPacket = (bool*)(SignatureManager.pbSendPacket + 0x3);
+		vars::bSendPacket = (bool*)(SignatureManager.pbSendPacket);
 		DWORD oldProtection;
 		VirtualProtect(vars::bSendPacket, sizeof(bool), PAGE_EXECUTE_READWRITE, &oldProtection);
 

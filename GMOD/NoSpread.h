@@ -41,7 +41,7 @@ public:
 
 
 		static auto fnShotManipulator_ApplySpread = (CShotManipulator_ApplySpread)SignatureManager.fnShotManipulator_ApplySpread;
-		static auto fnShotManipulator_constructor = (CShotManipulator_constructor)(SignatureManager.fnShotManipulator_constructor - 0x2F);
+		static auto fnShotManipulator_constructor = (CShotManipulator_constructor)(SignatureManager.fnShotManipulator_constructor);
 
 		CVector shootAngles = cmd->m_viewangles;
 

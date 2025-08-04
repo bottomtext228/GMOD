@@ -20,8 +20,8 @@ void CPredictionSystem::StartPrediction(CUserCmd* cmd) {
 	g_bIsPredicting = true;
 	static bool bInit = false;
 	if (!bInit) {
-		m_pPredictionRandomSeed = *(int**)(SignatureManager.pm_nPredictionRandomSeed + 0x4);
-		m_pPredictionPlayer = *(CPed***)(SignatureManager.pm_pPredictionPlayer + 0x5);
+		m_pPredictionRandomSeed = (int*)(SignatureManager.pm_nPredictionRandomSeed);
+		m_pPredictionPlayer = (CPed**)(SignatureManager.pm_pPredictionPlayer);
 
 		bInit = true;
 	}
@@ -30,8 +30,7 @@ void CPredictionSystem::StartPrediction(CUserCmd* cmd) {
 	m_moveType = localPed->GetMoveType();
 
 	typedef void(__cdecl* CPredictableIdHelperResetFn)();
-	static CPredictableIdHelperResetFn Reset = (CPredictableIdHelperResetFn)(SignatureManager.fnCPredictableIdHelper_Reset
-		+ *(uintptr_t*)(SignatureManager.fnCPredictableIdHelper_Reset + 0x1) + 0x5);
+	static CPredictableIdHelperResetFn Reset = (CPredictableIdHelperResetFn)(SignatureManager.fnCPredictableIdHelper_Reset);
 
 	Reset();
 
@@ -54,16 +53,13 @@ void CPredictionSystem::StartPrediction(CUserCmd* cmd) {
 	}
 
 	typedef bool(__thiscall* PhysicsRunThinkFn)(CPed*, int thinkMethod);
-	static PhysicsRunThinkFn PhysicsRunThink = (PhysicsRunThinkFn)(
-		SignatureManager.fnCBaseEntity_PhysicsRunThink + *(uintptr_t*)(SignatureManager.fnCBaseEntity_PhysicsRunThink + 0x1) + 0x5);
+	static PhysicsRunThinkFn PhysicsRunThink = (PhysicsRunThinkFn)(SignatureManager.fnCBaseEntity_PhysicsRunThink);
 
 	typedef int(__thiscall* GetNextThinkTickFn)(CPed*, const char* pszContext);
-	static GetNextThinkTickFn GetNextThinkTick = (GetNextThinkTickFn)(
-		SignatureManager.fnCBaseEntity_GetNextThinkTick + *(uintptr_t*)(SignatureManager.fnCBaseEntity_GetNextThinkTick + 0x1) + 0x5);
+	static GetNextThinkTickFn GetNextThinkTick = (GetNextThinkTickFn)(SignatureManager.fnCBaseEntity_GetNextThinkTick);
 
 	typedef int(__thiscall* SetNextThinkFn)(CPed*, float thinkTime, const char* pszContext);
-	static SetNextThinkFn SetNextThink = (SetNextThinkFn)(
-		SignatureManager.fnCBaseEntity_SetNextThink + *(uintptr_t*)(SignatureManager.fnCBaseEntity_SetNextThink + 0x1) + 0x5);
+	static SetNextThinkFn SetNextThink = (SetNextThinkFn)(SignatureManager.fnCBaseEntity_SetNextThink);
 
 	localPed->UpdateButtonState(cmd->m_ibuttons);
 	localPed->SetLocalViewAngles(cmd->m_viewangles);

@@ -33,7 +33,7 @@ public:
 		LuaShared = (CLuaShared*)GetPointer("lua_shared.dll", "LUASHARED");
 		Prediction = (CPrediction*)GetPointer("client.dll", "VClientPrediction");
 		GameMovement = (CGameMovement*)GetPointer("client.dll", "GameMovement");
-		MoveHelper = **(IMoveHelper***)(SignatureManager.pMoveHelperClient + 0x2);
+		MoveHelper = (IMoveHelper*)(SignatureManager.pMoveHelperClient);
 		/*Localize = (ILocalize*)GetPointer("vgui2.dll", "VGUI_Localize");*/
 		assert(Trace != NULL && "EngineTraceClient interface is not found.");
 		assert(Client != NULL && "VClient interface is not found.");
@@ -50,7 +50,7 @@ public:
 		// есть ещё PlayerInfoManager001 и он не подходит, поэтому нельзя через GetPointer()
 		PlayerInfo = (CPlayerInfoManager*)CreateInterface("PlayerInfoManager002", NULL);
 		assert(PlayerInfo != NULL && "PlayerInfoManager002 interface is not found.");
-		GlobalVars = **(CGlobalVarsBase***)(SignatureManager.pGlobalVars + 0x1);//PlayerInfo->GetGlobalVars();
+		GlobalVars = (CGlobalVarsBase*)(SignatureManager.pGlobalVars); //PlayerInfo->GetGlobalVars();
 
 
 	}

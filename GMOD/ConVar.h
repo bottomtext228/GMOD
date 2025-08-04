@@ -46,7 +46,7 @@ public:
 
 
 	CConVarManager() {
-		Cvar = **reinterpret_cast<CCvar***>(SignatureManager.pCVarSig + 2);
+		Cvar = reinterpret_cast<CCvar*>(SignatureManager.pCVarSig);
 	}
 
 

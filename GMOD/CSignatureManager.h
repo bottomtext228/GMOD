@@ -27,32 +27,34 @@ public:
 	uintptr_t pDTStore;
 
 	CSignatureManager() {
-		fnShotManipulator_ApplySpread = BTMemory::FindSignature("client.dll", "\x55\x8B\xEC\xF3\x0F\x10\x05\x00\x00\x00\x00\x83\xEC\x14\xF3\x0F\x10\x4D\x00\x0F\x2F\xC8\x56\x8B\xF1\x77\x08\x0F\x57\xC0\x0F\x2F\xC1", "xxxxxxx????xxxxxxx?xxxxxxxxxxxxxx");// reinterpret_cast<CShotManipulator_ApplySpread>(vars::client + 0x1515A0);
-		fnShotManipulator_constructor = BTMemory::FindSignature("client.dll", "\x0F\x28\xDC\xC7\x00\x00\x00\x00\x00", "xxxxx????"); //reinterpret_cast<CShotManipulator_constructor>(vars::client + 0x3B7A10);
+		fnShotManipulator_ApplySpread = BTMemory::FindSignature("client.dll", "\x55\x8B\xEC\xF3\x0F\x10\x05\x00\x00\x00\x00\x83\xEC\x14\xF3\x0F\x10\x4D\x00\x0F\x2F\xC8\x56\x8B\xF1\x77\x08\x0F\x57\xC0\x0F\x2F\xC1", "xxxxxxx????xxxxxxx?xxxxxxxxxxxxxx");
+
 		// must sub 0x2F
+		fnShotManipulator_constructor = BTMemory::FindSignature("client.dll", "\x0F\x28\xDC\xC7\x00\x00\x00\x00\x00", "xxxxx????"); //reinterpret_cast<CShotManipulator_constructor>(vars::client + 0x3B7A10);
 
 		// ida sig: 8B 0D ?? ?? ?? ?? 33 C0 89 45 FC 83 C4 04 89 45 F8 C7 45 ?? ?? ?? ?? ?? 8B 01
+		// must add + 0x2
 		pCVarSig = BTMemory::FindSignature("engine.dll", "\x8B\x0D\x00\x00\x00\x00\x33\xC0\x89\x45\xFC\x83\xC4\x04\x89\x45\xF8\xC7\x45\x00\x00\x00\x00\x00\x8B\x01", "xx????xxxxxxxxxxxxx?????xx");
+		
 		//pPlayerResource = BTMemory::FindSignature("client.dll", "\x89\x3D\x00\x00\x00\x00\x8B\xCF\x8B\x17\xFF\x75\x0C\xFF\x75\x08\xFF\x92\x00\x00\x00\x00\x33\xC0\x85\xFF\x0F\x44\xF0", "xx????xxxxxxxxxxxx????xxxxxxx");
-		// must add + 0x2
 
+		// must add + 0x2
 		pMoveHelperClient = BTMemory::FindSignature("client.dll", "\x8B\x0D\x00\x00\x00\x00\x8B\x46\x08\x68", "xx????xxxx");
-		// must add + 0x2
 
-		pGlobalVars = BTMemory::FindSignature("client.dll", "\xA1\x00\x00\x00\x00\x83\xC4\x04\x89\x3D\x00\x00\x00\x00", "x????xxxxx????");
 		// must add + 0x1
+		pGlobalVars = BTMemory::FindSignature("client.dll", "\xA1\x00\x00\x00\x00\x83\xC4\x04\x89\x3D\x00\x00\x00\x00", "x????xxxxx????");
 
-		pbSendPacket = BTMemory::FindSignature("engine.dll", "\xC6\x45\xFF\x01\x8B\x01\x8B\x40\x18", "xxxxxxxxx");
 		// must add + 0x3
+		pbSendPacket = BTMemory::FindSignature("engine.dll", "\xC6\x45\xFF\x01\x8B\x01\x8B\x40\x18", "xxxxxxxxx");
 
 		fnCPredictableIdHelper_Reset = BTMemory::FindSignature("client.dll", "\xE8\x00\x00\x00\x00\x8B\x7D\x08\x8B\x75\x0C", "x????xxxxxx");
 		//fnCPredictableIdHelper_Reset + *(fnCPredictableIdHelper_Reset + 0x1) + 0x5;
 
-		pm_nPredictionRandomSeed = BTMemory::FindSignature("client.dll", "\x75\x0C\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\x5D", "xxxx????????x");
 		// must add + 0x4;
+		pm_nPredictionRandomSeed = BTMemory::FindSignature("client.dll", "\x75\x0C\xC7\x05\x00\x00\x00\x00\x00\x00\x00\x00\x5D", "xxxx????????x");
 
-		pm_pPredictionPlayer = BTMemory::FindSignature("client.dll", "\x83\xC4\x04\x89\x3D\x00\x00\x00\x00", "xxxxx????");
 		// must add + 0x5;
+		pm_pPredictionPlayer = BTMemory::FindSignature("client.dll", "\x83\xC4\x04\x89\x3D\x00\x00\x00\x00", "xxxxx????");
 
 		fnCBaseEntity_PhysicsRunThink = BTMemory::FindSignature("client.dll", "\xE8\x00\x00\x00\x00\x84\xC0\x0F\x84\x00\x00\x00\x00\xF3\x0F\x10\x87\x00\x00\x00\x00", "x????xxxx????xxxx????");
 		// fnCBaseEntity_PhysicsRunThink + *(fnCBaseEntity_PhysicsRunThink + 0x1) + 0x5;
@@ -66,9 +68,10 @@ public:
 		fnCBasePlayer_SetPlayerCollisionBounds = BTMemory::FindSignature("client.dll", "\x8B\x91\x00\x00\x00\x00\xB8\x00\x00\x00\x00\x56", "xx????x????x");
 
 		// ida sig: 8B 0D ?? ?? ?? ?? 0F B7 F0 57 8B 04 F1
-		pDTStore = BTMemory::FindSignature("engine.dll", "\x8B\x0D\x00\x00\x00\x00\x0F\xB7\xF0\x57\x8B\x04\xF1", "xx????xxxxxxx");
 		// must add 0x2;
+		pDTStore = BTMemory::FindSignature("engine.dll", "\x8B\x0D\x00\x00\x00\x00\x0F\xB7\xF0\x57\x8B\x04\xF1", "xx????xxxxxxx");
 
+		///////////////////////////////////////
 		SignatureAssert(fnShotManipulator_ApplySpread);
 		SignatureAssert(fnShotManipulator_constructor);
 		SignatureAssert(pCVarSig);
@@ -83,5 +86,18 @@ public:
 		SignatureAssert(fnCBasePlayer_SetPlayerCollisionBounds);
 		SignatureAssert(pGlobalVars);
 		SignatureAssert(pbSendPacket);
+		///////////////////////////////////////
+		fnShotManipulator_constructor = fnShotManipulator_constructor - 0x2F;
+		pCVarSig = **(uintptr_t**)(pCVarSig + 0x2);
+		pMoveHelperClient = **(uintptr_t**)(pMoveHelperClient + 0x2);
+		pGlobalVars = **(uintptr_t**)(pGlobalVars + 0x1);
+		pbSendPacket = pbSendPacket + 0x3;
+		fnCPredictableIdHelper_Reset = fnCPredictableIdHelper_Reset + *(uintptr_t*)(fnCPredictableIdHelper_Reset + 0x1) + 0x5;
+		pm_nPredictionRandomSeed = *(uintptr_t*)(pm_nPredictionRandomSeed + 0x4);
+		pm_pPredictionPlayer = *(uintptr_t*)(pm_pPredictionPlayer + 0x5);
+		fnCBaseEntity_PhysicsRunThink = fnCBaseEntity_PhysicsRunThink + *(uintptr_t*)(fnCBaseEntity_PhysicsRunThink + 0x1) + 0x5;
+		fnCBaseEntity_GetNextThinkTick = fnCBaseEntity_GetNextThinkTick + *(uintptr_t*)(fnCBaseEntity_GetNextThinkTick + 0x1) + 0x5;
+		fnCBaseEntity_SetNextThink = fnCBaseEntity_SetNextThink + *(uintptr_t*)(fnCBaseEntity_SetNextThink + 0x1) + 0x5;
+		pDTStore = **(uintptr_t**)(pDTStore + 0x2);
 	}
 } SignatureManager;
