@@ -176,7 +176,7 @@ namespace Utils {
 		static ULONGLONG ticks = 0;
 		if (GetTickCount64() - ticks > vars::esp::setupBonesDelay) {
 			ticks = GetTickCount64();
-			for (int entityIndex = 0; entityIndex < Interfaces.GlobalVars->maxClients; entityIndex++) {
+			for (int entityIndex = 1; entityIndex <= Interfaces.GlobalVars->maxClients; entityIndex++) {
 				CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 				if (ped && ped->IsPlayer() && ped->IsAlive() && ped != localPed) {
 					auto renderAble = ped->GetClientRenderable();

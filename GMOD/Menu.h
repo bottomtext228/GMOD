@@ -439,7 +439,7 @@ private:
 
 	std::vector<std::pair<CPed*, int>> getPlayers() {
 		std::vector<std::pair<CPed*, int>> playersList;
-		for (int entityIndex = 0; entityIndex < Interfaces.ClientEntityList->GetHighestEntityIndex(); entityIndex++) {
+		for (int entityIndex = 1; entityIndex <= Interfaces.GlobalVars->maxClients; entityIndex++) {
 			CPed* entity = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 			if (entity && entity != localPed) {
 				if (entity->IsPlayer())

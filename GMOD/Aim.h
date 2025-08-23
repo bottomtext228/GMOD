@@ -206,7 +206,7 @@ public:
 		CPed* nearestPed = 0;
 		float distance = 99999;
 
-		for (int entityIndex = 0; entityIndex < Interfaces.GlobalVars->maxClients; entityIndex++) {
+		for (int entityIndex = 1; entityIndex <= Interfaces.GlobalVars->maxClients; entityIndex++) {
 			CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 			if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo() && !Utils::isPlayerInFriendList(entityIndex)) {
 
@@ -245,7 +245,7 @@ public:
 		CPed* nearestPed = 0;
 		float distance = 99999;
 
-		for (int entityIndex = 0; entityIndex < Interfaces.GlobalVars->maxClients; entityIndex++) {
+		for (int entityIndex = 1; entityIndex <= Interfaces.GlobalVars->maxClients; entityIndex++) {
 			CPed* ped = Interfaces.ClientEntityList->GetClientEntity(entityIndex);
 			if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && ped->GetModelInfo() && !Utils::isPlayerInFriendList(entityIndex)) {
 
