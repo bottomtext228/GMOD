@@ -1,5 +1,8 @@
 
 class IClientRenderable;
+class IClientNetworkable;
+class IClientThinkable;
+class ICollidable;
 class modelInfo;
 #define	FL_ONGROUND				(1<<0)	// At rest / on the ground
 #define FL_DUCKING				(1<<1)	// Player flag -- Player is fully crouched
@@ -61,9 +64,36 @@ public:
 		return VMT.getvfunc<fn>(this, 130)(this);
 	}
 
+	void* GetCollidable() {
+		typedef void* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 3)(this);
+	}
+
+	IClientNetworkable* GetClientNetworkable() {
+		typedef IClientNetworkable* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 4)(this);
+	}
+
 	IClientRenderable* GetClientRenderable() {
 		typedef IClientRenderable* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 5)(this);
+	}
+
+	CPed* GetIClient() {
+		// returns this
+		typedef CPed* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 6)(this);
+	}
+
+	CPed* GetBaseEntity() {
+		// returns this
+		typedef CPed* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 7)(this);
+	}
+
+	IClientThinkable* GetClientThinkable() {
+		typedef IClientThinkable* (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 8)(this);
 	}
 
 	bool inline IsAlive() {
@@ -126,6 +156,11 @@ public:
 	void SetLocalViewAngles(CVector& angles) {
 		typedef void(__thiscall* fn)(void*, CVector&);
 		VMT.getvfunc<fn>(this, 351);
+	}
+
+	int GetEntityIndex() {
+		// virtual function -> (((uintptr_t)this + 0x8) + 0x24)();
+		// offset ->  + 0x50
 	}
 
 	int GetHealth() {
@@ -355,4 +390,3 @@ public:
 	char pad_0000[4]; //0x0000
 	char* m_ModelName; //0x0004
 };
-

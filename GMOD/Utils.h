@@ -197,15 +197,6 @@ namespace Utils {
 		return velocity * Interfaces.GlobalVars->interval_per_tick;
 	}
 
-	int GetPlayerIndexByPed(CPed* playerPed) { // ужас, так как цикл фор на куча итераций и только ради работы френдлиста
-		for (int i = 0; i <= Interfaces.ClientEntityList->GetHighestEntityIndex(); i++) {
-			CPed* ped = Interfaces.ClientEntityList->GetClientEntity(i);
-			if (ped == playerPed)
-				return i;
-		}
-		return -1;
-	}
-
 	const char* GetHostName() {
 		auto LUA = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
 		LUA->PushSpecial(CLuaInterface::SPECIAL_GLOB);

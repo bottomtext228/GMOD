@@ -11,7 +11,7 @@ public:
 		trace_t trace = Interfaces.Trace->TraceRayWrapper(localPos, Utils::GetPointOfSight(localPos, CMD->m_viewangles), localPed); // trace.hitbox == 0 - head maybe;
 		CPed* ped = trace.ped;
 
-		if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && !Utils::isPlayerInFriendList(Utils::GetPlayerIndexByPed(ped))) {
+		if (ped && ped != localPed && ped->IsAlive() && ped->IsPlayer() && !Utils::isPlayerInFriendList(ped->GetClientNetworkable()->GetEntityIndex())) {
 
 			if (vars::aim::triggerBot) {
 				if (vars::aim::holdOrClick) {

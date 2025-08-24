@@ -1,9 +1,9 @@
- class IClientEntityList
+class IClientEntityList
 {
 public:
 	// Get IClientNetworkable interface for specified entity
-	virtual void* GetClientNetworkable(int entnum) = 0;
-	virtual void* GetClientNetworkableFromHandle(void* hEnt) = 0;
+	virtual IClientNetworkable* GetClientNetworkable(int entnum) = 0;
+	virtual IClientNetworkable* GetClientNetworkableFromHandle(void* hEnt) = 0;
 	virtual void* GetClientUnknownFromHandle(void* hEnt) = 0;
 
 	// NOTE: This function is only a convenience wrapper.
