@@ -108,7 +108,7 @@
     <ClInclude Include="masks.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="icliententitylist.h">
+    <ClInclude Include="IClientEntityList.h">
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="engine.h">
@@ -124,9 +124,6 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="CEntity.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="cliententlist.h">
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="interfaces.h">
@@ -150,7 +147,7 @@
     <ClInclude Include="CModelInfo.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="clientrenderable.h">
+    <ClInclude Include="IClientRenderable.h">
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="panelwrapper.h">
@@ -203,6 +200,21 @@
     </ClInclude>
     <ClInclude Include="Includes.h">
       <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="renderview.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="IClientNetworkable.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="IClientThinkable.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="ICollidable.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="CViewSetup.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

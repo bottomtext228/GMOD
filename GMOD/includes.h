@@ -68,6 +68,7 @@ CPed* localPed = NULL;
 #include "CLua.h"
 #include "localization.h"
 #include "renderview.h"
+#include "CViewSetup.h"
 #include "interfaces.h"
 /*                         */
 

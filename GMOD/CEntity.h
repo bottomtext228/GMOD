@@ -158,11 +158,6 @@ public:
 		VMT.getvfunc<fn>(this, 351);
 	}
 
-	int GetEntityIndex() {
-		// virtual function -> (((uintptr_t)this + 0x8) + 0x24)();
-		// offset ->  + 0x50
-	}
-
 	int GetHealth() {
 		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_iHealth");
 		return *(int*)((uintptr_t)this + offset);
@@ -179,8 +174,10 @@ public:
 	}
 
 	CVector& GetAngRotation() {
-		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_angRotation");
-		return *(CVector*)((uintptr_t)this + offset);
+		/*static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_angRotation");
+		return *(CVector*)((uintptr_t)this + offset);*/
+		typedef CVector&(__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 10)(this);
 	}
 
 	int GetTeamNum() {

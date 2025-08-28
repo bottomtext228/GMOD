@@ -17,6 +17,9 @@ struct matrix3x4_t {
 	}
 };
 
+struct matrix4x4_t {
+	float m[4][4];
+};
 
 void MatrixAngles(matrix3x4_t& matrix, float* angles) {
 

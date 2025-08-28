@@ -67,6 +67,8 @@ namespace vars {
 		bool edgeJump = false;
 		bool autoJump = false;
 		KeyBindToggle edgeJumpKeyBind = KeyBindToggle(KeyBind::KeyCode::N);
+		bool camHack = false;
+		int camSpeed = 1;
 	}
 
 

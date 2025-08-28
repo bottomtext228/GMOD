@@ -1,6 +1,10 @@
 #pragma once
 
 std::array<std::string, 128> g_Nicknames;
+CUserCmd g_userCmd;
+// for camhack
+CVector g_lastViewAngles;
+CVector g_lastViewPosition;
 
 namespace Utils {
 	bool WorldToScreen(CVector pos, CVector2D& screen) {

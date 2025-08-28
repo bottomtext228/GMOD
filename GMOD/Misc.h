@@ -36,5 +36,55 @@ public:
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)(oWndProc));
 	}
 
+	void CamHack(CUserCmd* cmd) {
+		cmd->m_forwardmove = 0;
+		cmd->m_sidemove = 0;
+		cmd->m_upmove = 0;
+		cmd->m_ibuttons = 0;
+		cmd->m_impulse = 0;
+		cmd->m_weaponselect = 0;
+		cmd->m_viewangles = g_lastViewAngles;
+	}
+
+	void CamHackOverrideView(CViewSetup* pSetup) {
+		CVector& angles = pSetup->angles;
+		float speed = Interfaces.GlobalVars->frametime * 1500;
+
+		CVector offset;
+
+		if (g_userCmd.m_forwardmove > 0) { // forward
+			offset += angles.Forward();
+		}
+
+		if (g_userCmd.m_forwardmove < 0) { // backward
+			offset -= angles.Forward();
+		}
+
+		if (g_userCmd.m_sidemove < 0) { // left
+			offset -= angles.Right();
+		}
+
+		if (g_userCmd.m_sidemove > 0) { // right
+			offset += angles.Right();
+		}
+
+		if (g_userCmd.m_buttons.IN_JUMP) { // up
+			offset += angles.Up();
+		}
+
+		if (g_userCmd.m_buttons.IN_SPEED) { // shift key
+			speed *= 3;
+		}
+
+		if (g_userCmd.m_buttons.IN_DUCK) { // ctrl key
+			speed /= 3;
+		}
+
+		offset.Normalize();
+
+		g_lastViewPosition += offset * speed;
+		pSetup->origin = g_lastViewPosition;
+	}
+
 }; CMisc* Misc;
 

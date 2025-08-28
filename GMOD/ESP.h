@@ -25,7 +25,7 @@ public:
 
 						// do not draw on spectated player
 						if (Interfaces.ClientEntityList->GetClientEntityFromHandle(localPed->GetObserverTarget()) == ped) continue;
-						
+							
 						if (vars::esp::box3DESP) {
 							DrawBoxESP(ped, entityIndex);
 						}

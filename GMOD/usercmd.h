@@ -10,7 +10,7 @@ struct CMDButtons {
 	bool IN_RIGHT : 1;			 // (1 << 8)
 	bool IN_MOVELEFT : 1;		 // (1 << 9)
 	bool IN_MOVERIGHT : 1;		 // (1 << 10)
-	bool IN_ATTACK2 : 2;		 // (1 << 11)
+	bool IN_ATTACK2 : 1;		 // (1 << 11)
 	bool IN_RUN : 1;			 // (1 << 12)
 	bool IN_RELOAD : 1;			 // (1 << 13)
 	bool IN_ALT1 : 1;			 // (1 << 14)

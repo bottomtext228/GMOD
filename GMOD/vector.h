@@ -56,6 +56,36 @@ public:
 		}
 	}
 
+	CVector Forward() {
+		const float pitch = x * (M_PI / 180);
+		const float yaw = y * (M_PI / 180);
+
+		return {
+			cosf(yaw),
+			sinf(yaw),
+			-sinf(pitch)
+		};
+	}
+
+	CVector Right() {
+		const float pitch = x * (M_PI / 180);
+		const float yaw = y * (M_PI / 180);
+
+		return {
+			sinf(yaw),
+			-cosf(yaw),
+			0.0f
+		};
+	}
+
+	CVector Up() {
+		return {
+			0.0f,
+			0.0f,
+			1.0f
+		};
+	}
+
 	inline CVector operator-(const CVector& v) { return CVector(x - v.x, y - v.y, z - v.z); }
 	inline CVector operator+(const CVector& v) { return CVector(x + v.x, y + v.y, z + v.z); }
 	inline CVector operator*(const int n) { return CVector(x * n, y * n, z * n); }

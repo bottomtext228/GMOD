@@ -176,8 +176,10 @@
     <ClInclude Include="CEntity.h" />
     <ClInclude Include="CGlobalVars.h" />
     <ClInclude Include="checksum_md5.h" />
-    <ClInclude Include="cliententlist.h" />
-    <ClInclude Include="clientrenderable.h" />
+    <ClInclude Include="CViewSetup.h" />
+    <ClInclude Include="IClientNetworkable.h" />
+    <ClInclude Include="IClientRenderable.h" />
+    <ClInclude Include="IClientThinkable.h" />
     <ClInclude Include="CModelInfo.h" />
     <ClInclude Include="ConVar.h" />
     <ClInclude Include="CPlayerResource.h" />
@@ -188,7 +190,8 @@
     <ClInclude Include="engine.h" />
     <ClInclude Include="ESP.h" />
     <ClInclude Include="Hooks.h" />
-    <ClInclude Include="icliententitylist.h" />
+    <ClInclude Include="IClientEntityList.h" />
+    <ClInclude Include="ICollidable.h" />
     <ClInclude Include="imgui\Hotkey.h" />
     <ClInclude Include="imgui\InputUtil.h" />
     <ClInclude Include="Includes.h" />
@@ -203,6 +206,7 @@
     <ClInclude Include="NoSpread.h" />
     <ClInclude Include="panelwrapper.h" />
     <ClInclude Include="Prediction.h" />
+    <ClInclude Include="renderview.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="Aim.h" />
     <ClInclude Include="studiobone.h" />

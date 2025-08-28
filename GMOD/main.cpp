@@ -1,6 +1,6 @@
 #define CHEAT_VERSION 2.4.1
 #define _CRT_SECURE_NO_WARNINGS
-//#define DEBUG
+#define DEBUG
 #pragma execution_character_set("utf-8")
 #include "includes.h"
 
@@ -34,7 +34,7 @@ LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 
 	if (Interfaces.Engine->IsInGame()) {
 		localPed = Interfaces.ClientEntityList->GetClientEntity(Interfaces.Engine->GetLocalPlayer());
-		ESP->Process();	
+		ESP->Process();
 	}
 	Menu->Render();
 
@@ -59,7 +59,7 @@ LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (!ImGui::GetCurrentContext())
 		return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 
-	
+
 	if (wParam == menuKey) {
 		BOOL repeatFlag = (HIWORD(lParam) & KF_REPEAT) == KF_REPEAT;
 		if (uMsg == WM_KEYDOWN && !repeatFlag) {
@@ -103,10 +103,11 @@ DWORD WINAPI MainThread(HMODULE hMod)
 		}
 	} while (!attached);
 	/* TODO:
-	* maybe make new smooth mode 
+	* maybe make new smooth mode
 	* improve menu (Functions tab)
 	* make config system
 	*/
+
 	while (!vars::misc::DLLUnload) {
 		Sleep(100);
 	}

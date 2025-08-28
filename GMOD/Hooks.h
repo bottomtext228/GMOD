@@ -11,18 +11,14 @@ CNoSpread* NoSpread;
 typedef bool(__thiscall* createMove_t)(void*, float, CUserCmd*);
 createMove_t oCreateMove;
 
-
 typedef void(__thiscall* paintTreverse_t)(void*, unsigned int, bool, bool);
 paintTreverse_t oPaintTraverse;
-
 
 typedef void(__thiscall* paint_t)(void*, int);
 paint_t oPaint;
 
-
 typedef void(__thiscall* runCommand_t)(void*, CPed* player, CUserCmd* ucmd, IMoveHelper* moveHelper);
 runCommand_t oRunCommand;
-
 
 typedef void(__thiscall* postThink_t)(void*);
 postThink_t oPostThink;
@@ -30,7 +26,11 @@ postThink_t oPostThink;
 typedef void(__thiscall* extraMouseSample_t)(void*, float, bool);
 extraMouseSample_t oExtraMouseSample;
 
+typedef void(__thiscall* calcView_t)(void*, CVector&, CVector&, float&, float&, float&);
+calcView_t oCalcView;
 
+typedef void(__thiscall* overrideView_t)(void*, CViewSetup*);
+overrideView_t oOverrideView;
 
 void __fastcall PaintTraverseFn(void* ecx, void* edx, unsigned int panel, bool forceRepaint, bool allowForce) {
 
@@ -58,18 +58,23 @@ bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* c
 	if (!localPed || !Interfaces.Engine->IsInGame() || !localPed->IsAlive())
 		return result;
 
-	Interfaces.Engine->SetViewAngles(cmd->m_viewangles);
+	g_userCmd = *cmd; // copy cmd for use in other hooks
 
-	static CPredictionSystem PredictionSystem;
+	Interfaces.Engine->SetViewAngles(cmd->m_viewangles);
 
 	if (vars::esp::setupBones)
 		Utils::SetupBones(); // вызов вне хука виртуальной функции может привести к спонтанному крашу
 
+	if (vars::misc::camHack) {
+		Misc->CamHack(cmd);
+		return false;
+	}
+
+	static CPredictionSystem PredictionSystem;
+
 
 	if (vars::misc::autoJump)
 		Misc->AutoJump(cmd);
-
-
 
 	PredictionSystem.StartPrediction(cmd);
 
@@ -137,6 +142,14 @@ void __fastcall ExtraMouseSampleFn(void* ecx, void* edx, float frametime, bool a
 	oExtraMouseSample(ecx, frametime, active);
 }
 
+void __fastcall OverrideViewFn(void* ecx, void* edx, CViewSetup* pSetup) {
+	oOverrideView(ecx, pSetup);
+
+	if (vars::misc::camHack) {
+		Misc->CamHackOverrideView(pSetup);
+	}
+}
+
 class CHooks {
 
 public:
@@ -147,15 +160,20 @@ public:
 	CVMTHookManager* RunCommand;
 	CVMTHookManager* ItemPostFrame;
 	CVMTHookManager* ExtraMouseSample;
+	CVMTHookManager* OverrideView;
 	void Hook() {
 		// 22 ExtraMouseSample CHLClient
 		ExtraMouseSample = new CVMTHookManager(Interfaces.Client);
 		oExtraMouseSample = (extraMouseSample_t)ExtraMouseSample->HookFunction(22, ExtraMouseSampleFn);
 		ExtraMouseSample->HookTable(true);
 		/////////////////////////////////////////////////////////////////////////////
+		// https://www.unknowncheats.me/wiki/Hooking_CreateMove_from_IClientMode
+		// We are getting IBaseClientDLL interface and getting 10th virtual function (HudProcessInput),
+		// then we are getting IClientShared right from the function code via + 5 offset
 		void* ClientShared = **reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(Interfaces.Client))[10] + 5);
 		ClientHook = new CVMTHookManager(ClientShared);
 		oCreateMove = (createMove_t)ClientHook->HookFunction(21, CreateMoveFn);
+		oOverrideView = (overrideView_t)ClientHook->HookFunction(16, OverrideViewFn);
 		ClientHook->HookTable(true);
 		/////////////////////////////////////////////////////////////////////////////
 		PaintTreverse = new CVMTHookManager(Interfaces.PanelWrapper);

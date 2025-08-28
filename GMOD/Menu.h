@@ -145,6 +145,15 @@ public:
 						ImGui::Checkbox("Auto Jump", &vars::misc::autoJump);
 						ImGui::Checkbox("Edge Jump", &vars::misc::edgeJump);
 						ImGui::Hotkey("Edge Jump Key:", vars::misc::edgeJumpKeyBind, 115.0f);
+						if (ImGui::Checkbox("CamHack", &vars::misc::camHack)) {
+							if (vars::misc::camHack) {
+								g_lastViewAngles = Interfaces.Engine->GetViewAngles();
+								g_lastViewPosition = localPed->GetEyePosition();
+							}
+							else {
+								Interfaces.Engine->SetViewAngles(g_lastViewAngles);
+							}
+						}
 						ImGui::SetCursorPosY(280);
 						if (ImGui::Button("Unload")) {
 							vars::misc::DLLUnload = true;
