@@ -11,13 +11,42 @@ public:
 		if (!weapon)
 			return;
 
-
-		if (weapon->IsScripted()) // will not work for Lua weapons
-			return;
-	
 		const char* weaponName = weapon->GetName();
-		if (strcmp(weaponName, "weapon_smg1") && strcmp(weaponName, "weapon_pistol") && strcmp(weaponName, "weapon_ar2") && strcmp(weaponName, "weapon_357")) // only work for this HL2 weapons
-			return;
+
+		// if it's a HL2 weapon, check if no spread is needed
+		if (!weapon->UsesLua()) {
+			if (strcmp(weaponName, "weapon_smg1")
+				&& strcmp(weaponName, "weapon_pistol")
+				&& strcmp(weaponName, "weapon_ar2")
+				&& strcmp(weaponName, "weapon_357")) // only work for this HL2 weapons
+				return;
+		}
+
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		// TODO: 
+		// * check other gun packs
+
+		float spread = 0.0f;
+
+		// if it is a Lua weapon
+		if (weapon->IsScripted()) {
+
+			// if it is a M9K weapon
+			if (!strcmp(Utils::GetLuaBase(weapon), "bobs_gun_base") || !strcmp(Utils::GetLuaBase(weapon), "bobs_scoped_base")) {
+
+				spread = Utils::GetM9KSpread(weapon, cmd->m_buttons.IN_ATTACK2);
+
+				Utils::M9KNoRecoil(weapon);
+			}
+
+			// if it is a TFA weapon
+			//if (!strcmp(Utils::GetLuaEntBase(weapon), "tfa_ins2_base"))
+			//{
+			//	spread = Utils::GetTFASpread(weapon);
+			//}
+		}
+
 
 		/*
 		* How NoSpread works?
@@ -35,6 +64,7 @@ public:
 		*	CBaseEntity::FireBullets(processShot)
 		*/
 
+
 		BYTE seed = MD5_PseudoRandom(cmd->m_command_number) & 0xFF;
 
 		Interfaces.UniformRandomStream->SetSeed(seed);
@@ -46,7 +76,8 @@ public:
 		CVector shootAngles = cmd->m_viewangles;
 
 		// pistol resets view punch in PrimaryAttack(), so we don't set view punch when using it
-		if (strcmp(weaponName, "weapon_pistol")) { // if not pistol
+		// also lua weapon seems to not use view punch too
+		if (strcmp(weaponName, "weapon_pistol") && !weapon->UsesLua()) { // if not pistol or not lua weapon
 			// ViewPunch are angles that are added to our shoot angles to simulate weapon recoil, so we should add them.
 			// localPed->GetVecPunchAngle() here differs from ViewPunch when we are actually shooting, 
 			// so we should predict its future value by multiplying ViewPunchVelocity on tick interval.		
@@ -56,31 +87,66 @@ public:
 			shootAngles += localPed->GetVecPunchAngle() + localPed->GetVecPunchAngleVel() * Interfaces.GlobalVars->interval_per_tick;
 #endif // USE_ENGINE_PREDICTION		
 		}
-		CVector shootDir = shootAngles.toDirection();
+		CVector shootDir = shootAngles.Forward();
 
 
+		// it is actually 4 Vectors
 		float shotInfo[12] = {
 			shootDir.x, shootDir.y, shootDir.z, // vShootDirection
 			0.0f, 0.0f, 0.0f, // vRight
 			0.0f, 0.0f, 0.0f, // vUp 
-			0.0f, 0.0f, 0.0f // vResult
+			0.0f, 0.0f, 0.0f // vResult	
 		};
 
-		fnShotManipulator_constructor((float*)&shotInfo, (float*)&shotInfo[3], (float*)&shotInfo[6]); // see CShotManipulator in source engine for more info
+		// see CShotManipulator in source engine for more info
+		fnShotManipulator_constructor((float*)&shotInfo, (float*)&shotInfo[3], (float*)&shotInfo[6]);
 
-		CVector weaponSpread{ 0.0f, 0.0f, 0.0f };
-		if (strcmp(weaponName, "weapon_357")) // revolver doesn't set spread in PrimaryAttack(), so we use (0.0, 0.0, 0.0)
-			weaponSpread = weapon->GetBulletSpread(); 
-		
+		CVector weaponSpread{ spread, spread, 0.0f };
+
+		// revolver uses (0.0, 0.0, 0.0) spread
+		// Lua weapons use spread that is stored in Lua
+		if (strcmp(weaponName, "weapon_357") && !weapon->UsesLua())
+			weaponSpread = weapon->GetBulletSpread(); // other default HL2 weapons use this
+
 		CVector bulletDirection = fnShotManipulator_ApplySpread((float*)&shotInfo, weaponSpread, 1.0f);
 
-		CVector bulletAngles = bulletDirection.toAngle();
+		CVector bulletAngles = bulletDirection.ToAngle();
 		CVector difference = cmd->m_viewangles - bulletAngles;
 
-
 		cmd->m_viewangles += difference;
-		vars::aim::newAngles = cmd->m_viewangles;
 	}
-
 };
 
+
+// This is NoSpread realisation via rebuild fnShotManipulator_ApplySpread function
+/*
+BYTE seed = MD5_PseudoRandom(cmd->m_command_number) & 0xFF;
+Interfaces.UniformRandomStream->SetSeed(seed);
+
+float x, y, z;
+
+float bias = 1.0f;
+float shotBiasMin = ConVarManager.GetConVar("ai_shot_bias_min")->m_fFloatValue;
+float shotBiasMax = ConVarManager.GetConVar("ai_shot_bias_max")->m_fFloatValue;
+
+float shotBias = ((shotBiasMax - shotBiasMin) * bias) + shotBiasMin;
+
+float flatness = (fabsf(shotBias) * 0.5);
+
+do {
+	auto pRandom = Interfaces.UniformRandomStream;
+	x = pRandom->RandomFloat(-1, 1) * flatness + pRandom->RandomFloat(-1, 1) * (1 - flatness);
+	y = pRandom->RandomFloat(-1, 1) * flatness + pRandom->RandomFloat(-1, 1) * (1 - flatness);
+
+	z = x * x + y * y;
+} while (z > 1);
+
+float spread = weapon->GetBulletSpread().x;
+auto angles = cmd->m_viewangles;
+
+auto cd = angles.Forward() + (angles.Right() * spread * x * (-1)) + (angles.Up() * y * spread * (-1));
+
+CVector bulletAngles = cd.toAngle();
+
+cmd->m_viewangles = bulletAngles - localPed->GetVecPunchAngle();
+*/

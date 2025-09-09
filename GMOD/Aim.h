@@ -70,7 +70,6 @@ public:
 					if (!vars::aim::ignoreZ) { // does silent aim really need this?
 						cmd->m_viewangles.x = aimAngles.x;
 					}
-					vars::aim::newAngles = cmd->m_viewangles;
 				}
 			}
 			else { m_shouldSmoothMouse = false; } // if target is not found

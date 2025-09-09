@@ -176,7 +176,7 @@ public:
 	CVector& GetAngRotation() {
 		/*static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_angRotation");
 		return *(CVector*)((uintptr_t)this + offset);*/
-		typedef CVector&(__thiscall* fn)(void*);
+		typedef CVector& (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 10)(this);
 	}
 
@@ -362,13 +362,25 @@ public:
 		typedef const char* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 372)(this);
 	}
+
 	const char* GetName() {
 		typedef const char* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 366)(this);
 	}
+
 	const char* GetPrintName() {
 		typedef const char* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 367)(this);
+	}
+
+	void PushEntity() {
+		typedef void* (__thiscall* fn)(void*);
+		VMT.getvfunc<fn>(this, 172)(this);
+	}
+
+	bool UsesLua() {
+		typedef bool (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 170)(this);
 	}
 };
 

@@ -25,23 +25,13 @@ public:
 		x = v.x; y = v.y; z = v.z;
 		return *this;
 	}
-
-	CVector toAngle() {
+	// Convert a direction vector to an angle pointing to that direction
+	CVector ToAngle() {
 		return {
 			atan2(-z, hypot(x, y)) * (180 / M_PI),
 			atan2(y, x) * (180 / M_PI),
 			0.0f
 		};
-	}
-
-	CVector toDirection() {
-		float x = this->x * (M_PI / 180);
-		float y = this->y * (M_PI / 180);
-
-		return { cosf(y) * cosf(x),
-			sinf(y) * cosf(x),
-			-sinf(x) };
-
 	}
 
 	void Normalize() {
@@ -55,34 +45,45 @@ public:
 			y = 0;
 		}
 	}
-
+	// Returns a normal vector facing in the direction that the angle points.
 	CVector Forward() {
-		const float pitch = x * (M_PI / 180);
-		const float yaw = y * (M_PI / 180);
+		float x = this->x * (M_PI / 180);
+		float y = this->y * (M_PI / 180);
+
+		float sx = sinf(x);
+		float sy = sinf(y);
+
+		float cx = cosf(x);
+		float cy = cosf(y);
 
 		return {
-			cosf(yaw),
-			sinf(yaw),
-			-sinf(pitch)
+			cy * cx,
+			sy * cx,
+			-sx
 		};
 	}
-
+	// Returns a normal vector facing in the direction that points right relative to the angle's direction.
 	CVector Right() {
-		const float pitch = x * (M_PI / 180);
-		const float yaw = y * (M_PI / 180);
-
-		return {
-			sinf(yaw),
-			-cosf(yaw),
-			0.0f
-		};
+		CVector v1 = Forward();
+		CVector v2 = { 0.0f, 0.0f, 1.0f };
+		auto right = v1.CrossProduct(v2);
+		right.Normalize();
+		return right;
+	}
+	// Returns a normal vector facing in the direction that points up relative to the angle's direction.
+	CVector Up() {
+		CVector v1 = Forward();
+		CVector v2 = Right();
+		auto up = v2.CrossProduct(v1);
+		up.Normalize();
+		return up;
 	}
 
-	CVector Up() {
+	CVector CrossProduct(CVector& v) {
 		return {
-			0.0f,
-			0.0f,
-			1.0f
+			y * v.z - v.y * z,
+			z * v.x - v.z * x,
+			x * v.y - v.x * y
 		};
 	}
 

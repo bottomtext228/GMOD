@@ -325,4 +325,76 @@ namespace Utils {
 		return sanitized;
 	}
 
+	const char* GetLuaBase(C_BaseCombatWeapon* weapon) {
+		// this function gets the SWEP.Base value from the Lua
+
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		weapon->PushEntity();
+
+		Lua->GetField(-1, "Base");
+		const char* out = "";
+
+		if (Lua->IsType(-1, LuaType::STRING))
+			out = Lua->GetString(-1, 0);
+
+		Lua->Pop(2);
+		return out;
+	}
+
+	float GetM9KSpread(C_BaseCombatWeapon* weapon, bool inScope = false) {
+		// this function gets the SWEP.Primary.Spread/IronAccuracy values from the Lua
+
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		weapon->PushEntity();
+
+		Lua->GetField(-1, "Primary");
+
+		if (inScope) { // in a scope
+			Lua->GetField(-1, "IronAccuracy");
+		}
+		else {
+			Lua->GetField(-1, "Spread");
+		}
+
+		float spread = (float)Lua->GetNumber(-1);
+		Lua->Pop(3);
+
+		return spread;
+	}
+
+	void M9KNoRecoil(C_BaseCombatWeapon* weapon) {
+		// this function modifies the SWEP.Primary.KickHorizonal/Up/Down value in the Lua
+
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		weapon->PushEntity();
+
+		Lua->GetField(-1, "Primary");
+
+		if (Lua->IsType(-1, LuaType::Table)) // if SWEP.Primary is a table
+		{
+			Lua->PushNumber(0);
+			Lua->SetField(-2, "KickHorizontal"); // SWEP.Primary.KickHorizontal = 0
+			Lua->PushNumber(0);
+			Lua->SetField(-2, "KickUp"); // SWEP.Primary.KickUp = 0
+			Lua->PushNumber(0);
+			Lua->SetField(-2, "KickDown"); // SWEP.Primary.KickDown = 0
+			Lua->Pop(2);
+		}
+		else Lua->Pop(2);
+	}
+
+	float GetTFASpread(C_BaseCombatWeapon* weapon) {
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		weapon->PushEntity(); // swep
+		Lua->GetField(-1, "CalculateConeRecoil"); // swep, swep:CalculateConeRecoil
+		Lua->Push(-2); // swep, swep:CalculateConeRecoil, swep
+		Lua->Call(1, 1); // swep, spread
+		float spread = Lua->GetNumber(-1); // swep, spread			
+		Lua->Pop(2); // 
+		return spread;
+	}
 }

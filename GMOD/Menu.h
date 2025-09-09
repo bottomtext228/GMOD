@@ -141,6 +141,8 @@ public:
 					case miscTabs::TAB_MISC:
 						ImGui::Checkbox("Custom sight", &vars::misc::customSight);
 						ImGui::Checkbox("Auto uncuff", &vars::misc::autoUncuff);
+						ImGui::SameLine();
+						ImGui::Checkbox("Left or Right MB", &vars::misc::leftOrRight);
 						ImGui::Checkbox("Ignore teammates", &vars::misc::ignoreLocalTeam);
 						ImGui::Checkbox("Auto Jump", &vars::misc::autoJump);
 						ImGui::Checkbox("Edge Jump", &vars::misc::edgeJump);

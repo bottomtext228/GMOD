@@ -13,7 +13,7 @@ struct matrix3x4_t {
 	float m[3][4];
 	float* operator[](int i) {
 		return m[i];
-		
+
 	}
 };
 
@@ -113,3 +113,16 @@ CVector GetAABBCenter(matrix3x4_t& transform, CVector& vecMinsIn, CVector& vecMa
 	return worldCenter;
 }
 
+CVector CrossProduct(CVector& v1, CVector& v2) {
+	return {
+		v1.y * v2.z - v2.y * v1.z,
+		v1.z * v2.x - v2.z * v1.x,
+		v1.x * v2.y - v2.x * v1.y
+	};
+}
+
+void VectorVectors(CVector& forward, CVector& right, CVector& up) {
+	CVector tmp = { 0.0f, 0.0f, 1.0f };
+	right = forward.CrossProduct(tmp);
+	up = forward.CrossProduct(right);
+}

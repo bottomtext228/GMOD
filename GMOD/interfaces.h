@@ -19,7 +19,7 @@ public:
 	CGameMovement* GameMovement;
 	CLuaShared* LuaShared;
 	IMoveHelper* MoveHelper;
-	IVRenderView* RenderView;
+	/*IVRenderView* RenderView;*/
 	/*ILocalize* Localize;*/
 	void GetInterfaces()
 	{
@@ -35,7 +35,7 @@ public:
 		Prediction = (CPrediction*)GetPointer("client.dll", "VClientPrediction");
 		GameMovement = (CGameMovement*)GetPointer("client.dll", "GameMovement");
 		MoveHelper = (IMoveHelper*)(SignatureManager.pMoveHelperClient);
-		RenderView = (IVRenderView*)GetPointer("engine.dll", "VEngineRenderView");
+		/*RenderView = (IVRenderView*)GetPointer("engine.dll", "VEngineRenderView");*/
 		/*Localize = (ILocalize*)GetPointer("vgui2.dll", "VGUI_Localize");*/
 		assert(Trace != NULL && "EngineTraceClient interface is not found.");
 		assert(Client != NULL && "VClient interface is not found.");

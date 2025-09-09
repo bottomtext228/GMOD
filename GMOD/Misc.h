@@ -24,8 +24,11 @@ public:
 
 	void AutoUncuff(CUserCmd* cmd) {
 		static bool isInAttack = false;
-		cmd->m_buttons.IN_ATTACK2 = !isInAttack;
 		isInAttack = !isInAttack;
+		if (vars::misc::leftOrRight)
+			cmd->m_buttons.IN_ATTACK = !isInAttack;
+		else
+			cmd->m_buttons.IN_ATTACK2 = !isInAttack;
 	}
 
 	void Unload(LPDIRECT3DDEVICE9 pDevice, HWND window, WNDPROC oWndProc) {
@@ -69,7 +72,7 @@ public:
 		}
 
 		if (g_userCmd.m_buttons.IN_JUMP) { // up
-			offset += angles.Up();
+			offset.z += 1;  // we don't want roll and other stuff here, so no angles.Up();
 		}
 
 		if (g_userCmd.m_buttons.IN_SPEED) { // shift key

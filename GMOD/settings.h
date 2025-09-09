@@ -26,7 +26,6 @@ namespace vars {
 	float viewMatrix[16];
 	namespace aim {
 		bool showTarget = false;
-		CVector newAngles = { 0.0, 0.0, 0.0 }; // мб костыль, для работы сайлента
 		bool smoothAim = false;
 		bool silentAim = false;
 		bool rage = false;
@@ -62,6 +61,7 @@ namespace vars {
 		bool customSight = false;
 		int sightColor = 0xFF00FF00; // a b g  r
 		bool autoUncuff = false;
+		bool leftOrRight = true; // true = left, false = right button for autoUncuff
 		bool ignoreLocalTeam = false;
 		bool DLLUnload = false;
 		bool edgeJump = false;
