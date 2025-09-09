@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <shlobj.h>
 #include <filesystem>
+#include <unordered_map>
+#include <tuple>
 #include <d3d9.h>
 #include <d3dx9.h>
 #pragma comment (lib, "D3dx9.lib")

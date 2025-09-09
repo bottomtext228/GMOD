@@ -142,10 +142,6 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 			printf("INJECTED!\n");
 
 			SetConsoleOutputCP(CP_UTF8);
-
-			// Enable buffering to prevent VS from chopping up UTF-8 byte sequences
-			setvbuf(stdout, nullptr, _IOFBF, 1000);
-
 		}
 #endif // DEBUG
 

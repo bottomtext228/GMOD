@@ -374,16 +374,33 @@ namespace Utils {
 		Lua->GetField(-1, "Primary");
 
 		if (Lua->IsType(-1, LuaType::Table)) // if SWEP.Primary is a table
-		{
+		{/*
+			static std::unordered_map<std::string, std::tuple<float, float, float>> data;
+
+
+			Lua->GetField(-1, "KickHorizontal");
+			float horizontal = Lua->GetNumber(-1);
+
+			Lua->GetField(-1, "KickUp");
+			float up = Lua->GetNumber(-1);
+
+			Lua->GetField(-1, "KickDown");
+			float down = Lua->GetNumber(-1);
+
+			Lua->Pop(6);
+
+			data[weapon->GetPrintName()] = std::make_tuple(horizontal, up, down);*/
+
+
 			Lua->PushNumber(0);
 			Lua->SetField(-2, "KickHorizontal"); // SWEP.Primary.KickHorizontal = 0
 			Lua->PushNumber(0);
 			Lua->SetField(-2, "KickUp"); // SWEP.Primary.KickUp = 0
 			Lua->PushNumber(0);
 			Lua->SetField(-2, "KickDown"); // SWEP.Primary.KickDown = 0
-			Lua->Pop(2);
+
 		}
-		else Lua->Pop(2);
+		Lua->Pop(2);
 	}
 
 	float GetTFASpread(C_BaseCombatWeapon* weapon) {
@@ -393,8 +410,66 @@ namespace Utils {
 		Lua->GetField(-1, "CalculateConeRecoil"); // swep, swep:CalculateConeRecoil
 		Lua->Push(-2); // swep, swep:CalculateConeRecoil, swep
 		Lua->Call(1, 1); // swep, spread
-		float spread = Lua->GetNumber(-1); // swep, spread			
+		float spread = (float)Lua->GetNumber(-1); // swep, spread			
 		Lua->Pop(2); // 
 		return spread;
+	}
+
+	void TFANoRecoil(C_BaseCombatWeapon* weapon) {
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		weapon->PushEntity();
+
+		Lua->GetField(-1, "Primary");
+
+		if (Lua->IsType(-1, LuaType::Table)) // if SWEP.Primary is a table
+		{
+			Lua->PushNumber(0);
+			Lua->SetField(-2, "KickHorizontal"); // SWEP.Primary.KickHorizontal = 0
+			Lua->PushNumber(0);
+			Lua->SetField(-2, "KickUp"); // SWEP.Primary.KickUp = 0
+			Lua->PushNumber(0);
+			Lua->SetField(-2, "KickDown"); // SWEP.Primary.KickDown = 0
+			Lua->PushNumber(0);
+			Lua->SetField(-2, "StaticRecoilFactor"); // SWEP.Primary.StaticRecoilFactor = 0
+
+		}
+		Lua->Pop(2);
+	}
+
+	double LuaMathRand(double min, double max) {
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		Lua->PushSpecial(CLuaInterface::SPECIAL_GLOB); // SPECIAL_GLOB
+		Lua->GetField(-1, "math"); // SPECIAL_GLOB, math
+		Lua->GetField(-1, "Rand"); // SPECIAL_GLOB, math, Rand
+		Lua->PushNumber(min); // SPECIAL_GLOB, math, Rand, min
+		Lua->PushNumber(max); // SPECIAL_GLOB, math, Rand, min, max
+		Lua->Call(2, 1); // SPECIAL_GLOB, math, retVal
+		double retVal = (double)Lua->GetNumber(-1);
+		Lua->Pop(3); //
+		return retVal;
+	}
+
+	void LuaMathSetSeed(double seed) {
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		Lua->PushSpecial(CLuaInterface::SPECIAL_GLOB); // SPECIAL_GLOB
+		Lua->GetField(-1, "math"); // SPECIAL_GLOB, math
+		Lua->GetField(-1, "randomseed"); // SPECIAL_GLOB, math, randomseed
+		Lua->PushNumber(seed); // SPECIAL_GLOB, math, randomseed, seed
+		Lua->Call(1, 0); // SPECIAL_GLOB, math
+		Lua->Pop(2); //s
+	}
+
+	double LuaCurTime() {
+		auto Lua = Interfaces.LuaShared->GetLuaInterface(LuaInterfaceType::CLIENT);
+
+		Lua->PushSpecial(CLuaInterface::SPECIAL_GLOB); // SPECIAL_GLOB
+		Lua->GetField(-1, "CurTime"); // SPECIAL_GLOB, CurTime
+		Lua->Call(0, 1); // SPECIAL_GLOB, time
+		double curTime = Lua->GetNumber(-1);
+		Lua->Pop(2); //
+		return curTime;
 	}
 }
