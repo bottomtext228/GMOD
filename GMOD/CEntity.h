@@ -61,7 +61,11 @@ public:
 
 	bool IsPlayer() {
 		typedef bool(__thiscall* fn)(void*);
+#ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 130)(this);
+#else
+		return VMT.getvfunc<fn>(this, 131)(this);
+#endif
 	}
 
 	void* GetCollidable() {
@@ -169,8 +173,10 @@ public:
 	}
 
 	CVector& GetVecOrigin() {
-		static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_vecOrigin");
-		return *(CVector*)((uintptr_t)this + offset);
+		typedef CVector& (__thiscall* fn)(void*);
+		return VMT.getvfunc<fn>(this, 9)(this);
+		//static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_vecOrigin");
+		//return *(CVector*)((uintptr_t)this + offset);
 	}
 
 	CVector& GetAngRotation() {
@@ -221,7 +227,12 @@ public:
 	}
 
 	CUserCmd*& GetCurrentCommand() {
-		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_hConstraintEntity") - 0x4;
+#ifndef _WIN64
+		constexpr int offsetToCurrentCommand = 0x4;
+#else
+		constexpr int offsetToCurrentCommand = 0x8;
+#endif
+		static uintptr_t offset = DTManager::GetOffset("DT_LocalPlayerExclusive", "m_hConstraintEntity") - offsetToCurrentCommand;
 		return *(CUserCmd**)((uintptr_t)this + offset);
 	}
 
@@ -250,12 +261,12 @@ public:
 		return *(uint32_t*)((uintptr_t)this + offset);
 	}
 
-	uintptr_t* GetWeaponHandles() {
+	uint32_t* GetWeaponHandles() {
 		static uintptr_t offset = DTManager::GetOffset("DT_BaseCombatCharacter", "m_hMyWeapons");
-		return (uintptr_t*)((uintptr_t)this + offset);
+		return (uint32_t*)((uintptr_t)this + offset);
 	}
 
-	uintptr_t GetWeaponHandle(int i) {
+	uint32_t GetWeaponHandle(int i) {
 		if (i < 0 || i >= MAX_WEAPONS) return NULL;
 		auto weapons = GetWeaponHandles();
 		auto weaponHandle = weapons[i];
@@ -263,13 +274,23 @@ public:
 	}
 
 	modelInfo* GetModelInfo() {
-		static uintptr_t offset = DTManager::GetOffset("DT_AnimTimeMustBeFirst", "m_flAnimTime") - 0x4;
+#ifndef _WIN64
+		constexpr int offsetToModelInfo = 0x4;
+#else
+		constexpr int offsetToModelInfo = 0x8;
+#endif
+		static uintptr_t offset = DTManager::GetOffset("DT_AnimTimeMustBeFirst", "m_flAnimTime") - offsetToModelInfo;
 		return *(modelInfo**)((uintptr_t)this + offset);
 	}
 
-	uint32_t GetCachedBones() {
-		static uintptr_t offset = DTManager::GetOffset("DT_BaseAnimating", "m_bClientSideFrameReset") - 0x1C;
-		return *(uint32_t*)((uintptr_t)this + offset);
+	uintptr_t GetCachedBones() {
+#ifndef  _WIN64
+		constexpr int offsetToBoneCache = 0x1C;
+#else
+		constexpr int offsetToBoneCache = 0x24;
+#endif
+		static uintptr_t offset = DTManager::GetOffset("DT_BaseAnimating", "m_bClientSideFrameReset") - offsetToBoneCache;
+		return *(uintptr_t*)((uintptr_t)this + offset);
 	}
 
 	CVector& GetVecViewOffset() {
@@ -286,9 +307,9 @@ public:
 		return GetObserverMode() != OBS_MODE_NONE;
 	}
 
-	uintptr_t GetObserverTarget() {
+	uint32_t GetObserverTarget() {
 		static uintptr_t offset = DTManager::GetOffset("DT_BasePlayer", "m_hObserverTarget");
-		return *(uintptr_t*)((uintptr_t)this + offset);
+		return *(uint32_t*)((uintptr_t)this + offset);
 	}
 
 	enum {
@@ -349,7 +370,11 @@ class C_BaseCombatWeapon
 public:
 	CVector& GetBulletSpread() {
 		typedef CVector& (__thiscall* fn)(void*);
+#ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 325)(this);
+#else
+		return VMT.getvfunc<fn>(this, 327)(this);
+#endif
 	}
 
 	bool IsScripted() {
@@ -360,27 +385,47 @@ public:
 
 	const char* GetHoldType() {
 		typedef const char* (__thiscall* fn)(void*);
+#ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 372)(this);
+#else
+		return VMT.getvfunc<fn>(this, 374)(this);
+#endif
 	}
 
 	const char* GetName() {
 		typedef const char* (__thiscall* fn)(void*);
+#ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 366)(this);
+#else
+		return VMT.getvfunc<fn>(this, 368)(this);
+#endif
 	}
 
 	const char* GetPrintName() {
 		typedef const char* (__thiscall* fn)(void*);
+#ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 367)(this);
+#else
+		return VMT.getvfunc<fn>(this, 369)(this);
+#endif
 	}
 
 	void PushEntity() {
 		typedef void* (__thiscall* fn)(void*);
+#ifndef _WIN64
 		VMT.getvfunc<fn>(this, 172)(this);
+#else
+		VMT.getvfunc<fn>(this, 173)(this);
+#endif
 	}
 
 	bool UsesLua() {
-		typedef bool (__thiscall* fn)(void*);
+		typedef bool(__thiscall* fn)(void*);
+#ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 170)(this);
+#else
+		return VMT.getvfunc<fn>(this, 171)(this);
+#endif
 	}
 };
 
@@ -396,6 +441,10 @@ class CScriptedEntity { weapon + 0x18b0 = m_pScriptedEntity
 class modelInfo
 {
 public:
-	char pad_0000[4]; //0x0000
-	char* m_ModelName; //0x0004
+#ifndef _WIN64
+	char pad_0000[4]; 
+#else
+	char pad_0000[8];
+#endif
+	char* m_ModelName;
 };

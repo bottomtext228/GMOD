@@ -40,7 +40,7 @@ void CPredictionSystem::StartPrediction(CUserCmd* cmd) {
 
 	m_flOldCurtime = Interfaces.GlobalVars->curtime;
 	m_flOldFrametime = Interfaces.GlobalVars->frametime;
-
+	
 	Interfaces.GlobalVars->curtime = localPed->GetTickBase() * Interfaces.GlobalVars->interval_per_tick;
 	Interfaces.GlobalVars->frametime = Interfaces.Prediction->IsEnginePaused() ? 0.0f : Interfaces.GlobalVars->interval_per_tick;
 	Interfaces.GameMovement->StartTrackPredictionErrors(localPed);
@@ -51,7 +51,7 @@ void CPredictionSystem::StartPrediction(CUserCmd* cmd) {
 	if (cmd->m_impulse) {
 		localPed->GetImpulse() = cmd->m_impulse;
 	}
-
+	
 	typedef bool(__thiscall* PhysicsRunThinkFn)(CPed*, int thinkMethod);
 	static PhysicsRunThinkFn PhysicsRunThink = (PhysicsRunThinkFn)(SignatureManager.fnCBaseEntity_PhysicsRunThink);
 

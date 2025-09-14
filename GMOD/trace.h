@@ -40,18 +40,39 @@ struct Ray_t
 private:
 };
 
+struct csurface_t
+{
+	const char* name;
+	short		surfaceProps;
+	unsigned short	flags;
+};
+
+struct cplane_t
+{
+	CVector	normal;
+	float	dist;
+	BYTE	type;
+	BYTE	signbits;	
+	BYTE	pad[2];
+};
+// size of trace_t is 0x64 in _WIN64
 struct trace_t
 {
 	CVector start;
 	CVector end;
-	BYTE plane[20];
+	cplane_t plane;
 	float flFraction;
 	int contents;
 	WORD dispFlags;
 	bool allSolid;
 	bool startSolid;
 	float fractionLeftSolid;
+#ifdef _WIN64
+	BYTE pad_0[4];
+	BYTE surface[11];
+#else
 	BYTE surface[8];
+#endif
 	int hitGroup;
 	short physicsBone;
 	CPed* ped;

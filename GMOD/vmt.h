@@ -12,12 +12,22 @@ public:
 	template<typename T>
 	T* GetVMT(uintptr_t address, uintptr_t offset)
 	{
+#ifdef _WIN64
+		uintptr_t step = 3;
+		uintptr_t instructionSize = 7;
+		uintptr_t instruction = address + offset;
+
+		uintptr_t relativeAddress = *(DWORD*)(instruction + step);
+		uintptr_t realAddress = instruction + instructionSize + relativeAddress;
+		return *(T**)(realAddress);
+#else
 		uintptr_t instruction = (address + offset);
 		return *(T**)(*(uintptr_t*)(instruction));
+#endif
 	}
 
 	template<typename T>
-	T* GetVMT(uintptr_t address, int index, uintptr_t offset) 
+	T* GetVMT(uintptr_t address, int index, uintptr_t offset)
 	{
 		uintptr_t instruction = ((*(uintptr_t**)(address))[index] + offset);
 		return *(T**)(*(uintptr_t*)(instruction));
@@ -48,6 +58,7 @@ public:
 		pCopyTable = malloc(sizeof(void*) * count);
 		memcpy(pCopyTable, pOrgTable, sizeof(void*) * count);
 		pObject = (uintptr_t*)Interface;
+
 		return true;
 	}
 	/*Hook/Unhook*/

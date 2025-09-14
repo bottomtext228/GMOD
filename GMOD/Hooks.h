@@ -11,7 +11,7 @@ CNoSpread* NoSpread;
 typedef bool(__thiscall* createMove_t)(void*, float, CUserCmd*);
 createMove_t oCreateMove;
 
-typedef void(__thiscall* paintTreverse_t)(void*, unsigned int, bool, bool);
+typedef void(__thiscall* paintTreverse_t)(void*, uintptr_t, bool, bool);
 paintTreverse_t oPaintTraverse;
 
 typedef void(__thiscall* paint_t)(void*, int);
@@ -32,7 +32,11 @@ calcView_t oCalcView;
 typedef void(__thiscall* overrideView_t)(void*, CViewSetup*);
 overrideView_t oOverrideView;
 
-void __fastcall PaintTraverseFn(void* ecx, void* edx, unsigned int panel, bool forceRepaint, bool allowForce) {
+void __fastcall PaintTraverseFn(void* ecx,
+#ifndef _WIN64
+	void*,
+#endif 
+	uintptr_t panel, bool forceRepaint, bool allowForce) {
 
 	const char* panelName = Interfaces.PanelWrapper->GetName(panel);
 
@@ -49,7 +53,11 @@ void __fastcall PaintTraverseFn(void* ecx, void* edx, unsigned int panel, bool f
 }
 
 
-bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* cmd) {
+bool __fastcall CreateMoveFn(void* ecx,
+#ifndef _WIN64
+	void*,
+#endif 
+	float SampleTime, CUserCmd* cmd) {
 
 	const bool result = oCreateMove(ecx, SampleTime, cmd);
 
@@ -99,7 +107,11 @@ bool __fastcall CreateMoveFn(void* ecx, void* edx, float SampleTime, CUserCmd* c
 	return false;
 }
 
-void __fastcall PaintFn(void* ecx, void* edx, int mode) {
+void __fastcall PaintFn(void* ecx,
+#ifndef _WIN64
+	void*,
+#endif 
+	int mode) {
 	constexpr int PAINT_INGAMEPANELS = (1 << 1);
 	if (mode & PAINT_INGAMEPANELS) {
 		float* pMatrix = Interfaces.Engine->WorldToScreenMatrix();
@@ -110,12 +122,20 @@ void __fastcall PaintFn(void* ecx, void* edx, int mode) {
 	oPaint(ecx, mode);
 }
 
-void __fastcall RunCommandFn(void* ecx, void* edx, CPed* player, CUserCmd* ucmd, IMoveHelper* moveHelper) {
+void __fastcall RunCommandFn(void* ecx,
+#ifndef _WIN64
+	void*,
+#endif 
+	CPed* player, CUserCmd* ucmd, IMoveHelper* moveHelper) {
 	if (g_bIsPredicting) return;
 	oRunCommand(ecx, player, ucmd, moveHelper);
 }
 
-void __fastcall ExtraMouseSampleFn(void* ecx, void* edx, float frametime, bool active) {
+void __fastcall ExtraMouseSampleFn(void* ecx,
+#ifndef _WIN64
+	void*,
+#endif 
+	float frametime, bool active) {
 	if (vars::aim::smoothAim && vars::aim::aimKeyBind.isDown() && m_shouldSmoothMouse) {
 
 		auto currentAngles = Interfaces.Engine->GetViewAngles();
@@ -142,7 +162,11 @@ void __fastcall ExtraMouseSampleFn(void* ecx, void* edx, float frametime, bool a
 	oExtraMouseSample(ecx, frametime, active);
 }
 
-void __fastcall OverrideViewFn(void* ecx, void* edx, CViewSetup* pSetup) {
+void __fastcall OverrideViewFn(void* ecx,
+#ifndef _WIN64
+	void*,
+#endif 
+	CViewSetup* pSetup) {
 	oOverrideView(ecx, pSetup);
 
 	if (vars::misc::camHack) {
@@ -169,8 +193,14 @@ public:
 		/////////////////////////////////////////////////////////////////////////////
 		// https://www.unknowncheats.me/wiki/Hooking_CreateMove_from_IClientMode
 		// We are getting IBaseClientDLL interface and getting 10th virtual function (HudProcessInput),
-		// then we are getting IClientShared right from the function code via + 5 offset
+		// then we are getting IClientShared right from the function code
+#ifndef _WIN64
 		void* ClientShared = **reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(Interfaces.Client))[10] + 5);
+#else
+		void* ClientShared = *reinterpret_cast<void**>(GetRealFromRelative((*reinterpret_cast<uintptr_t**>(Interfaces.Client))[10], 3, 7, true));
+#endif 
+
+
 		ClientHook = new CVMTHookManager(ClientShared);
 		oCreateMove = (createMove_t)ClientHook->HookFunction(21, CreateMoveFn);
 		oOverrideView = (overrideView_t)ClientHook->HookFunction(16, OverrideViewFn);

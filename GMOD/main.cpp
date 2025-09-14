@@ -3,7 +3,7 @@
 #define DEBUG
 #pragma execution_character_set("utf-8")
 #include "includes.h"
-
+#include <Windows.h>
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -16,7 +16,7 @@ void inline debug(const char* msg) {
 }
 #endif //  DEBUG
 
-
+	
 
 EndScene oEndScene = NULL;
 WNDPROC oWndProc;
@@ -97,7 +97,11 @@ DWORD WINAPI MainThread(HMODULE hMod)
 		if (kiero::init(kiero::RenderType::D3D9) == kiero::Status::Success)
 		{
 			kiero::bind(42, (void**)&oEndScene, hkEndScene);
+#ifndef _WIN64
 			window = FindWindowA(0, "Garry's Mod");
+#else 
+			window = FindWindowA(0, "Garry's Mod (x64)");
+#endif
 			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
 			attached = true;
 		}
@@ -117,13 +121,13 @@ DWORD WINAPI MainThread(HMODULE hMod)
 	return TRUE;
 }
 
+
 BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 {
 	switch (dwReason)
 	{
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
-
 		vars::client = (uintptr_t)GetModuleHandle(L"client.dll");
 		vars::engine = (uintptr_t)GetModuleHandle(L"engine.dll");
 		vars::resX = GetSystemMetrics(0);

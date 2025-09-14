@@ -19,32 +19,15 @@ enum class LuaInterfaceType : unsigned __int8 {
 
 class CLuaFile {
 public:
-	char pad000[4];
+	uintptr_t pad000;
 	char* m_pFileName;
+#ifndef _WIN64
 	char pad008[44];
+#else
+	char pad008[55];
+#endif
 	char* m_pContent;
 };
-
-
-class CConCommand {
-public:
-	int m_iArgsCount;
-	char pad_0004[1028]; //0x0004
-	const char* m_pArgList[64]; // first argument is always command name;
-	const char* getArg(int index) {
-		if (index >= 0 && index < m_iArgsCount) {
-			return m_pArgList[index];
-		}
-		return "";
-	}
-	const char* getCommandName() {
-		return m_pArgList[0];
-	}
-
-
-
-};
-
 
 class CLuaInterface {
 public:
@@ -261,7 +244,7 @@ public:
 	virtual void* ExecuteLuaFileMaybe(void* fileName, void* Src, int isClientInterface, const char* luaFilePath); // 7
 	//////////////////////////////////////////////////////////////
 
-
+	// because of the virtual function the 0x0 padding is already taken by VMT
 
 	CLuaFile** m_pFiles; //0x0004
 	int m_unk; //0x0008 // maybe max count of the files?

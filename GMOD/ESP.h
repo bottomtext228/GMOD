@@ -25,7 +25,7 @@ public:
 
 						// do not draw on spectated player
 						if (Interfaces.ClientEntityList->GetClientEntityFromHandle(localPed->GetObserverTarget()) == ped) continue;
-							
+
 						if (vars::esp::box3DESP) {
 							DrawBoxESP(ped, entityIndex);
 						}
@@ -106,7 +106,7 @@ private:
 		}
 
 		if (vars::esp::renderCurrentWeapon) {
-			auto weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(ped->GetActiveWeaponHandle());
+			C_BaseCombatWeapon* weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(localPed->GetActiveWeaponHandle());
 			if (weapon)
 				espText += std::string(weapon->GetName()) + "\n";
 		}
@@ -115,7 +115,7 @@ private:
 			for (int i = 0; i < 256; i++) {
 				auto weaponHandle = ped->GetWeaponHandle(i);
 				if (weaponHandle != -1) {
-					auto weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(weaponHandle);
+					C_BaseCombatWeapon* weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(weaponHandle);
 					if (weapon)
 						espText += std::string(weapon->GetName()) + "\n";
 				}
@@ -138,7 +138,6 @@ private:
 #endif // DEBUG
 
 		if (entity->GetTeamNum() == 0 && entity->GetModelInfo()) {
-
 			ImU32 espColor = 0xFFFF7300;
 			if (Utils::isEntityInSpecificEntitiesList(entity->GetModelInfo()->m_ModelName)) {
 				espColor = 0xFF00FF22; // 0073FF  22FF00 <- rgb | abgr -> FFFF7300 FF00FF22
@@ -153,7 +152,6 @@ private:
 				ImDrawList* draw = ImGui::GetBackgroundDrawList();
 				ImVec2 textSize = ImGui::CalcTextSize(entity->GetModelInfo()->m_ModelName);
 				draw->AddText(ImVec2(entityPos.x - textSize.x / 2, entityPos.y - textSize.y), espColor, entity->GetModelInfo()->m_ModelName);
-
 			}
 		}
 	}
@@ -287,12 +285,10 @@ private:
 		   std::make_pair(UP_LEFT_NEAR, UP_LEFT_FAR),
 		   std::make_pair(UP_RIGHT_NEAR, UP_RIGHT_FAR),
 		   std::make_pair(UP_LEFT_FAR, UP_RIGHT_FAR)
-
 		};
 
 		for (auto& [from, to] : cornersSerialNumber) {
 			draw->AddLine(screenPos[from].ToImVec2(), screenPos[to].ToImVec2(), ESPColor);
-
 		}
 
 	}

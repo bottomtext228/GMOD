@@ -1,6 +1,12 @@
 typedef void* (*CreateInterfaceFn)(const char* pName, int* pReturnCode);
 
 
+#ifdef _WIN64
+constexpr auto RandomSeedOffset = 0x2;
+#else 
+constexpr auto RandomSeedOffset = 0x5;
+#endif
+
 class CInterfaces
 {
 public:
@@ -27,7 +33,7 @@ public:
 		Client = GetPointer("client.dll", "VClient");
 		ClientEntityList = (IClientEntityList*)GetPointer("client.dll", "VClientEntityList");
 		Engine = (CEngine*)GetPointer("engine.dll", "VEngineClient");
-		UniformRandomStream = VMT.GetVMT<CUniformRandomStream>((uintptr_t)GetProcAddress(GetModuleHandleA("vstdlib.dll"), "RandomSeed"), 0x5);
+		UniformRandomStream = VMT.GetVMT<CUniformRandomStream>((uintptr_t)GetProcAddress(GetModuleHandleA("vstdlib.dll"), "RandomSeed"), RandomSeedOffset);
 		PanelWrapper = (VPanelWrapper*)GetPointer("vgui2.dll", "VGUI_Panel");
 		ModelInfo = (CModelInfo*)GetPointer("engine.dll", "VModelInfoClient");
 		EngineVGUI = GetPointer("engine.dll", "VEngineVGui");
@@ -70,7 +76,11 @@ public:
 			if (Interface != NULL)
 			{
 #ifdef  DEBUG
-				printf("%s Found: 0x%X\n", PossibleInterfaceName, (DWORD)Interface);
+#ifndef _WIN64
+				printf("%s Found: 0x%X\n", PossibleInterfaceName, (uintptr_t)Interface);
+#else 
+				printf("%s Found: 0x%llX\n", PossibleInterfaceName, (uintptr_t)Interface);
+#endif
 #endif //  DEBUG
 
 
@@ -81,7 +91,11 @@ public:
 			if (Interface != NULL)
 			{
 #ifdef DEBUG
-				printf("%s Found: 0x%X\n", PossibleInterfaceName, (DWORD)Interface);
+#ifndef _WIN64
+				printf("%s Found: 0x%X\n", PossibleInterfaceName, (uintptr_t)Interface);
+#else
+				printf("%s Found: 0x%llX\n", PossibleInterfaceName, (uintptr_t)Interface);
+#endif
 #endif // DEBUG
 
 				break;

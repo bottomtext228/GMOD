@@ -140,7 +140,12 @@ public:
 
 	void			SmoothViewOnMovingPlatform(CPed* pPlayer, CVector& offset);
 	bool			IsEnginePaused() {
-		return *(bool*)((uintptr_t)this + 0xB);
+#ifdef _WIN64
+		constexpr int m_bEnginePausedOffset = 0xF;
+#else
+		constexpr int m_bEnginePausedOffset = 0xB;
+#endif
+		return *(bool*)((uintptr_t)this + m_bEnginePausedOffset);
 	}
 
 };

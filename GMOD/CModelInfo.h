@@ -8,4 +8,3 @@ public:
 		return VMT.getvfunc<fn>(this, 28)(this, model);
 	}
 };
-

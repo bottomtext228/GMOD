@@ -40,7 +40,7 @@ public:
 				Utils::M9KNoRecoil(weapon);
 			}
 
-			
+
 			// if it is a TFA weapon
 			if (!strcmp(Utils::GetLuaBase(weapon), "tfa_ins2_base"))
 			{
@@ -48,34 +48,34 @@ public:
 				Utils::TFANoRecoil(weapon);
 			}
 
-	/*		if (!strcmp(Utils::GetLuaBase(weapon), "swb_base")) {
-				weapon->PushEntity();
+			/*		if (!strcmp(Utils::GetLuaBase(weapon), "swb_base")) {
+						weapon->PushEntity();
 
-				Lua->GetField(-1, "GetCurrentCone");
-				Lua->Push(-2);
-				Lua->Call(1, 1);
-				spread = Lua->GetNumber(-1);
-				Lua->Pop(2);
-			}*/
-				//	Lua->GetField(-1, "MaxSpreadInc");
-			//	double curCone = 0.09f + Lua->GetNumber(-1);
-			//	Lua->Pop(2);
-			//	// 	self.CurCone = math.Clamp(cone + self.AddSpread * (self.dt.Bipod and 0.5 or 1) + (vel / 10000 * self.VelocitySensitivity) * (self.dt.Status == FAS_STAT_ADS and 0.25 or 1) + self.Owner.ViewAff, 0, 0.09 + self.MaxSpreadInc)
+						Lua->GetField(-1, "GetCurrentCone");
+						Lua->Push(-2);
+						Lua->Call(1, 1);
+						spread = Lua->GetNumber(-1);
+						Lua->Pop(2);
+					}*/
+					//	Lua->GetField(-1, "MaxSpreadInc");
+				//	double curCone = 0.09f + Lua->GetNumber(-1);
+				//	Lua->Pop(2);
+				//	// 	self.CurCone = math.Clamp(cone + self.AddSpread * (self.dt.Bipod and 0.5 or 1) + (vel / 10000 * self.VelocitySensitivity) * (self.dt.Status == FAS_STAT_ADS and 0.25 or 1) + self.Owner.ViewAff, 0, 0.09 + self.MaxSpreadInc)
 
-			//	//if self.Owner:Crouching() then cone = cone * 0.85 end
-			//	if (cmd->m_buttons.IN_DUCK)
-			//		curCone *= 0.75f;
+				//	//if self.Owner:Crouching() then cone = cone * 0.85 end
+				//	if (cmd->m_buttons.IN_DUCK)
+				//		curCone *= 0.75f;
 
-			//	// 	math.randomseed(commandNumber)
-			//	CVector spreadAng;
-			//	Utils::LuaMathSetSeed((double)cmd->m_command_number);
-			//	spreadAng.x = Utils::LuaMathRand(-curCone, curCone);
-			//	spreadAng.y = Utils::LuaMathRand(-curCone, curCone);
-			//	spreadAng.z = 0;
+				//	// 	math.randomseed(commandNumber)
+				//	CVector spreadAng;
+				//	Utils::LuaMathSetSeed((double)cmd->m_command_number);
+				//	spreadAng.x = Utils::LuaMathRand(-curCone, curCone);
+				//	spreadAng.y = Utils::LuaMathRand(-curCone, curCone);
+				//	spreadAng.z = 0;
 
-			//	cmd->m_viewangles -= (spreadAng * 25.f);
-			//	cmd->m_viewangles -= localPed->GetVecPunchAngle();
-			//}
+				//	cmd->m_viewangles -= (spreadAng * 25.f);
+				//	cmd->m_viewangles -= localPed->GetVecPunchAngle();
+				//}
 		}
 
 
