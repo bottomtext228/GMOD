@@ -38,7 +38,8 @@ public:
 							DrawBoneESP(ped, entityIndex);
 						}
 
-						if (vars::esp::renderHealth || vars::esp::renderGameNick || vars::esp::renderSteamNick || vars::esp::renderCurrentWeapon) {
+						if (vars::esp::renderHealth || vars::esp::renderGameNick || vars::esp::renderSteamNick 
+							|| vars::esp::renderCurrentWeapon || vars::esp::renderWeapons) {
 							DrawPlayerInfo(ped, entityIndex);
 						}
 
@@ -106,7 +107,7 @@ private:
 		}
 
 		if (vars::esp::renderCurrentWeapon) {
-			C_BaseCombatWeapon* weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(localPed->GetActiveWeaponHandle());
+			C_BaseCombatWeapon* weapon = (C_BaseCombatWeapon*)Interfaces.ClientEntityList->GetClientEntityFromHandle(ped->GetActiveWeaponHandle());
 			if (weapon)
 				espText += std::string(weapon->GetName()) + "\n";
 		}
@@ -238,7 +239,6 @@ private:
 		CVector2D screenPos[8]{};
 		CVector corners[8];
 
-		/*  https://cdn.discordapp.com/attachments/768531187110510602/959526118845743215/unknown.png */
 		enum ESPCorners {
 			DOWN_LEFT_NEAR,
 			DOWN_RIGHT_NEAR,
@@ -249,18 +249,21 @@ private:
 			UP_LEFT_FAR,
 			UP_RIGHT_FAR
 		};
-		/*																							 */
 
+		float eyeAnglesYaw = ped->GetEyeAngles().y;
 
-		corners[DOWN_LEFT_NEAR] = { pos.x - vars::boxESPSize, pos.y - vars::boxESPSize, pos.z };
-		corners[DOWN_RIGHT_NEAR] = { pos.x + vars::boxESPSize, pos.y - vars::boxESPSize, pos.z };
-		corners[DOWN_LEFT_FAR] = { pos.x - vars::boxESPSize, pos.y + vars::boxESPSize, pos.z };
-		corners[DOWN_RIGHT_FAR] = { pos.x + vars::boxESPSize, pos.y + vars::boxESPSize, pos.z };
-		corners[UP_LEFT_NEAR] = { pos.x - vars::boxESPSize, pos.y - vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
-		corners[UP_RIGHT_NEAR] = { pos.x + vars::boxESPSize, pos.y - vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
-		corners[UP_LEFT_FAR] = { pos.x - vars::boxESPSize, pos.y + vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
-		corners[UP_RIGHT_FAR] = { pos.x + vars::boxESPSize, pos.y + vars::boxESPSize, pos.z + ped->GetVecViewOffset().z };
+		CVector mins = ped->GetCollidable()->OBBMins();
+		CVector maxs = ped->GetCollidable()->OBBMaxs();
 
+		corners[DOWN_LEFT_NEAR]	 = pos + CVector{ mins.x, mins.y, mins.z }.Rotate(eyeAnglesYaw);
+		corners[DOWN_RIGHT_NEAR] = pos + CVector{ mins.x, maxs.y, mins.z }.Rotate(eyeAnglesYaw);
+		corners[DOWN_LEFT_FAR]	 = pos + CVector{ maxs.x, mins.y, mins.z }.Rotate(eyeAnglesYaw);
+		corners[DOWN_RIGHT_FAR]	 = pos + CVector{ maxs.x, maxs.y, mins.z }.Rotate(eyeAnglesYaw);
+
+		corners[UP_LEFT_NEAR]    = pos + CVector{ mins.x, mins.y, maxs.z }.Rotate(eyeAnglesYaw);
+		corners[UP_RIGHT_NEAR]   = pos + CVector{ mins.x, maxs.y, maxs.z }.Rotate(eyeAnglesYaw);
+		corners[UP_LEFT_FAR]     = pos + CVector{ maxs.x, mins.y, maxs.z }.Rotate(eyeAnglesYaw);
+		corners[UP_RIGHT_FAR]    = pos + CVector{ maxs.x, maxs.y, maxs.z }.Rotate(eyeAnglesYaw);
 
 		/* типо чтобы не вызывать WorldToScreen лишний раз */
 		for (unsigned int i = 0; i < 8; i++) {

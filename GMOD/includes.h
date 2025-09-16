@@ -57,12 +57,12 @@
 CPed* localPed = NULL;
 #include "studiobone.h"
 #include "CModelInfo.h"
+#include "trace.h"
 #include "ICollidable.h"
 #include "IClientThinkable.h"
 #include "IClientNetworkable.h"
 #include "IClientRenderable.h"
 #include "panelwrapper.h"
-#include "trace.h"
 #include "engine.h"
 #include "IClientEntityList.h"
 #include "CPrediction.h"

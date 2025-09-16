@@ -39,10 +39,12 @@ public:
 		if (length > 0) {
 			x = x / length;
 			y = y / length;
+			z = z / length;
 		}
 		else {
 			x = 0;
 			y = 0;
+			z = 0;
 		}
 	}
 	// Returns a normal vector facing in the direction that the angle points.
@@ -77,6 +79,20 @@ public:
 		auto up = v2.CrossProduct(v1);
 		up.Normalize();
 		return up;
+	}
+	// Returns a vector rotated by an angle
+	CVector Rotate(float angle) {
+		angle = angle * (M_PI / 180);
+
+		float sin = sinf(angle);
+		float cos = cosf(angle);
+
+		return {
+			cos * x - sin * y,
+			sin * x + cos * y,
+			z
+		};
+
 	}
 
 	CVector CrossProduct(CVector& v) {

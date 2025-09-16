@@ -35,6 +35,8 @@ LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	if (Interfaces.Engine->IsInGame()) {
 		localPed = Interfaces.ClientEntityList->GetClientEntity(Interfaces.Engine->GetLocalPlayer());
 		ESP->Process();
+		/*ImGui::Text("%0.2f, %0.2f, %0.2f", localPed->GetVecViewOffset().z, localPed->GetCollidable()->OBBMins().y, localPed->GetCollidable()->OBBMins().z);
+		ImGui::Text("%0.2f, %0.2f, %0.2f", localPed->GetCollidable()->OBBMaxs().x, localPed->GetCollidable()->OBBMaxs().y, localPed->GetCollidable()->OBBMaxs().z);*/
 	}
 	Menu->Render();
 

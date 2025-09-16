@@ -74,7 +74,6 @@ namespace vars {
 
 	bool* bSendPacket = nullptr;
 	bool menu = false;
-	float boxESPSize = 15.0;
 	int resX;
 	int resY;
 	uintptr_t client;

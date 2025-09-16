@@ -68,8 +68,8 @@ public:
 #endif
 	}
 
-	void* GetCollidable() {
-		typedef void* (__thiscall* fn)(void*);
+	ICollidable* GetCollidable() {
+		typedef ICollidable* (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 3)(this);
 	}
 
@@ -178,12 +178,17 @@ public:
 		//static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_vecOrigin");
 		//return *(CVector*)((uintptr_t)this + offset);
 	}
-
+	// only useful for local player, for other players use GetEyeAngles
 	CVector& GetAngRotation() {
-		/*static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_angRotation");
-		return *(CVector*)((uintptr_t)this + offset);*/
 		typedef CVector& (__thiscall* fn)(void*);
 		return VMT.getvfunc<fn>(this, 10)(this);
+		//static uintptr_t offset = DTManager::GetOffset("DT_BaseEntity", "m_angRotation");
+		//return *(CVector*)((uintptr_t)this + offset);
+	}
+
+	CVector& GetEyeAngles() {
+		static uintptr_t offset = DTManager::GetOffset("DT_HL2MPLocalPlayerExclusive", "m_angEyeAngles[0]");
+		return *(CVector*)((uintptr_t)this + offset);
 	}
 
 	int GetTeamNum() {
@@ -442,7 +447,7 @@ class modelInfo
 {
 public:
 #ifndef _WIN64
-	char pad_0000[4]; 
+	char pad_0000[4];
 #else
 	char pad_0000[8];
 #endif
