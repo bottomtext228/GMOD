@@ -1,105 +1,137 @@
 # GMOD Cheat
-# Video review ( Видеообзор ):
+
+## EN
+
+### Video review:
 https://youtu.be/LQt7m-nebWE
-# Visuals: 
-  - `Lines` ( линии к игрокам ) 
 
-  - `3DBoxESP` ( 3д коробки на игроках ) 
-  
-  - `2DBoxESP` ( 2д коробки на игроках )
+### Visuals:
+- `Lines` (lines to players)  
+- `3DBoxESP` (3D boxes on players)  
+- `2DBoxESP` (2D boxes on players)  
+- `Health` (health)  
+- `Max health` (maximum health)  
+- `Game nick` (DarkRP "in-game" nickname: Player:Nick())  
+- `Steam nick` (Steam nickname)  
+- `Current weapon` (current weapon in hands)  
+- `All weapons` (all weapons in inventory)  
+- `BoneESP` (bones wallhack)  
+- `Dormant check` (checks if players are updated)  
+- `Distance check` (distance check for players)  
+- `SetupBones` (forces bone updates on players at distance, reduces FPS, delay can be set with `SetupDelay`)  
+- `Entities` (shows object model names)  
+- `Specific Entities only` (shows names only for selected entities)  
 
-  - `Health` ( здоровье )
-  
-  - `Max health` ( максимальное здоровье )
+### Aim:
+- `TriggerBot` (fires when enemy is in crosshair)  
+- `Hold or Click` (fires in clicks instead of holding, useful for fast pistol fire)  
+- `No Spread` (removes weapon spread for HL2/M9K weapons)  
+- `Silent Aim` (instant invisible aim lock when firing)  
+- `Smooth Aim` (smooth aim assist)  
+- `Aim mode` (Angle speed = constant rotation speed, Smooth steps = smoother aim closer to target)  
+- `Angle speed` (rotation speed for Smooth Aim in angle mode)  
+- `Smooth steps` (number of steps in smooth mode)  
+- `Aim Target` (aim target)  
+- `Render FOV` (renders aim field of view)  
+- `FOV` (field of view radius setting)  
+- `Ignore Walls` (ignores obstacles when finding targets)  
+- `Show target` (shows current aim target bone)  
+- `Ignore limbs` (ignores limbs)  
+- `Sticky Aim` (turns off aim when crosshair leaves target)  
+- `Ignore Z` (ignores Z coordinate)  
+- `Target type` (Hitbox/Bone)  
+- `Keybind` (aim keybind)  
 
-  - `Game nick` ( "игровой" ник на дарк рп (Player:Nick()) )
+### Miscellaneous:
+- `Friends` (whitelist players for aim/triggerbot, highlights them in WH)  
+- `Lua` (execute Lua code on client, server (if host), or menu)  
+- `Entities` (adds models to "Specific Entities" list for WH)  
 
-  - `Steam nick` ( стимовский ник )
+#### Misc:
+- `Custom sight` (custom HL2 crosshair, changes color on enemy detection)  
+- `Auto uncuff` (uncuffs in DarkRP by spamming LMB/RMB)  
+- `Ignore teammates` (treats teammates as friends; depends on server mod)  
+- `Auto Jump` (bunny hop)  
+- `Edge Jump` (jump on edge)  
+- `CamHack` (free camera, camera controls are identical to NoClip)
+- `Unload` (unloads cheat)  
 
-  - `Current weapon` ( текущее оружие в руках )
+### Usage:
+Download **GMOD.dll** and **GMOD.Injector.exe** from [latest release](https://github.com/bottomtext228/GMOD/releases/latest), place them in one folder and run injector (any injector works).  
+For x64 chromium version use **GMOD_x64.dll** and **GMOD.Injector_x64.exe**.  
 
-  - `All weapons` ( всё оружие в инвентаре )
-    
-  - `BoneESP` ( вх на кости )
+- Menu activation key - `End`  
+- Aim default keybind - `MOUSE5`  
+- Edge Jump - `N`  
 
-  - `Dormant check` ( проверка на "обновляемость" игроков )
-  
-  - `Distance check` ( проверка на расстояние до игроков )
-  
-  - `SetupBones` ( принудительное обновление костей у моделей игроков ( на дальней дистанции игра может не обновлять положение костей ). Снижает FPS, поэтому есть возможность установки задержки между вызывами - `SetupDelay` )
+### Notes:
+Supports only default **x86 (not chromium)** and **x64 chromium** versions of Garry's Mod.  
 
-  - `Entities` (  показ названий моделей объектов )
-
-  - `Specific Entities only` ( при включённом этом параметре будут показываться названия модели только выбранных объектов )
-
-# Aim: 
-  - `TriggerBot` ( стрельба при нахождении противника в прицеле ) 
-
-  - `Hold or Click` ( при включённом этом параметре триггербот вместо "зажима" стрельбы будет прокликивать, что на 9мм пистолете позволяет очень быстро стрелять )
-
-  - `No Spread` ( убирает разброс у огнестрельного оружия из Half Life 2 )
-
-  - `Silent Aim` ( при выстреле ( при зажатой кнопке стрельбы ) невидимая локально мгновенная наводка на цель  ) 
-
-  - `Smooth Aim` ( плавная наводка на цель )
-
-  - `Aim mode` ( Smooth Aim modes: Angle speed (constant angle speed) and Smooth steps (the closer to the target, the smoother the aiming ) ( режимы работы Smooth Aim: Angle speed (постоянная угловая скорость) и Smooth steps (чем ближе к цели, тем плавнее наводка) )
-  - `Angle speed` ( угловая скорость наводки Smooth Aim в режиме angle speed )
-    
-  - `Smooth steps` ( количество шагов наводки на цель в режиме smooth steps )
-
-  - `Aim Target` ( цель аима ) 
-
-  - `Render FOV` ( показ радиуса действия аима )
-
-  - `FOV` ( настройка радиуса действия аима ) 
-
-  - `Ignore Walls` ( игнорирование препятствий при поиске аимом цели ) 
-
-  - `Show target` ( показ текущей цели (кости игрока) аима )
-  
-  - `Ignore limbs` ( игнорирование конечностей )
-  
-  - `Sticky Aim` ( при выключенном режиме аим выключается как только прицел на цели )
-
-  - `Ignore Z` ( игнорирование Z координаты цели )
-    
-  - `Target type` ( Hitbox/Bone )
-
-  - `Keybind` ( Aim keybind )  
-
-# Miscellaneous: 
-  - `Friends` ( добавление игроков по нику в белый список аима. Также друзья подсвечиваются особым цветом в WH )
- 
-  - `Lua` ( выполнение луа-кода. Код может выполняться на стороне клиента, сервера ( если вы хостите сервер ) и меню )
-   
-  - `Entities` ( добавление моделей объектов в список "Specific Entities", влияет на WH на модели объектов ) 
-
-  ## `Misc`: 
-
-   - `Custom sight` ( заменяет стандартный прицел из Half Life 2 на куда более заметный. При нахождении противника в прицеле меняет цвет ) 
-
-   - `Auto uncuff` ( высвобождение из наручников (Dark RP) путём прокликиванием "ПКМ" ) 
-
-   - `Ignore teammates` ( все игроки в одной команде с локальным игроком будут считаться друзьями (Зависит от мода сервера - может не работать)) 
-
-   - `Auto Jump` ( автопрыжок )
-   
-   - `Edge Jump` ( прыжок с края ) 
-   
-   - `Unload` ( выгрузка чита )
-# Usage ( использование )
-Download GMOD.dll and GMOD.Injector.exe from [latest release](https://github.com/bottomtext228/GMOD/releases/latest), place them in one folder and run injector (you can use any injector if you want).
-
-- Menu activation key - `End`.
-- Aim default keybind - `MOUSE5`,
-- Edge Jump - `N`.
 ---
 
-Скачайте GMOD.dll и GMOD.Injector.exe с [последнего релиза](https://github.com/bottomtext228/GMOD/releases/latest), положите их в одну папку и запустите инжектор (можете использовать любой при желании).
+## RU
 
-- Кнопка активации меню - `End`.
-- Стандартная клавиша аима - `MOUSE5`,
-- Edge Jump - `N`.
-# Notes 
-Works only on x86 Garry's Mod version.
+### Видеообзор:
+https://youtu.be/LQt7m-nebWE
+
+### Визуализация:
+- `Lines` (линии к игрокам)  
+- `3DBoxESP` (3д коробки на игроках)  
+- `2DBoxESP` (2д коробки на игроках)  
+- `Health` (здоровье)  
+- `Max health` (максимальное здоровье)  
+- `Game nick` ("игровой" ник на дарк рп (Player:Nick()))  
+- `Steam nick` (стимовский ник)  
+- `Current weapon` (текущее оружие в руках)  
+- `All weapons` (всё оружие в инвентаре)  
+- `BoneESP` (вх на кости)  
+- `Dormant check` (проверка на "обновляемость" игроков)  
+- `Distance check` (проверка на расстояние до игроков)  
+- `SetupBones` (принудительное обновление костей, снижает FPS, задержка регулируется `SetupDelay`)  
+- `Entities` (показ названий моделей объектов)  
+- `Specific Entities only` (отображает только выбранные объекты)  
+
+### Аим:
+- `TriggerBot` (стрельба при нахождении противника в прицеле)  
+- `Hold or Click` (триггербот стреляет кликами, быстро на пистолете)  
+- `No Spread` (убирает разброс оружия из HL2/M9K)  
+- `Silent Aim` (невидимая мгновенная наводка на цель при выстреле)  
+- `Smooth Aim` (плавная наводка на цель)  
+- `Aim mode` (режимы Smooth Aim: Angle speed — постоянная скорость, Smooth steps — плавнее ближе к цели)  
+- `Angle speed` (угловая скорость при режиме angle speed)  
+- `Smooth steps` (количество шагов в режиме smooth steps)  
+- `Aim Target` (цель аима)  
+- `Render FOV` (показ радиуса действия аима)  
+- `FOV` (радиус действия аима)  
+- `Ignore Walls` (игнорирование стен и объектов при поиске целей)  
+- `Show target` (показ текущей цели (кости игрока))  
+- `Ignore limbs` (игнор конечностей)  
+- `Sticky Aim` (аим отключается, если прицел уходит от цели)  
+- `Ignore Z` (игнор оси Z)  
+- `Target type` (Hitbox/Bone)  
+- `Keybind` (клавиша активации аима)  
+
+### Разное:
+- `Friends` (добавление игроков в белый список аима/триггербота, подсвечиваются особым цветом)  
+- `Lua` (выполнение Lua-кода на клиенте, сервере (если хост), или меню)  
+- `Entities` (добавление моделей в список "Specific Entities" для отображения в WH) 
+
+#### Дополнительно:
+- `Custom sight` (замена прицела HL2, меняет цвет при наведении на врага)  
+- `Auto uncuff` (снятие наручников в DarkRP спамом ЛКМ/ПКМ)  
+- `Ignore teammates` (считает союзников друзьями, зависит от мода сервера)  
+- `Auto Jump` (автопрыжок)  
+- `Edge Jump` (прыжок с края)  
+- `CamHack` (свободная камера, управление камерой идентично NoClip)
+- `Unload` (выгрузка чита)  
+
+### Использование:
+Скачайте **GMOD.dll** и **GMOD.Injector.exe** с [последнего релиза](https://github.com/bottomtext228/GMOD/releases/latest), положите их в одну папку и запустите инжектор (можете использовать любой).  
+Для x64 chromium версии используйте **GMOD_x64.dll** и **GMOD.Injector_x64.exe**.  
+
+- Кнопка активации меню - `End`  
+- Стандартная клавиша аима - `MOUSE5`  
+- Edge Jump - `N`  
+
+### Примечания:
+Поддерживаются только версии Garry's Mod: **x86 (не chromium)** и **x64 chromium**.  

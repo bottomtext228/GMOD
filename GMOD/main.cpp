@@ -1,9 +1,8 @@
-#define CHEAT_VERSION 2.4.1
+#define CHEAT_VERSION 2.5
 #define _CRT_SECURE_NO_WARNINGS
-#define DEBUG
+//#define DEBUG
 #pragma execution_character_set("utf-8")
 #include "includes.h"
-#include <Windows.h>
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -35,8 +34,6 @@ LRESULT WINAPI hkEndScene(LPDIRECT3DDEVICE9 pDevice) {
 	if (Interfaces.Engine->IsInGame()) {
 		localPed = Interfaces.ClientEntityList->GetClientEntity(Interfaces.Engine->GetLocalPlayer());
 		ESP->Process();
-		/*ImGui::Text("%0.2f, %0.2f, %0.2f", localPed->GetVecViewOffset().z, localPed->GetCollidable()->OBBMins().y, localPed->GetCollidable()->OBBMins().z);
-		ImGui::Text("%0.2f, %0.2f, %0.2f", localPed->GetCollidable()->OBBMaxs().x, localPed->GetCollidable()->OBBMaxs().y, localPed->GetCollidable()->OBBMaxs().z);*/
 	}
 	Menu->Render();
 
