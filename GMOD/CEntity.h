@@ -61,11 +61,7 @@ public:
 
 	bool IsPlayer() {
 		typedef bool(__thiscall* fn)(void*);
-#ifndef _WIN64
-		return VMT.getvfunc<fn>(this, 130)(this);
-#else
 		return VMT.getvfunc<fn>(this, 131)(this);
-#endif
 	}
 
 	ICollidable* GetCollidable() {
@@ -116,7 +112,7 @@ public:
 
 	bool IsLineOfSightClear(CVector const& point, int checkType, CPed* ignoredEntity) {
 		typedef bool(__thiscall* fn)(void*, const CVector&, int, CPed*);
-		return VMT.getvfunc<fn>(this, 274)(this, point, checkType, ignoredEntity);
+		return VMT.getvfunc<fn>(this, 276)(this, point, checkType, ignoredEntity);
 	}
 
 	CVector GetViewDirection() {
@@ -129,7 +125,7 @@ public:
 
 	void SelectItem(const char* pszItem, int iSubType) {
 		typedef void(__thiscall* fn)(void*, const char*, int);
-		VMT.getvfunc<fn>(this, 320)(this, pszItem, iSubType);
+		VMT.getvfunc<fn>(this, 322)(this, pszItem, iSubType);
 	}
 
 	void PreThink() {
@@ -149,7 +145,7 @@ public:
 
 	void SetScrollSpeed(int scrollSpeed) {
 		typedef void(__thiscall* fn)(void*, int);
-		VMT.getvfunc<fn>(this, 374)(this, scrollSpeed);
+		VMT.getvfunc<fn>(this, 376)(this, scrollSpeed);
 	}
 
 	void UpdateButtonState(int nButtonMask) {
@@ -376,7 +372,7 @@ public:
 	CVector& GetBulletSpread() {
 		typedef CVector& (__thiscall* fn)(void*);
 #ifndef _WIN64
-		return VMT.getvfunc<fn>(this, 325)(this);
+		return VMT.getvfunc<fn>(this, 327)(this);
 #else
 		return VMT.getvfunc<fn>(this, 327)(this);
 #endif
@@ -398,27 +394,30 @@ public:
 	}
 
 	const char* GetName() {
+		// search in CPrediction::RunCommand
 		typedef const char* (__thiscall* fn)(void*);
 #ifndef _WIN64
-		return VMT.getvfunc<fn>(this, 366)(this);
+		return VMT.getvfunc<fn>(this, 368)(this);
 #else
 		return VMT.getvfunc<fn>(this, 368)(this);
 #endif
 	}
 
 	const char* GetPrintName() {
+		// this method comes after GetName method in VMT
 		typedef const char* (__thiscall* fn)(void*);
 #ifndef _WIN64
-		return VMT.getvfunc<fn>(this, 367)(this);
+		return VMT.getvfunc<fn>(this, 369)(this);
 #else
 		return VMT.getvfunc<fn>(this, 369)(this);
 #endif
 	}
 
 	void PushEntity() {
+		// search by CBaseEntity::PushEntity !g_Lua in IDA Pro
 		typedef void* (__thiscall* fn)(void*);
 #ifndef _WIN64
-		VMT.getvfunc<fn>(this, 172)(this);
+		VMT.getvfunc<fn>(this, 173)(this);
 #else
 		VMT.getvfunc<fn>(this, 173)(this);
 #endif
@@ -427,7 +426,7 @@ public:
 	bool UsesLua() {
 		typedef bool(__thiscall* fn)(void*);
 #ifndef _WIN64
-		return VMT.getvfunc<fn>(this, 170)(this);
+		return VMT.getvfunc<fn>(this, 172)(this);
 #else
 		return VMT.getvfunc<fn>(this, 171)(this);
 #endif

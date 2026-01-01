@@ -1,6 +1,6 @@
 #pragma once
 #define SignatureAssert(sig) (assert(sig != NULL && "Signature is not found."))
-
+// TODO: move this function somewhere?
 uintptr_t GetRealFromRelative(uintptr_t address, int offset, int instructionSize, bool isRelative) // Address must be an instruction, not a pointer! And offset = the offset to the bytes you want to retrieve.
 {
 #ifdef _WIN64
@@ -85,8 +85,8 @@ public:
 
 		// x86:
 		// must add + 0x2
-		// 8B 0D ?? ?? ?? ?? 33 C0 89 45 FC 83 C4 04 89 45 F8 C7 45 ?? ?? ?? ?? ?? 8B 01
-		// must add + 0x2
+		// 8B 0D ? ? ? ? 33 C0 89 45 FC 83 C4 04 89 45 F4 C7 45 ? ? ? ? ?
+		// \x8B\x0D\x00\x00\x00\x00\x33\xC0\x89\x45\xFC\x83\xC4\x04\x89\x45\xF4\xC7\x45\x00\x00\x00\x00\x00, xx????xxxxxxxxxxxxx?????
 		// 
 		// x86 chromium:
 		// must add + 0x2
@@ -99,7 +99,7 @@ public:
 #ifdef _WIN64
 		pCVarSig = BTMemory::FindSignature("engine.dll", "\x48\x8B\x0D\x00\x00\x00\x00\x48\x8D\x05\x00\x00\x00\x00\x4C\x8B\xE0\x48\x89\x44\x24\x00\x41\x8B\xC7", "xxx????xxx????xxxxxxx?xxx");
 #else
-		pCVarSig = BTMemory::FindSignature("engine.dll", "\x8B\x0D\x00\x00\x00\x00\x33\xC0\x89\x45\xFC\x83\xC4\x04\x89\x45\xF8\xC7\x45\x00\x00\x00\x00\x00\x8B\x01", "xx????xxxxxxxxxxxxx?????xx");
+		pCVarSig = BTMemory::FindSignature("engine.dll", "\x8B\x0D\x00\x00\x00\x00\x33\xC0\x89\x45\xFC\x83\xC4\x04\x89\x45\xF4\xC7\x45\x00\x00\x00\x00\x00", "xx????xxxxxxxxxxxxx?????");
 #endif
 		// not used
 		////pPlayerResource = BTMemory::FindSignature("client.dll", "\x89\x3D\x00\x00\x00\x00\x8B\xCF\x8B\x17\xFF\x75\x0C\xFF\x75\x08\xFF\x92\x00\x00\x00\x00\x33\xC0\x85\xFF\x0F\x44\xF0", "xx????xxxxxxxxxxxx????xxxxxxx");

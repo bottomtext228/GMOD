@@ -1,4 +1,4 @@
-#define CHEAT_VERSION 2.5
+#define CHEAT_VERSION 2.5.1
 #define _CRT_SECURE_NO_WARNINGS
 //#define DEBUG
 #pragma execution_character_set("utf-8")
@@ -15,7 +15,7 @@ void inline debug(const char* msg) {
 }
 #endif //  DEBUG
 
-	
+
 
 EndScene oEndScene = NULL;
 WNDPROC oWndProc;
