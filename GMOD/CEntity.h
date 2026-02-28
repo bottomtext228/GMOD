@@ -374,7 +374,7 @@ public:
 #ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 327)(this);
 #else
-		return VMT.getvfunc<fn>(this, 327)(this);
+		return VMT.getvfunc<fn>(this, 321)(this);
 #endif
 	}
 
@@ -389,7 +389,7 @@ public:
 #ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 372)(this);
 #else
-		return VMT.getvfunc<fn>(this, 374)(this);
+		return VMT.getvfunc<fn>(this, 368)(this);
 #endif
 	}
 
@@ -399,7 +399,7 @@ public:
 #ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 368)(this);
 #else
-		return VMT.getvfunc<fn>(this, 368)(this);
+		return VMT.getvfunc<fn>(this, 362)(this);
 #endif
 	}
 
@@ -409,7 +409,7 @@ public:
 #ifndef _WIN64
 		return VMT.getvfunc<fn>(this, 369)(this);
 #else
-		return VMT.getvfunc<fn>(this, 369)(this);
+		return VMT.getvfunc<fn>(this, 363)(this);
 #endif
 	}
 

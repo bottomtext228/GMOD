@@ -1,4 +1,4 @@
-#define CHEAT_VERSION 2.5.1
+#define CHEAT_VERSION 2.5.2
 #define _CRT_SECURE_NO_WARNINGS
 //#define DEBUG
 #pragma execution_character_set("utf-8")
